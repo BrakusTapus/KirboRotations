@@ -1,0 +1,97 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<AssemblyName>KirboRotations</AssemblyName>
+		<TargetFramework>net7.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Authors>Kirbo</Authors>
+		<Version>4.0.0.2</Version>
+		<PlatformTarget>x64</PlatformTarget>
+		<Platforms>AnyCPU</Platforms>
+		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<LangVersion>latest</LangVersion>
+		<UserSecretsId>06a3dd5e-6f28-452f-bfa5-5d93d34fec1b</UserSecretsId>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;</NoWarn>
+		<WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;</NoWarn>
+		<WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Ranged\Simple_MCH.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="RotationSolver.Basic" Version="3.4.11" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Reference Include="Dalamud">
+			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="ImGui.NET">
+			<HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="ImGuiScene">
+			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Lumina">
+			<HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+			<Private>False</Private>
+		</Reference> 
+		<Reference Include="Lumina.Excel">
+			<HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="FFXIVClientStructs">
+			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Newtonsoft.Json">
+			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="Serilog">
+			<HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+		<Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
+		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
+		<Using Include="Dalamud.Interface" />
+		<Using Include="ImGuiNET" />
+		<Using Include="Newtonsoft.Json" />
+		<Using Include="RotationSolver.Basic" />
+		<Using Include="RotationSolver.Basic.Actions" />
+		<Using Include="RotationSolver.Basic.Attributes" />
+		<Using Include="RotationSolver.Basic.Configuration.RotationConfig" />
+		<Using Include="RotationSolver.Basic.Data" />
+		<Using Include="RotationSolver.Basic.Helpers" />
+		<Using Include="RotationSolver.Basic.Rotations" />
+		<Using Include="RotationSolver.Basic.Rotations.Basic" />
+		<Using Include="System.Numerics" />
+		<Using Include="System.Reflection" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Tank\" />
+		<Folder Include="Healer\" />
+		<Folder Include="Melee\" />
+		<Folder Include="Magical\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Ranged\Simple_MCH.cs" />
+	</ItemGroup>
+
+</Project>
