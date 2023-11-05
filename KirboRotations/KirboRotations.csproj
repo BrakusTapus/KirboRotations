@@ -25,6 +25,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Ranged\Mch_Rota_Kirbo.cs" />
 	  <Compile Remove="Ranged\Simple_MCH.cs" />
 	</ItemGroup>
 
@@ -91,6 +92,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="Ranged\Mch_Rota_Kirbo.cs" />
 	  <None Include="Ranged\Simple_MCH.cs" />
 	</ItemGroup>
 
