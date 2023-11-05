@@ -45,8 +45,8 @@ public class MchRotationKirbo : MCH_Base
 			.SetCombo("RotationSelection", 1, "Select which Rotation will be used. (Openers will only be followed at level 90)", new string[2] { "Early AA", "Delayed Tools" })
 			.SetBool("BatteryStuck", false, "Battery overcap protection\n(Will try and use Rook AutoTurret if Battery is at 100 and next skill increases Battery)")
 			.SetBool("HeatStuck", false, "Heat overcap protection\n(Will try and use HyperCharge if Heat is at 100 and next skill increases Heat)")
-			.SetBool("DumpSkills", true, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
-			.SetBool("LBInPvP", true, "Use the LB in PvP when Target is killable by it");
+			.SetBool("DumpSkills", true, "Dump Skills when HostileTarget is dying\n(Will try and spend remaining resources before boss dies)")
+			.SetBool("LBInPvP", true, "Use the LB in PvP when HostileTarget is killable by it");
 	}
 
 	protected override IAction CountDownAction(float remainTime)

@@ -1,10 +1,9 @@
 ﻿namespace KirboRotations.Ranged;
 
-// Link to the Ratation source code
-//[SourceCode(Path = "%Branch/FilePath to your sourse code% eg. main/BaseRotations/Melee/NIN_Default.cs%")]
-// The detailed or extended description links of this Ratation, such as loop diagrams, recipe urls, teaching videos, etc.,
-// can be written more than one
-//[LinkDescription("%Link to the pics or just a link%", "%Description about your rotation.%")]
+using FFXIVClientStructs.FFXIV.Client.Game;
+
+[SourceCode(Path = "main/KirboRotations/Ranged/Simple_MCH.cs")]
+[LinkDescription("https://github.com/BrakusTapus/KirboRotations", "Github Page")]
 //[YoutubeLink(ID = "%If you got a youtube video link, please add here, just video id!%")]
 [RotationDesc(ActionID.Wildfire)]
 public sealed class Simple_MCH : MCH_Base
@@ -12,19 +11,23 @@ public sealed class Simple_MCH : MCH_Base
 	public override string GameVersion => "6.51";
 
 	public override string RotationName => "Simple_MCH";
+
 	public override bool ShowStatus => true;
+
 	public override void DisplayStatus()
 	{
 		ImGui.Text("GCD remain:        " + WeaponRemain);
-		ImGui.Text("Drill CD remain: " + Drill.CooldownRemaining);
-		ImGui.Text("Target.GetHealthRatio" + Target.GetHealthRatio().ToString());
-		ImGui.Text("Target.GetHealthRatio" + HostileTarget.StatusTime(true, StatusID.Wildfire).ToString());
-		ImGui.Text("Target.Name" + Target.Name.ToString());
+		ImGui.Text("HostileTarget.Name" + HostileTarget.Name.ToString());
+		ImGui.Text("HostileTarget.GetHealthRatio" + HostileTarget.GetHealthRatio().ToString());
+		ImGui.Text("Player has Wildfire: " + Player.HasStatus(true, StatusID.Wildfire));
+		
 	}
 
 	protected override bool GeneralGCD(out IAction act)
 	{
-		if(DataCenter)
+		TerritoryContentType Content = TerritoryContentType;
+		bool PvP = (int)Content == 6;
+		if(PvP)
 		{
 			if(PvP_HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty))
 			{
@@ -43,7 +46,7 @@ public sealed class Simple_MCH : MCH_Base
 				return true;
 			}
 
-			if(PvP_Bioblaster.CanUse(out act, CanUseOption.MustUseEmpty, 1) && Target.DistanceToPlayer() < 12)
+			if(PvP_Bioblaster.CanUse(out act, CanUseOption.MustUseEmpty, 1) && HostileTarget.DistanceToPlayer() < 12)
 			{
 				return true;
 			}
@@ -73,7 +76,7 @@ public sealed class Simple_MCH : MCH_Base
 		else
 		{
 			float tolerance = 0.5f;
-			if(AutoCrossbow.CanUse(out act) && Target.DistanceToPlayer() <= 12)
+			if(AutoCrossbow.CanUse(out act) && HostileTarget.DistanceToPlayer() <= 12)
 			{
 				return true;
 			}
@@ -83,27 +86,27 @@ public sealed class Simple_MCH : MCH_Base
 				return true;
 			}
 
-			if(Target.GetHealthRatio() > 0.6 && BioBlaster.CanUse(out act, CanUseOption.MustUse, 2) && Target.DistanceToPlayer() <= 12)
+			if(BioBlaster.CanUse(out act, CanUseOption.MustUse, 2) && HostileTarget.GetHealthRatio() >= 0.6 && HostileTarget.DistanceToPlayer() <= 12)
 			{
 				return true;
 			}
 
-			if(Drill.CanUse(out act))
+			if(Drill.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo) && !IsOverheated)
 			{
 				return true;
 			}
 
-			if(AirAnchor.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo))
+			if(AirAnchor.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo) && !IsOverheated)
 			{
 				return true;
 			}
 
-			if(!AirAnchor.EnoughLevel && HotShot.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo))
+			if(!AirAnchor.EnoughLevel && HotShot.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo) && !IsOverheated)
 			{
 				return true;
 			}
 
-			if(ChainSaw.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo))
+			if(ChainSaw.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo) && !IsOverheated)
 			{
 				return true;
 			}
@@ -115,49 +118,49 @@ public sealed class Simple_MCH : MCH_Base
 
 			if(CleanShot.CanUse(out act)) // default skill
 			{
-				if(Drill.CooldownRemaining < tolerance)
+				if(Drill.WillHaveOneCharge(tolerance) && Drill.EnoughLevel)
 				{
 					return false;
 				}
-				if(AirAnchor.CooldownRemaining < tolerance)
+				if(AirAnchor.WillHaveOneCharge(tolerance) && AirAnchor.EnoughLevel)
 				{
 					return false;
 				}
-				if(ChainSaw.CooldownRemaining < tolerance)
-				{
-					return false;
-				}
-				return true;
-			}
-
-			if(SlugShot.CanUse(out act)) // default skill
-			{
-				if(Drill.CooldownRemaining < tolerance)
-				{
-					return false;
-				}
-				if(AirAnchor.CooldownRemaining < tolerance)
-				{
-					return false;
-				}
-				if(ChainSaw.CooldownRemaining < tolerance)
+				if(ChainSaw.WillHaveOneCharge(tolerance) && ChainSaw.EnoughLevel)
 				{
 					return false;
 				}
 				return true;
 			}
 
-			if(SplitShot.CanUse(out act)) // default skill
+			if(SlugShot.CanUse(out act)) // Bugs out if player is synched down
 			{
-				if(Drill.CooldownRemaining < tolerance)
+				if(Drill.WillHaveOneCharge(tolerance) && Drill.EnoughLevel)
 				{
 					return false;
 				}
-				if(AirAnchor.CooldownRemaining < tolerance)
+				if(AirAnchor.WillHaveOneCharge(tolerance) && AirAnchor.EnoughLevel)
 				{
 					return false;
 				}
-				if(ChainSaw.CooldownRemaining < tolerance)
+				if(ChainSaw.WillHaveOneCharge(tolerance) && ChainSaw.EnoughLevel)
+				{
+					return false;
+				}
+				return true;
+			}
+
+			if(SplitShot.CanUse(out act)) // Bugs out if player is synched down
+			{
+				if(Drill.WillHaveOneCharge(tolerance) && Drill.EnoughLevel)
+				{
+					return false;
+				}
+				if(AirAnchor.WillHaveOneCharge(tolerance) && AirAnchor.EnoughLevel)
+				{
+					return false;
+				}
+				if(ChainSaw.WillHaveOneCharge(tolerance) && ChainSaw.EnoughLevel)
 				{
 					return false;
 				}
@@ -165,16 +168,16 @@ public sealed class Simple_MCH : MCH_Base
 			}
 			return base.GeneralGCD(out act);
 		}
-		return base.GeneralGCD(out act);
 	}
 
 	//0GCD actions here.
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
 	{
+		TerritoryContentType Content = TerritoryContentType;
+		bool PvP = (int)Content == 6;
 
-		if(InPvP)
+		if(PvP)
 		{
-			act = null;
 			if(PvP_Wildfire.CanUse(out act, CanUseOption.OnLastAbility) && nextGCD == PvP_HeatBlast)
 			{
 				return true;
@@ -183,7 +186,7 @@ public sealed class Simple_MCH : MCH_Base
 			{
 				return true;
 			}
-			if(nextGCD == PvP_ChainSaw && Target.GetHealthRatio() < 0.5 && PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty))
+			if(nextGCD == PvP_ChainSaw && HostileTarget.GetHealthRatio() < 0.5 && PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty))
 			{
 				return true;
 			}
@@ -202,7 +205,7 @@ public sealed class Simple_MCH : MCH_Base
 				{
 					return false;
 				}
-				else if(TarOnMeTargetCount >= 1 || NumberOfHostilesInRange >= 1)
+				else if(NumberOfHostilesInRange >= 1)
 				{
 					return true;
 				}
@@ -235,7 +238,6 @@ public sealed class Simple_MCH : MCH_Base
 
 			if(UseReassembleForAbilities(nextGCD, out act) && !IsOverheated && NextAbilityToNextGCD > 0.6)
 			{
-				// The 'act' variable is set to Reassemble by 'TryUseReassembleForAbilities' if it's usable.
 				return true;
 			}
 
@@ -276,8 +278,8 @@ public sealed class Simple_MCH : MCH_Base
 		}
 
 		// Check if the conditions for using Burst Medicine are met.
-		if(Wildfire.CooldownRemaining <= 20 && CombatTime > 60 && NextAbilityToNextGCD > 1.2 && !Player.HasStatus(true, StatusID.Medicated)
-			&& !TinctureOfDexterity6.IsCoolingDown && !TinctureOfDexterity7.IsCoolingDown && !TinctureOfDexterity8.IsCoolingDown && Drill.CooldownRemaining < 3)
+		if(Wildfire.WillHaveOneCharge(20) && CombatTime > 60 && NextAbilityToNextGCD > 1.2
+			&& !TinctureOfDexterity6.IsCoolingDown && !TinctureOfDexterity7.IsCoolingDown && !TinctureOfDexterity8.IsCoolingDown && Drill.WillHaveOneCharge(3))
 		{
 			// Attempt to use Burst Medicine.
 			return UseBurstMedicine(out act, false);
@@ -286,7 +288,7 @@ public sealed class Simple_MCH : MCH_Base
 		// If the conditions are not met, return false.
 		return false;
 	}
-	private bool UseReassembleForAbilities(IAction nextGCD, out IAction act)
+	private static bool UseReassembleForAbilities(IAction nextGCD, out IAction act)
 	{
 		act = null; // Default to null if Reassemble cannot be used.
 
@@ -295,9 +297,9 @@ public sealed class Simple_MCH : MCH_Base
 		const float upperThreshold = 2.5f; // 2.5 seconds upper bound
 
 		// Check the cooldowns of Drill, AirAnchor, and ChainSaw.
-		bool isDrillCooldownWithinRange = Drill.CooldownRemaining >= lowerThreshold && Drill.CooldownRemaining <= upperThreshold;
-		bool isAirAnchorCooldownWithinRange = AirAnchor.CooldownRemaining >= lowerThreshold && AirAnchor.CooldownRemaining <= upperThreshold;
-		bool isChainSawCooldownWithinRange = ChainSaw.CooldownRemaining >= lowerThreshold && ChainSaw.CooldownRemaining <= upperThreshold;
+		bool isDrillCooldownWithinRange = !Drill.WillHaveOneCharge(lowerThreshold) && Drill.WillHaveOneCharge(upperThreshold);
+		bool isAirAnchorCooldownWithinRange = !AirAnchor.WillHaveOneCharge(lowerThreshold) && AirAnchor.WillHaveOneCharge(upperThreshold);
+		bool isChainSawCooldownWithinRange = !ChainSaw.WillHaveOneCharge(lowerThreshold) && ChainSaw.WillHaveOneCharge(upperThreshold);
 
 		// Check if the player's level is too low for Drill.
 		bool isPlayerLevelTooLowForDrill = !Drill.EnoughLevel;
@@ -311,7 +313,7 @@ public sealed class Simple_MCH : MCH_Base
 
 		// If the cooldown of any of the abilities is within the specified range or the next GCD is eligible,
 		// attempt to use Reassemble.
-		if((isDrillCooldownWithinRange || isAirAnchorCooldownWithinRange || isChainSawCooldownWithinRange) || isNextGCDEligible)
+		if(isDrillCooldownWithinRange || isAirAnchorCooldownWithinRange || isChainSawCooldownWithinRange || isNextGCDEligible)
 		{
 			// Try to use Reassemble. If it can be used, set 'act' and return true.
 			return Reassemble.CanUse(out act, CanUseOption.MustUseEmpty);
@@ -320,7 +322,7 @@ public sealed class Simple_MCH : MCH_Base
 		// If none of the conditions are met, return false.
 		return false;
 	}
-	private bool ShouldUseHypercharge(out IAction act)
+	private static bool ShouldUseHypercharge(out IAction act)
 	{
 		act = null; // Default to null if Hypercharge cannot be used.
 
@@ -331,35 +333,43 @@ public sealed class Simple_MCH : MCH_Base
 		}
 
 		// Check if the target has the Wildfire status.
-		bool hasWildfire = Target.HasStatus(true, StatusID.Wildfire);
+		bool hasWildfire = HostileTarget.HasStatus(true, StatusID.Wildfire);
 
 		// Check if the Wildfire cooldown is greater than 30 seconds.
-		bool isWildfireCooldownLong = Wildfire.CooldownRemaining > 30;
+		bool isWildfireCooldownLong = !Wildfire.WillHaveOneCharge(30);
 
 		// Check if the Wildfire cooldown is less than 30 seconds.
-		bool isWildfireCooldownShort = Wildfire.CooldownRemaining < 30;
+		bool isWildfireCooldownShort = Wildfire.WillHaveOneCharge(30);
 
 		// Check if the Heat gauge is at least 50.
 		bool isHeatAtLeast50 = Heat >= 50;
 
-		// Check if the Heat gauge is between 90 and 100.
-		bool isHeatFullAlmostFull = Heat <= 100 && Heat >= 90;
+		// Check if the Heat gauge is or is greater then 95.
+		bool isHeatFullAlmostFull = Heat >= 95;
 
 		// Check the cooldowns of your main abilities to see if they will be ready soon.
-		bool isAnyMainAbilityReadySoon = Drill.CooldownRemaining < 8 ||
-										 AirAnchor.CooldownRemaining < 8 ||
-										 ChainSaw.CooldownRemaining < 8;
+		bool isAnyMainAbilityReadySoon = Drill.WillHaveOneCharge(8) ||
+										 AirAnchor.WillHaveOneCharge(8) ||
+										 ChainSaw.WillHaveOneCharge(8);
 
 		// Check if the last ability used was Wildfire.
 		bool isLastAbilityWildfire = IsLastAbility(ActionID.Wildfire);
 
-		// Determine if Hypercharge should be used based on the presence of Wildfire status,
-		// the Wildfire's cooldown, the current heat, not being overheated, and all main abilities not being ready soon,
-		// with an exception if the last ability used was Wildfire.
-		bool shouldUseHypercharge = (hasWildfire) ||
-									(!isAnyMainAbilityReadySoon || isLastAbilityWildfire) &&
-									((isWildfireCooldownLong && isHeatAtLeast50) ||
-									 (isWildfireCooldownShort && isHeatFullAlmostFull));
+		// Should use Hypercharge if:
+		// 1. If the target already has the Wildfire status, Hypercharge is immediately considered for use.
+		// 2. If the target does not have the Wildfire status, the decision to use Hypercharge is based on a combination of ability readiness and resource management:
+		//    a. Hypercharge is considered if none of the main abilities are ready soon or if the last ability used was Wildfire, indicating a strategic setup for damage output.
+		//    b. The decision is further refined by assessing the Wildfire cooldown and the current Heat level:
+		//       i. If the Wildfire cooldown is long (over 30 seconds), Hypercharge is considered if the Heat level is at least 50, suggesting a build-up phase.
+		//       ii. If the Wildfire cooldown is short (under 30 seconds), Hypercharge is considered if the Heat level is almost full (95 or higher), indicating a peak damage phase.
+		// This boolean encapsulates the logic for optimal Hypercharge use, balancing between cooldown management and resource optimization for maximum effectiveness.
+		bool shouldUseHypercharge = hasWildfire ||
+									(
+									  (!isAnyMainAbilityReadySoon || isLastAbilityWildfire) &&
+									  ((isWildfireCooldownLong && isHeatAtLeast50) ||
+									   (isWildfireCooldownShort && isHeatFullAlmostFull))
+									);
+
 
 		// If the conditions are met, attempt to use Hypercharge.
 		if(shouldUseHypercharge)
@@ -370,27 +380,26 @@ public sealed class Simple_MCH : MCH_Base
 		// If the conditions are not met, return false.
 		return false;
 	}
-	private bool ShouldUseWildfire(out IAction act)
+	private static bool ShouldUseWildfire(out IAction act)
 	{
 		act = null; // Default to null if Wildfire cannot be used.
 
 		// Check if the target is a boss. If not, return false immediately.
-		if(!Target.IsBoss() && !Target.IsDummy())
+		if(!HostileTarget.IsBoss() && !HostileTarget.IsDummy())
 		{
 			return false;
 		}
 
-
 		// Check the cooldowns of your main abilities.
-		bool isDrillReadySoon = Drill.CooldownRemaining < 8;
-		bool isAirAnchorReadySoon = AirAnchor.CooldownRemaining < 8;
-		bool isChainSawReadySoon = ChainSaw.CooldownRemaining < 8;
+		bool isDrillReadySoon = Drill.WillHaveOneCharge(8);
+		bool isAirAnchorReadySoon = AirAnchor.WillHaveOneCharge(8);
+		bool isChainSawReadySoon = ChainSaw.WillHaveOneCharge(8);
 
 		// Check if the combat time is less than 10 seconds and the last action was AirAnchor.
 		bool isEarlyCombatAndLastActionAirAnchor = CombatTime < 15 && IsLastGCD(ActionID.AirAnchor);
 
 		// Determine if Wildfire should be used based on the conditions provided.
-		bool shouldUseWildfire = !isDrillReadySoon && !isAirAnchorReadySoon && !isChainSawReadySoon ||
+		bool shouldUseWildfire = (!isDrillReadySoon && !isAirAnchorReadySoon && !isChainSawReadySoon) ||
 								 isEarlyCombatAndLastActionAirAnchor;
 
 		// If the conditions are met, attempt to use Wildfire.
@@ -402,12 +411,13 @@ public sealed class Simple_MCH : MCH_Base
 		// If the conditions are not met, return false.
 		return false;
 	}
-	private bool ShouldUseBarrelStabilizer(out IAction act)
+	private static bool ShouldUseBarrelStabilizer(out IAction act)
 	{
 		act = null; // Default to null if Barrel Stabilizer cannot be used.
 
 		// Check if the target is not a boss or a dummy.
-		if(!Target.IsBoss() || !Target.IsDummy())
+		// Doesn't need optimisation in these cases
+		if(!HostileTarget.IsBoss() || !HostileTarget.IsDummy())
 		{
 			return BarrelStabilizer.CanUse(out act, CanUseOption.MustUse);
 		}
@@ -415,14 +425,19 @@ public sealed class Simple_MCH : MCH_Base
 		// Check if the combat time is less than 10 seconds and the last action was Drill.
 		bool isEarlyCombatAndLastActionDrill = CombatTime < 10 && IsLastAction(ActionID.Drill);
 
-		// Check the relative cooldowns of Wildfire and Barrel Stabilizer.
-		bool isWildfireCooldownLonger = Wildfire.CooldownRemaining > BarrelStabilizer.CooldownRemaining;
-		bool isBarrelStabilizerCooldownLonger = BarrelStabilizer.CooldownRemaining > Wildfire.CooldownRemaining;
+		// Check if the Heat is 50 or more.
+		bool enoughHeat = Heat >= 50;
+
+		// Check if Wildfire will have a charge within the next 30 seconds.
+		bool isWildfireCooldownShort = Wildfire.WillHaveOneCharge(30);
+
+		// Check if Wildfire will not have a charge within the next 30 seconds and Heat is 50 or less.
+		bool isWildfireCooldownLongAndLowHeat = !Wildfire.WillHaveOneCharge(30) && Heat <= 50;
 
 		// Determine if Barrel Stabilizer should be used based on the conditions provided.
 		bool shouldUseBarrelStabilizer = isEarlyCombatAndLastActionDrill ||
-										 isWildfireCooldownLonger ||
-										 isBarrelStabilizerCooldownLonger;
+										 (!isWildfireCooldownShort && enoughHeat) ||
+										 isWildfireCooldownLongAndLowHeat;
 
 		// If the conditions are met, attempt to use Barrel Stabilizer.
 		if(shouldUseBarrelStabilizer)
@@ -433,31 +448,33 @@ public sealed class Simple_MCH : MCH_Base
 		// If the conditions are not met, return false.
 		return false;
 	}
-	private bool ShouldUseRookAutoturret(IAction nextGCD, out IAction act)
+	private static bool ShouldUseRookAutoturret(IAction nextGCD, out IAction act)
 	{
 		act = null; // Default to null if Rook Autoturret cannot be used.
 
 		// Logic when the target is a boss.
-		if(Target.IsBoss() || Target.IsDummy())
+		if(HostileTarget.IsBoss() || HostileTarget.IsDummy())
 		{
 			// If combat time is less than 80 seconds and last summon battery power was at least 50.
 			if(CombatTime < 80 && Battery >= 50 && !RookAutoturret.IsCoolingDown)
 			{
 				return RookAutoturret.CanUse(out act, CanUseOption.MustUse);
 			}
+			
 			// If combat time is more than 80 seconds and additional conditions are met, use Rook Autoturret.
 			else if(CombatTime >= 80)
 			{
-				bool hasWildfireStatus = Target.HasStatus(true, StatusID.Wildfire);
-				bool isWildfireCooldownLong = Wildfire.CooldownRemaining > 30;
+				float GCDSpeed = WeaponTotal;
+				bool hasWildfireStatus = Player.HasStatus(true, StatusID.Wildfire);
+				bool isWildfireCooldownLong = !Wildfire.WillHaveOneCharge(30);
 				bool isBatteryHighEnough = Battery >= 80;
-				bool isAirAnchorOrChainSawSoon = AirAnchor.CooldownRemaining < 3 || ChainSaw.CooldownRemaining < 3;
+				bool isAirAnchorOrChainSawSoon = AirAnchor.WillHaveOneCharge(GCDSpeed) || ChainSaw.WillHaveOneCharge(GCDSpeed);
 				bool isNextGCDCleanShot = nextGCD == CleanShot;
 
-				if((isWildfireCooldownLong && isBatteryHighEnough) ||
-					(hasWildfireStatus) ||
-					(!hasWildfireStatus && Wildfire.CooldownRemaining < 30 && (isBatteryHighEnough && isAirAnchorOrChainSawSoon)) ||
-					(isBatteryHighEnough && (isAirAnchorOrChainSawSoon || isNextGCDCleanShot)))
+				if(hasWildfireStatus ||
+				   (!hasWildfireStatus && Wildfire.WillHaveOneCharge(30) && isBatteryHighEnough && isAirAnchorOrChainSawSoon) ||
+				   (isWildfireCooldownLong && isBatteryHighEnough) ||
+				   (isBatteryHighEnough && (isAirAnchorOrChainSawSoon || isNextGCDCleanShot)))
 				{
 					return RookAutoturret.CanUse(out act, CanUseOption.MustUse);
 				}
@@ -466,9 +483,10 @@ public sealed class Simple_MCH : MCH_Base
 		// Logic when the target is not a boss.
 		else
 		{
+			float GCDSpeed = WeaponTotal;
 			// If the target's time to kill is 17 seconds or more and battery is full.
-			bool isAirAnchorOrChainSawSoon = AirAnchor.CooldownRemaining < 3 || ChainSaw.CooldownRemaining < 3;
-			if(Target.GetTimeToKill(false) >= 17 && Battery == 100)
+			bool isAirAnchorOrChainSawSoon = AirAnchor.WillHaveOneCharge(GCDSpeed) || ChainSaw.WillHaveOneCharge(GCDSpeed);
+			if(HostileTarget.GetTimeToKill(false) >= 17 && Battery == 100)
 			{
 				// If the next GCD is Clean Shot or if Air Anchor or Chain Saw are about to be ready.
 				if(nextGCD == CleanShot || isAirAnchorOrChainSawSoon)
@@ -477,7 +495,7 @@ public sealed class Simple_MCH : MCH_Base
 				}
 			}
 			// If the target's time to kill is 17 seconds or more, use Rook Autoturret.
-			else if(Target.GetTimeToKill(false) >= 17)
+			else if(HostileTarget.GetTimeToKill(false) >= 17)
 			{
 				return RookAutoturret.CanUse(out act, CanUseOption.MustUse);
 			}
