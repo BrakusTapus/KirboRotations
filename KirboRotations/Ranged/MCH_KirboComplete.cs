@@ -89,7 +89,7 @@ public class MCH_KirboComplete : MCH_Base
 		.SetCombo(CombatType.PvE, "RotationSelection", 1, "Select which Rotation will be used. (Openers will only be followed at level 90)", "Early AA", "Delayed Tools", "Early All")
 		.SetBool(CombatType.PvE, "BatteryStuck", false, "Battery overcap protection\n(Will try and use Rook AutoTurret if Battery is at 100 and next skill increases Battery)")
 		.SetBool(CombatType.PvE, "HeatStuck", false, "Heat overcap protection\n(Will try and use HyperCharge if Heat is at 100 and next skill increases Heat)")
-		.SetBool(CombatType.PvE, "DumpSkills", true, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
+		.SetBool(CombatType.PvE, "DumpSkills", false, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
 		.SetFloat(ConfigUnitType.Percent, CombatType.PvP, "MarksManThreshold", 0.35f, "Marksman Threshold", 0f, 1f, 0.1f)
 		.SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
 		.SetBool(CombatType.PvP, "PreventActionWaste", true, "Turn on to prevent using actions on targets with invulns\n(For example: DRK with Undead Redemption)")
@@ -388,10 +388,10 @@ public class MCH_KirboComplete : MCH_Base
 		act = null;
 
 		#region PvP
-		if(PvP_Purify.CanUse(out act) && PvP_Purify.IsCoolingDown)
-		{
-			return false;
-		}
+		bool hasGuard =	HostileTarget.HasStatus(false, StatusID.PvP_Guard);
+		bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
+		bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
+		bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);
 
 		if(Configs.GetBool("GuardCancel") && Player.HasStatus(true, StatusID.PvP_Guard)) return false;
 
@@ -536,9 +536,6 @@ public class MCH_KirboComplete : MCH_Base
 		bool FATEs = (int)Content == 8;
 		bool Eureka = (int)Content == 26;
 
-		int rotationVariant = Configs.GetCombo("RotationSelection");
-
-
 		if(ShouldUseBurstMedicine(out act))
 		{
 			return true;
@@ -662,9 +659,14 @@ public class MCH_KirboComplete : MCH_Base
 					return true;
 				}
 			}
+
+			if(ShouldUseGaussroundOrRicochet(out act) && NextAbilityToNextGCD > GaussRound.AnimationLockTime + Ping)
+			{
+				return true;
+			}
 		}
 
-		if(ShouldUseBarrelStabilizer(out act))
+		/*if(ShouldUseBarrelStabilizer(out act))
 		{
 			return true;
 		}
@@ -679,7 +681,7 @@ public class MCH_KirboComplete : MCH_Base
 			return true;
 		}
 
-		if(ShouldUseReassemble(nextGCD, out act, rotationVariant) && !IsOverheated && NextAbilityToNextGCD > Reassemble.AnimationLockTime + Ping)
+		if(ShouldUseReassemble(nextGCD, out act) && !IsOverheated && NextAbilityToNextGCD > Reassemble.AnimationLockTime + Ping)
 		{
 			return true;
 		}
@@ -687,14 +689,9 @@ public class MCH_KirboComplete : MCH_Base
 		if(ShouldUseHypercharge(out act))
 		{
 			return true;
-		}
+		}*/
 
-		if(ShouldUseGaussroundOrRicochet(out act) && NextAbilityToNextGCD > GaussRound.AnimationLockTime + Ping)
-		{
-			return true;
-		}
-
-		/*if(Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || Player.Level < 90)
+		if(Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || Player.Level < 90)
 		{
 			if((IsLastAbility(false, Hypercharge) || Heat >= 50) && HostileTarget.IsBossFromIcon()
 				&& Wildfire.CanUse(out act, CanUseOption.OnLastAbility)) return true;
@@ -736,7 +733,12 @@ public class MCH_KirboComplete : MCH_Base
 					return true;
 				}
 			}
-		}*/
+
+			if(ShouldUseGaussroundOrRicochet(out act) && NextAbilityToNextGCD > GaussRound.AnimationLockTime + Ping)
+			{
+				return true;
+			}
+		}
 
 		return base.EmergencyAbility(nextGCD, out act);
 		#endregion
@@ -763,7 +765,8 @@ public class MCH_KirboComplete : MCH_Base
 		// If the conditions are not met, return false.
 		return false;
 	}
-	private bool ShouldUseReassemble(IAction nextGCD, out IAction act, int rotationVariant)
+
+	private bool ShouldUseReassemble(IAction nextGCD, out IAction act)
 	{
 		act = null; // Default to null if Reassemble cannot be used.
 
@@ -782,46 +785,9 @@ public class MCH_KirboComplete : MCH_Base
 			return false;
 		}
 
-		// Rotation variant consideration
-		switch(rotationVariant)
-		{
-			case 0: // Early AA
-					// Define specific conditions for Early AA
-				if(isNextGCDEligibleForDefault)
-				{
-					return Reassemble.CanUse(out act, CanUseOption.MustUseEmpty);
-				}
-				break;
-
-			case 1: // Delayed Tools
-					// Define specific conditions for Delayed Tools
-					// Example: Might be same as default or different logic
-				if(isNextGCDEligibleForDefault)
-				{
-					return Reassemble.CanUse(out act, CanUseOption.MustUseEmpty);
-				}
-				break;
-
-			case 2: // Early All
-				if(isNextGCDEligibleForDefault)
-				{
-					return Reassemble.CanUse(out act, CanUseOption.MustUseEmpty);
-				}
-				break;
-
-			default:
-				// If the rotation variant is not recognized, use the default conditions
-				if(isNextGCDEligibleForDefault)
-				{
-					return Reassemble.CanUse(out act, CanUseOption.MustUseEmpty);
-				}
-				break;
-		}
-
 		// If none of the conditions are met for any rotation variant, return false.
 		return false;
 	}
-
 	private bool ShouldUseHypercharge(out IAction act)
 	{
 		act = null; // Default to null if Hypercharge cannot be used.
@@ -1059,7 +1025,7 @@ public class MCH_KirboComplete : MCH_Base
 	}
 	#endregion
 
-	protected override bool AttackAbility(out IAction act)
+	/*protected override bool AttackAbility(out IAction act)
 	{
 		#region PVE
 		if(OpenerInProgress)
@@ -1080,7 +1046,7 @@ public class MCH_KirboComplete : MCH_Base
 		act = null;
 		return false;
 		#endregion
-	}
+	}*/
 
 
 	protected override void UpdateInfo()
