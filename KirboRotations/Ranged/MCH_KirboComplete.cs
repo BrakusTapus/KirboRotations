@@ -90,7 +90,7 @@ public class MCH_KirboComplete : MCH_Base
 		.SetBool(CombatType.PvE, "BatteryStuck", false, "Battery overcap protection\n(Will try and use Rook AutoTurret if Battery is at 100 and next skill increases Battery)")
 		.SetBool(CombatType.PvE, "HeatStuck", false, "Heat overcap protection\n(Will try and use HyperCharge if Heat is at 100 and next skill increases Heat)")
 		.SetBool(CombatType.PvE, "DumpSkills", false, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
-		.SetFloat(ConfigUnitType.Percent, CombatType.PvP, "MarksManThreshold", 0.35f, "Marksman Threshold", 0f, 1f, 0.1f)
+		.SetBool(CombatType.PvP, "LBInPvP", true, "Use the LB in PvP when Target is killable by it")
 		.SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
 		.SetBool(CombatType.PvP, "PreventActionWaste", true, "Turn on to prevent using actions on targets with invulns\n(For example: DRK with Undead Redemption)")
 		.SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)");
@@ -386,8 +386,8 @@ public class MCH_KirboComplete : MCH_Base
 	protected override bool GeneralGCD(out IAction act)
 	{
 		act = null;
-
 		#region PvP
+
 		bool hasGuard =	HostileTarget.HasStatus(false, StatusID.PvP_Guard);
 		bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
 		bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
@@ -395,14 +395,17 @@ public class MCH_KirboComplete : MCH_Base
 
 		if(Configs.GetBool("GuardCancel") && Player.HasStatus(true, StatusID.PvP_Guard)) return false;
 
-		if(Configs.GetBool("SafetyCheck") && HostileTarget.HasStatus(false, StatusID.PvP_Chiten)) return false;
+		if(Configs.GetBool("SafetyCheck") && hasChiten) return false;
 
-		if(Configs.GetBool("PreventActionWaste") && HostileTarget.HasStatus(false, StatusID.PvP_Guard, StatusID.PvP_HallowedGround, StatusID.PvP_UndeadRedemption)) return false;
+		if(Configs.GetBool("PreventActionWaste") && (hasGuard || hasHallowedGround || hasUndeadRedemption)) return false;
 
-		if(HostileTarget.GetHealthRatio() <= Configs.GetFloat("MarksManThreshold") && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse) && !IsPvPOverheated) return true;
 
 		if(!IsPvPOverheated)
 		{
+			if(HostileTarget && Configs.GetBool("LBInPvP") && HostileTarget.CurrentHp < 32000 && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse))
+			{
+				return true;
+			}
 			if(Player.HasStatus(true, StatusID.PvP_DrillPrimed))
 			{
 				if(PvP_Drill.CanUse(out act, CanUseOption.MustUseEmpty)) return true;
@@ -484,17 +487,20 @@ public class MCH_KirboComplete : MCH_Base
 
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
 	{
+		act = null;
 		#region PvP
-		if(PvP_Purify.CanUse(out act) && PvP_Purify.IsCoolingDown)
-		{
-			return false;
-		}
+
+
+		bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard);
+		bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
+		bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
+		bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);
 
 		if(Configs.GetBool("GuardCancel") && Player.HasStatus(true, StatusID.PvP_Guard)) return false;
 
-		if(Configs.GetBool("PreventActionWaste") && HostileTarget.HasStatus(false, StatusID.PvP_Guard, StatusID.PvP_HallowedGround, StatusID.PvP_UndeadRedemption)) return false;
+		if(Configs.GetBool("SafetyCheck") && hasChiten) return false;
 
-		if(HostileTarget.GetHealthRatio() <= Configs.GetFloat("MarksManThreshold") && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse) && !IsPvPOverheated) return true;
+		if(Configs.GetBool("PreventActionWaste") && (hasGuard || hasHallowedGround || hasUndeadRedemption)) return false;
 
 		if(IsPvPOverheated && !Player.WillStatusEnd(3.5f, true, StatusID.PvP_Overheated) && HostileTarget.DistanceToPlayer() < 20 && PvP_Wildfire.CanUse(out act, CanUseOption.MustUse))
 		{
