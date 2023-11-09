@@ -11,7 +11,6 @@
 		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
-		<UserSecretsId>06a3dd5e-6f28-452f-bfa5-5d93d34fec1b</UserSecretsId>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,7 +28,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="RotationSolver.Basic" Version="3.4.11" />
+		<PackageReference Include="RotationSolver.Basic" Version="3.4.15" />
 	</ItemGroup>
 
 	<ItemGroup>
