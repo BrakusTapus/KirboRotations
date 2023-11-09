@@ -324,15 +324,6 @@ public sealed class Simple_MCH : MCH_Base
 				return true;
 			}
 
-			/*if(GaussRound.CanUse(out act, CanUseOption.MustUseEmpty) && NextAbilityToNextGCD > 0.6)
-			{
-				return true;
-			}
-			if(Ricochet.HasOneCharge && Ricochet.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility) && NextAbilityToNextGCD > 0.6)
-			{
-				return true;
-			}*/
-
 			return base.EmergencyAbility(nextGCD, out act);
 		}
 	}
@@ -469,51 +460,34 @@ public sealed class Simple_MCH : MCH_Base
 		return false;
 	}
 
-	/*private bool ShouldUseWildfire(IAction nextGCD, out IAction act)
+	private bool ShouldUseWildfire(IAction nextGCD, out IAction act)
 	{
-		act = null; // Default to null if Wildfire cannot be used.
-		bool notEnoughHeatForHypercharge = Heat < 45;
-		bool sufficientHeatForWildfire = Heat >= 45; // Ensure at least 50 heat for later use of Wildfire.
-
-		if(notEnoughHeatForHypercharge || !InCombat || (IsOverheated && HeatStacks <= 4))
+		if(Wildfire.CanUse(out act, CanUseOption.OnLastAbility))
 		{
+			if(ChainSaw.EnoughLevel && nextGCD == ChainSaw && Heat >= 50)
+			{
+				return true;
+			}
+
+			if(Drill.IsCoolingDown && AirAnchor.IsCoolingDown && ChainSaw.IsCoolingDown && Heat >= 45)
+			{
+				return true;
+			}
+
+			if(!CombatElapsedLessGCD(2) && Heat >= 50)
+			{
+				return true;
+			}
+
+			if(IsOverheated && HeatStacks > 4)
+			{
+				return true;
+			}
+
 			return false;
 		}
+	}
 
-		// Check if the target is a boss. If not, return false immediately.
-		if(!HostileTarget.IsBossFromTTK() && !HostileTarget.IsDummy())
-		{
-			return false;
-		}
-
-		// Check if the combat time is less than 15 seconds.
-		bool isEarlyCombat = CombatElapsedLess(15);
-
-		// Determine if Wildfire should be used early in combat.
-		bool shouldUseWildfireEarly = isEarlyCombat && Drill.IsCoolingDown && AirAnchor.IsCoolingDown;
-
-		// After the initial sequence, use Wildfire when two of the main abilities are cooling down and the third is the next GCD, or when all three are cooling down.
-		bool allAbilitiesCoolingDown = Drill.IsCoolingDown && AirAnchor.IsCoolingDown && ChainSaw.IsCoolingDown;
-		bool shouldUseWildfireLater = !isEarlyCombat 
-										&& sufficientHeatForWildfire 
-										&&
-									  (allAbilitiesCoolingDown ||
-									   (Drill.IsCoolingDown && AirAnchor.IsCoolingDown && nextGCD == ChainSaw) ||
-									   (Drill.IsCoolingDown && ChainSaw.IsCoolingDown && nextGCD == AirAnchor) ||
-									   (AirAnchor.IsCoolingDown && ChainSaw.IsCoolingDown && nextGCD == Drill));
-
-		// Combine the early combat and later conditions.
-		bool shouldUseWildfire = shouldUseWildfireEarly || shouldUseWildfireLater;
-
-		// If the conditions are met, attempt to use Wildfire.
-		if(shouldUseWildfire)
-		{
-			return Wildfire.CanUse(out act, CanUseOption.OnLastAbility);
-		}
-
-		// If the conditions are not met, return false.
-		return false;
-	}*/
 	private bool ShouldUseBarrelStabilizer(out IAction act)
 	{
 		act = null; // Default to null if Barrel Stabilizer cannot be used.

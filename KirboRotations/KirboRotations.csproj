@@ -24,11 +24,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Ranged\Mch_Rota_Kirbo.cs" />
+	  <Compile Remove="Ranged\Simple_MCH.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="RotationSolver.Basic" Version="3.4.15" />
+		<PackageReference Include="RotationSolver.Basic" Version="3.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -90,7 +90,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="Ranged\Mch_Rota_Kirbo.cs" />
+	  <None Include="Ranged\Simple_MCH.cs" />
 	</ItemGroup>
 
 </Project>
