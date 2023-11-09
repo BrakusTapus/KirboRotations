@@ -16,7 +16,6 @@ public class MCH_KirboComplete : MCH_Base
 
 	public override CombatType Type => CombatType.Both;
 
-
 	private bool InBurst { get; set; }
 
 	private bool expanded = false;
