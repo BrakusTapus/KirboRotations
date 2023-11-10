@@ -484,12 +484,11 @@ public class MCH_KirboComplete : MCH_Base
 		#endregion
 	}
 
-
 	protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
 	{
 		act = null;
-		#region PvP
 
+		#region PvP
 
 		bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard);
 		bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
@@ -602,6 +601,8 @@ public class MCH_KirboComplete : MCH_Base
 				return true;
 			}
 		}
+
+		// LvL 90+
 		if((!OpenerInProgress || OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90)
 		{
 			if(Wildfire.CanUse(out act, (CanUseOption)16) && nextGCD == ChainSaw && Heat >= 50)
@@ -672,31 +673,7 @@ public class MCH_KirboComplete : MCH_Base
 			}
 		}
 
-		/*if(ShouldUseBarrelStabilizer(out act))
-		{
-			return true;
-		}
-
-		if(ShouldUseWildfire(nextGCD, out act) && NextAbilityToNextGCD > RookAutoturret.AnimationLockTime + Ping)
-		{
-			return true;
-		}
-
-		if(ShouldUseRookAutoturret(nextGCD, out act) && NextAbilityToNextGCD > RookAutoturret.AnimationLockTime + Ping)
-		{
-			return true;
-		}
-
-		if(ShouldUseReassemble(nextGCD, out act) && !IsOverheated && NextAbilityToNextGCD > Reassemble.AnimationLockTime + Ping)
-		{
-			return true;
-		}
-
-		if(ShouldUseHypercharge(out act))
-		{
-			return true;
-		}*/
-
+		// LvL 30-89 and Casual Content
 		if(Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || Player.Level < 90)
 		{
 			if((IsLastAbility(false, Hypercharge) || Heat >= 50) && HostileTarget.IsBossFromIcon()

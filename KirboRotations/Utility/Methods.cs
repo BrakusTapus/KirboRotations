@@ -1,7 +1,4 @@
-﻿using Dalamud.Game.ClientState.JobGauge;
-using Dalamud.Game.ClientState.JobGauge.Types;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using System.Threading;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace KirboRotations.Utility;
 
@@ -28,5 +25,7 @@ public static class Methods
 	/// <summary> Checks if the player is in a PVP enabled zone. </summary>
 	/// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
 	public static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
+
+
 
 }
