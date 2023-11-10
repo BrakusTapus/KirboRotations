@@ -443,7 +443,7 @@ public class MCH_KirboComplete : MCH_Base
 			{
 				return true;
 			}
-			if(HostileTarget.GetHealthRatio() > 0.6 && BioBlaster.CanUse(out act, (CanUseOption)1, 2) && ObjectHelper.DistanceToPlayer(HostileTarget) <= 12f)
+			if(HostileTarget.GetHealthRatio() > 0.6 && IsLongerThan(15) && BioBlaster.CanUse(out act, (CanUseOption)1, 2) && ObjectHelper.DistanceToPlayer(HostileTarget) <= 12f)
 			{
 				return true;
 			}
@@ -469,14 +469,26 @@ public class MCH_KirboComplete : MCH_Base
 			}
 			if(CleanShot.CanUse(out act, CanUseOption.MustUse))
 			{
+				if(Drill.WillHaveOneCharge(0.1f))
+				{
+					return false;
+				}
 				return true;
 			}
 			if(SlugShot.CanUse(out act, CanUseOption.MustUse))
 			{
+				if(Drill.WillHaveOneCharge(0.1f))
+				{
+					return false;
+				}
 				return true;
 			}
 			if(SplitShot.CanUse(out act, CanUseOption.MustUse))
 			{
+				if(Drill.WillHaveOneCharge(0.1f))
+				{
+					return false;
+				}
 				return true;
 			}
 		}
@@ -661,7 +673,7 @@ public class MCH_KirboComplete : MCH_Base
 				{
 					return true;
 				}
-				if(Heat >= 50 && !Wildfire.WillHaveOneCharge(30f))
+				if(Heat >= 50 && !Wildfire.WillHaveOneCharge(40f))
 				{
 					return true;
 				}
