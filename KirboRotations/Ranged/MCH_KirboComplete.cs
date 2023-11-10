@@ -10,7 +10,7 @@ public class MCH_KirboComplete : MCH_Base
 
 	public override string GameVersion => "6.51";
 
-	public override string RotationName => "Machinist Revived\nBy\nKirbo & Incognito";
+	public override string RotationName => "Machinist Revived\nBy Kirbo & Incognito";
 
 	public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n Should be optimised for Boss Level 90 content with 2.5 GCD.";
 
@@ -18,7 +18,6 @@ public class MCH_KirboComplete : MCH_Base
 
 	private bool InBurst { get; set; }
 
-	private bool expanded = false;
 	public override bool ShowStatus => true;
 	public override void DisplayStatus()
 	{
@@ -35,12 +34,7 @@ public class MCH_KirboComplete : MCH_Base
 			ImGui.Text("OpenerHasFinished: " + OpenerHasFinished);
 			ImGui.Text("OpenerInProgress: " + OpenerInProgress);
 		}
-		if(ImGui.ArrowButton("##PvPRelated", expanded ? ImGuiDir.Down : ImGuiDir.Right))
-		{
-			expanded = !expanded; // Toggle the expanded state
-		}
-
-		if(expanded)
+		if(Methods.InPvP())
 		{
 			ImGui.Text("InPvP: " + Methods.InPvP());
 			ImGui.Text("IsPvPOverheated: " + IsPvPOverheated);
@@ -174,7 +168,6 @@ public class MCH_KirboComplete : MCH_Base
 	private bool Opener(out IAction act)
 	{
 		act = default(IAction);
-		//byte OverHeatStacks = StatusHelper.StatusStack(Player, true, (StatusID)2688);
 		while(OpenerInProgress && (!OpenerHasFinished || !OpenerHasFailed))
 		{
 			if(TimeSinceLastAction.TotalSeconds > 3.0 && !Flag)
