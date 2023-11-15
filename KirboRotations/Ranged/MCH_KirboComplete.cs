@@ -91,6 +91,9 @@ public class MCH_KirboComplete : MCH_Base
 
 	protected override IAction CountDownAction(float remainTime)
 	{
+		TerritoryContentType Content = TerritoryContentType;
+		bool UltimateRaids = (int)Content == 28;
+
 		if(OpenerActionsAvailable)
 		{
 			switch(Configs.GetCombo("RotationSelection")) // Select CountDownAction Depending on which Rotation will be used
@@ -157,10 +160,28 @@ public class MCH_KirboComplete : MCH_Base
 			{
 				return CleanShot;
 			}
-			if(remainTime < 5f && Reassemble.CurrentCharges > 0)
+			if(remainTime < 5f && Reassemble.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.Reassemble))
 			{
 				return Reassemble;
 			}
+		}
+
+		if(UltimateRaids)
+		{
+			if(Player.Level != 70)
+			{
+				return base.CountDownAction(remainTime);
+			}
+			if(remainTime <= Drill.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && Drill.CanUse(out _))
+			{
+				return Drill;
+			}
+			if(remainTime < 5f && Reassemble.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.Reassemble))
+			{
+				return Reassemble;
+			}
+			return base.CountDownAction(remainTime);
+
 		}
 		return base.CountDownAction(remainTime);
 	}
@@ -545,6 +566,7 @@ public class MCH_KirboComplete : MCH_Base
 		bool VCDungeonFinder = (int)Content == 30;
 		bool FATEs = (int)Content == 8;
 		bool Eureka = (int)Content == 26;
+		bool UltimateRaids = (int)Content == 28;
 
 		if(ShouldUseBurstMedicine(out act))
 		{
