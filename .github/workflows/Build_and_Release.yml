@@ -7,15 +7,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Check if to skip    
   Check_Commit:
     runs-on: windows-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Check Commit Message
-        id: check_commit_message
         run: |
-          if (${{ github.event_name }} -eq 'workflow_dispatch') {
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
             echo "Manual dispatch detected. Setting RUN_WORKFLOW to true."
             echo "commit_contains_new=true" >> $GITHUB_ENV
           } else {
