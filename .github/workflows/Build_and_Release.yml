@@ -52,7 +52,7 @@ jobs:
       # extract the version number from '.csproj'
       - name: Extract version numbers
         id: extract_versions  # Add an id to this step to reference its outputs
-        working-directory: D:\a\KirboRotations\KirboRotations
+        working-directory: D:\a\KirboRotations\
         run: |
           $csprojPath = "./KirboRotations.csproj"
           $csprojXml = [xml](Get-Content $csprojPath)
