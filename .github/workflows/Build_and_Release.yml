@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Checks if commit contains word NEW or if manual dispatch
   Check_Commit:
     runs-on: windows-latest
     steps:
@@ -28,7 +29,7 @@ jobs:
           }
         shell: pwsh
 
-  # Checks if the version number has been updated
+  # Extracts version number
   Check_Version:
     needs: Check_Commit
     if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.outputs.commit_contains_new == 'true' }}
@@ -129,7 +130,7 @@ jobs:
           Get-ChildItem -Recurse
         shell: pwsh
 
-      # create releae
+      # create release
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -155,7 +156,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: D:\a\KirboRotations\bin\Release\net7.0-windows\KirboRotations.dll
+          asset_path: D:\a\KirboRotations\KirboRotations\KirboRotations\bin\Release\net7.0-windows\KirboRotations.dll
           asset_name: KirboRotations.dll
           asset_content_type: application/octet-stream
 
@@ -167,7 +168,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: D:\a\KirboRotations\bin\Release\net7.0-windows\KirboRotations.pdb
+          asset_path: D:\a\KirboRotations\KirboRotations\KirboRotations\bin\Release\net7.0-windows\KirboRotations.pdb
           asset_name: KirboRotations.pdb
           asset_content_type: application/octet-stream
 
