@@ -80,7 +80,7 @@ jobs:
 
       # extract the version number from '.csproj'
       - name: Extract version numbers
-        working-directory: D:\a\KirboRotations
+        working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
         run: |
           $KirboRotationsPath = "./KirboRotations.csproj"
         
