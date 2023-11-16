@@ -12,7 +12,8 @@ jobs:
     steps:
       - name: Check Commit Message
         run: |
-          if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+          $eventName = '${{ github.event_name }}'
+          if ($eventName -eq 'workflow_dispatch') {
             echo "Manual dispatch detected. Setting RUN_WORKFLOW to true."
             echo "commit_contains_new=true" >> $GITHUB_ENV
           } else {
@@ -25,6 +26,7 @@ jobs:
               echo "commit_contains_new=false" >> $GITHUB_ENV
             }
           }
+
 
   # Checks if the version number has been updated
   Check_Version:
