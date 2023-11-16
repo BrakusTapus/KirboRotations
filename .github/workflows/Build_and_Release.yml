@@ -26,7 +26,7 @@ jobs:
               echo "commit_contains_new=false" >> $GITHUB_ENV
             }
           }
-
+        shell: pwsh
 
   # Checks if the version number has been updated
   Check_Version:
