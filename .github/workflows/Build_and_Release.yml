@@ -10,7 +10,11 @@ jobs:
   # Checks if the commit message contains the keyword "NEW"
   Check_Commit:
     runs-on: windows-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'NEW')
+    if: >
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main' &&
+      contains(github.event.head_commit.message, 'NEW') &&
+      github.event_name != 'workflow_dispatch'
     steps:
       - name: Check Commit Message
         run: |
@@ -22,12 +26,12 @@ jobs:
               [Environment]::SetEnvironmentVariable("RUN_WORKFLOW", "true", [EnvironmentVariableTarget]::Process)
             } else {
               Write-Host "Commit message does not contain 'NEW'. Setting RUN_WORKFLOW to false."
-              [Environment]::SetEnvironmentVariable("RUN_WORKFLOW", "false", [EnvironmentVariableTarget]::Process)
+              [Environment]::SetEnvironmentVariable("RUN_WORKWORKFLOW", "false", [EnvironmentVariableTarget]::Process)
             }
           } else {
             Write-Host "Not a push event to the main branch. Setting RUN_WORKFLOW to false."
             [Environment]::SetEnvironmentVariable("RUN_WORKFLOW", "false", [EnvironmentVariableTarget]::Process)
-          }  
+          }
         id: check_commit_message
   # Checks if the version number has been updated
   Check_Version:
