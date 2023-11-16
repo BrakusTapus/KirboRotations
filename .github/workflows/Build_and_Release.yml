@@ -54,14 +54,11 @@ jobs:
         id: extract_versions  # Add an id to this step to reference its outputs
         working-directory: D:\a\KirboRotations\KirboRotations
         run: |
-          $KirboRotations = "./KirboRotations.csproj"
-        
-          $KirboRotationsXml = [xml](Get-Content KirboRotations)
-        
-          $KirboRotationsVersion = $KirboRotationsXml.Project.PropertyGroup.Version
-        
-          echo "Project 1 Version: $KirboRotations"
-          echo "::set-output name=current_version::$KirboRotationsVersion"
+          $csprojPath = "./KirboRotations.csproj"
+          $csprojXml = [xml](Get-Content $csprojPath)
+          $version = $csprojXml.Project.PropertyGroup.Version
+          echo "Project Version: $version"
+          echo "::set-output name=current_version::$version"
   # build and release if the version number has been updated
   build:
     needs: Check_Version
