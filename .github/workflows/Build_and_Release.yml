@@ -7,14 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Checks if the commit message contains the keyword "NEW"
+  # Check if to skip   
   Check_Commit:
     runs-on: windows-latest
-    if: >
-      github.event_name == 'push' &&
-      github.ref == 'refs/heads/main' &&
-      contains(github.event.head_commit.message, 'NEW') &&
-      github.event_name != 'workflow_dispatch'
+    if: ${{ github.event_name != 'workflow_dispatch' }}
     steps:
       - name: Check Commit Message
         run: |
@@ -36,6 +32,7 @@ jobs:
   # Checks if the version number has been updated
   Check_Version:
     needs: Check_Commit
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.result == 'success' }}
     runs-on: windows-latest
     outputs:
       current_version: ${{ steps.extract_versions.outputs.current_version }}
