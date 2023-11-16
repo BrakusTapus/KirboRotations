@@ -10,29 +10,24 @@ jobs:
   # Check if to skip   
   Check_Commit:
     runs-on: windows-latest
-    if: ${{ github.event_name != 'workflow_dispatch' }}
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Check Commit Message
-        run: |
-          # Check if the commit message contains the keyword "NEW"
-          if ($env:GITHUB_EVENT_NAME -eq "push" -and $env:GITHUB_REF -eq "refs/heads/main" -and $env:GITHUB_EVENT_PATH) {
-            $commitMessage = (Get-Content $env:GITHUB_EVENT_PATH | ConvertFrom-Json).head_commit.message
-            if ($commitMessage -like "*NEW*") {
-              Write-Host "Commit message contains 'NEW'. Setting RUN_WORKFLOW to true."
-              [Environment]::SetEnvironmentVariable("RUN_WORKFLOW", "true", [EnvironmentVariableTarget]::Process)
-            } else {
-              Write-Host "Commit message does not contain 'NEW'. Setting RUN_WORKFLOW to false."
-              [Environment]::SetEnvironmentVariable("RUN_WORKWORKFLOW", "false", [EnvironmentVariableTarget]::Process)
-            }
-          } else {
-            Write-Host "Not a push event to the main branch. Setting RUN_WORKFLOW to false."
-            [Environment]::SetEnvironmentVariable("RUN_WORKFLOW", "false", [EnvironmentVariableTarget]::Process)
-          }
         id: check_commit_message
+        run: |
+          $commitMessage = (Get-Content $env:GITHUB_EVENT_PATH | ConvertFrom-Json).head_commit.message
+          if ($commitMessage -like "*NEW*") {
+            echo "Commit message contains 'NEW'. Setting RUN_WORKFLOW to true."
+            echo "::set-output name=commit_contains_new::true"
+          } else {
+            echo "Commit message does not contain 'NEW'. Setting RUN_WORKFLOW to false."
+            echo "::set-output name=commit_contains_new::false"
+          }
+
   # Checks if the version number has been updated
   Check_Version:
     needs: Check_Commit
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.result == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.outputs.commit_contains_new == 'true' }}
     runs-on: windows-latest
     outputs:
       current_version: ${{ steps.extract_versions.outputs.current_version }}
