@@ -64,6 +64,7 @@ public class MCH_KirboComplete : MCH_Base
         ImGui.Spacing();
         ImGui.Separator();
         ImGui.Spacing();
+
         // Calculate the remaining vertical space in the window
         float remainingSpace = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing(); // Subtracting button height with spacing
         if (remainingSpace > 0)
