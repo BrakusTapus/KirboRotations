@@ -10,7 +10,7 @@ public class MCH_KirboComplete : MCH_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Machinist Revived";
+    public override string RotationName => "Kirbo's Machinist";
 
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n Should be optimised for Boss Level 90 content with 2.5 GCD.";
 
