@@ -1,5 +1,4 @@
 ﻿using KirboRotations.Utility;
-using RotationSolver.Basic.Configuration;
 
 namespace KirboRotations.Ranged;
 
@@ -12,7 +11,7 @@ public class MCH_KirboComplete : MCH_Base
 
     public override string RotationName => "Kirbo's Machinist";
 
-    public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n Should be optimised for Boss Level 90 content with 2.5 GCD.";
+    public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
 
     public override CombatType Type => CombatType.Both;
 
@@ -60,11 +59,24 @@ public class MCH_KirboComplete : MCH_Base
             ImGui.Text("IsPvPOverheated: " + IsPvPOverheated);
             ImGui.Text("PvP_HeatStacks: " + PvP_HeatStacks);
             ImGui.Text("PvP_Analysis CurrentCharges: " + PvP_Analysis.CurrentCharges);
-            ImGui.Text($"HostileTarget GetHealthRatio:  {HostileTarget.GetHealthRatio() * 100:F2}%%");
-            ImGui.Text($"Player.HealthRatio: {Target.CurrentHp}");
+            ImGui.Text($"Target.HealthRatio: {Target.CurrentHp}");
+        }
+        ImGui.Spacing();
+        ImGui.Separator();
+        ImGui.Spacing();
+        // Calculate the remaining vertical space in the window
+        float remainingSpace = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing(); // Subtracting button height with spacing
+        if (remainingSpace > 0)
+        {
+            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace);
+        }
+
+        // Add a button for resetting rotation properties
+        if (ImGui.Button("Reset Rotation"))
+        {
+            ResetRotationProperties();
         }
     }
-
     private int Openerstep { get; set; }
 
     private bool OpenerHasFinished { get; set; }
@@ -105,7 +117,7 @@ public class MCH_KirboComplete : MCH_Base
         .SetBool(CombatType.PvE, "HeatStuck", false, "Heat overcap protection\n(Will try and use HyperCharge if Heat is at 100 and next skill increases Heat)")
         .SetBool(CombatType.PvE, "DumpSkills", false, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
         //.SetBool(CombatType.PvP, "LBInPvP", true, "Use the LB in PvP when Target is killable by it")
-        .SetInt(CombatType.PvP, "MarksmanRifleThreshold", 32000, "Marksman Rifle HP Threshold", 0, 60000)
+        .SetInt(CombatType.PvP, "MarksmanRifleThreshold", 32000, "Marksman Rifle HP Threshold\n(Doule click or hold CTRL and click to set value)", 0, 75000)
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
         .SetBool(CombatType.PvP, "PreventActionWaste", true, "Turn on to prevent using actions on targets with invulns\n(For example: DRK with Undead Redemption)")
         .SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)");
@@ -637,6 +649,7 @@ public class MCH_KirboComplete : MCH_Base
             }
         }
         #endregion
+
         #region PVE
         TerritoryContentType Content = TerritoryContentType;
         bool Dungeon = (int)Content == 2;
@@ -1169,6 +1182,14 @@ public class MCH_KirboComplete : MCH_Base
             OpenerHasFinished = false;
             Openerstep = 0;
         }
+    }
+    private void ResetRotationProperties()
+    {
+        Openerstep = 0;
+        OpenerHasFinished = false;
+        OpenerHasFailed = false;
+        OpenerActionsAvailable = false;
+        OpenerInProgress = false;
     }
     public void HandleOpenerAvailability()
     {
