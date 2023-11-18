@@ -1169,6 +1169,7 @@ public class MCH_KirboComplete : MCH_Base
 
         InBurst = Player.HasStatus(true, StatusID.Wildfire);
     }
+
     public void StateOfOpener()
     {
         if (Player.IsDead)
@@ -1182,6 +1183,14 @@ public class MCH_KirboComplete : MCH_Base
             OpenerHasFailed = false;
             OpenerHasFinished = false;
             Openerstep = 0;
+        }
+        if (OpenerHasFailed)
+        {
+            OpenerInProgress = false;
+        }
+        if (OpenerHasFinished)
+        {
+            OpenerInProgress = false;
         }
     }
     private void ResetRotationProperties()
