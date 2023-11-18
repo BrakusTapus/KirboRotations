@@ -223,7 +223,7 @@ public class MCH_KirboComplete : MCH_Base
     private bool Opener(out IAction act)
     {
         act = default(IAction);
-        while (OpenerInProgress && (!OpenerHasFinished || !OpenerHasFailed))
+        while (OpenerInProgress /* && (!OpenerHasFinished || !OpenerHasFailed)*/)
         {
             if (TimeSinceLastAction.TotalSeconds > 3.0 && !Flag)
             {
@@ -245,12 +245,20 @@ public class MCH_KirboComplete : MCH_Base
                     switch (Openerstep)
                     {
                         case 0:
+                            if (AirAnchor.IsCoolingDown)
+                            {
+                                OpenerHasFailed = true;
+                            }
                             return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 1:
                             return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 2:
                             return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 3:
+                            if (Drill.IsCoolingDown)
+                            {
+                                OpenerHasFailed = true;
+                            }
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
                             return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
@@ -315,6 +323,10 @@ public class MCH_KirboComplete : MCH_Base
                         case 2:
                             return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 3:
+                            if (Drill.IsCoolingDown)
+                            {
+                                OpenerHasFailed = true;
+                            }
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
                             return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
@@ -329,6 +341,10 @@ public class MCH_KirboComplete : MCH_Base
                         case 9:
                             return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 10:
+                            if (AirAnchor.IsCoolingDown)
+                            {
+                                OpenerHasFailed = true;
+                            }
                             return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 11:
                             return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
@@ -361,6 +377,10 @@ public class MCH_KirboComplete : MCH_Base
                         case 25:
                             return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 26:
+                            if (Drill.IsCoolingDown)
+                            {
+                                OpenerHasFailed = true;
+                            }
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 27:
                             OpenerHasFinished = true;
@@ -373,12 +393,20 @@ public class MCH_KirboComplete : MCH_Base
                     switch (Openerstep)
                     {
                         case 0:
+                            if (AirAnchor.IsCoolingDown)
+                            {
+                                OpenerHasFailed = true;
+                            }
                             return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 1:
                             return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 2:
                             return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
                         case 3:
+                            if (Drill.IsCoolingDown)
+                            {
+                                OpenerHasFailed = true;
+                            }
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
                             return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
