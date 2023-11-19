@@ -24,6 +24,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Melee\DRG_Kirbo.cs" />
 	  <Compile Remove="Ranged\Simple_MCH.cs" />
 	</ItemGroup>
 
@@ -69,6 +70,7 @@
 		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
 		<Using Include="Dalamud.Interface" />
 		<Using Include="ImGuiNET" />
+		<Using Include="KirboRotations.Utility" />
 		<Using Include="Newtonsoft.Json" />
 		<Using Include="RotationSolver.Basic" />
 		<Using Include="RotationSolver.Basic.Actions" />
@@ -78,6 +80,7 @@
 		<Using Include="RotationSolver.Basic.Helpers" />
 		<Using Include="RotationSolver.Basic.Rotations" />
 		<Using Include="RotationSolver.Basic.Rotations.Basic" />
+		<Using Include="System.ComponentModel" />
 		<Using Include="System.Numerics" />
 		<Using Include="System.Reflection" />
 	</ItemGroup>
@@ -85,11 +88,11 @@
 	<ItemGroup>
 		<Folder Include="Tank\" />
 		<Folder Include="Healer\" />
-		<Folder Include="Melee\" />
 		<Folder Include="Magical\" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="Melee\DRG_Kirbo.cs" />
 	  <None Include="Ranged\Simple_MCH.cs" />
 	</ItemGroup>
 

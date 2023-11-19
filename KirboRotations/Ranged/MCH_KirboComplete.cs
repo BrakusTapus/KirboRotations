@@ -1,4 +1,9 @@
-﻿using KirboRotations.Utility;
+﻿using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.IoC;
+using Dalamud.Logging;
+using Dalamud.Plugin.Services;
+using KirboRotations.Utility;
 
 namespace KirboRotations.Ranged;
 
@@ -6,7 +11,6 @@ namespace KirboRotations.Ranged;
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
 public class MCH_KirboComplete : MCH_Base
 {
-
     public override string GameVersion => "6.51";
 
     public override string RotationName => "Kirbo's Machinist";
@@ -53,13 +57,13 @@ public class MCH_KirboComplete : MCH_Base
             ImGui.Text("OpenerInProgress: " + OpenerInProgress);
             ImGui.Text("OpenerHasFailed: " + OpenerHasFailed);
             ImGui.Text("OpenerHasFinished: " + OpenerHasFinished);
+            ImGui.Text("Flag: " + Flag);
         }
         else
         {
             ImGui.Text("IsPvPOverheated: " + IsPvPOverheated);
             ImGui.Text("PvP_HeatStacks: " + PvP_HeatStacks);
             ImGui.Text("PvP_Analysis CurrentCharges: " + PvP_Analysis.CurrentCharges);
-            ImGui.Text($"Target.HealthRatio: {Target.CurrentHp}");
         }
         ImGui.Spacing();
         ImGui.Separator();
@@ -111,6 +115,26 @@ public class MCH_KirboComplete : MCH_Base
     }
 
     private bool IsPvPOverheated => Player.HasStatus(true, StatusID.PvP_Overheated);
+
+    // Thank you Rabbs!
+    // private static BaseAction PvP_MarksmansSpite { get; } = new(ActionID.PvP_MarksmansSpite)
+    // {
+    //
+    //     ChoiceTarget = (Targets, mustUse) =>
+    //     {
+    //        Targets = Targets.Where(b => b.YalmDistanceX < 50 &&
+    //       (b.CurrentHp + b.CurrentMp * 6) < 50000 &&
+    //      b.HasStatus(false, (StatusID)3054)).ToArray();
+    //
+    //    if (Targets.Any())
+    //  {
+    //    return Targets.OrderBy(ObjectHelper.GetHealthRatio).Last();
+    //   }
+    //
+    //          return null;
+    //    },
+    //  ActionCheck = (BattleChara b, bool m) => LimitBreakLevel >= 1
+    // };
 
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
         .SetCombo(CombatType.PvE, "RotationSelection", 1, "Select which Rotation will be used. (Openers will only be followed at level 90)", "Early AA", "Delayed Tools", "Early All")
@@ -241,24 +265,16 @@ public class MCH_KirboComplete : MCH_Base
             }
             switch (Configs.GetCombo("RotationSelection"))
             {
-                case 0: //Early AA
+                case 0: // Early AA
                     switch (Openerstep)
                     {
                         case 0:
-                            if (AirAnchor.IsCoolingDown)
-                            {
-                                OpenerHasFailed = true;
-                            }
                             return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 1:
                             return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 2:
                             return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 3:
-                            if (Drill.IsCoolingDown)
-                            {
-                                OpenerHasFailed = true;
-                            }
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
                             return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
@@ -313,7 +329,7 @@ public class MCH_KirboComplete : MCH_Base
                             break;
                     }
                     break;
-                case 1: //Delayed Tools
+                case 1: // Delayed Tools
                     switch (Openerstep)
                     {
                         case 0:
@@ -323,10 +339,10 @@ public class MCH_KirboComplete : MCH_Base
                         case 2:
                             return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 3:
-                            if (Drill.IsCoolingDown)
-                            {
-                                OpenerHasFailed = true;
-                            }
+                            //if (Drill.IsCoolingDown)
+                            //{
+                            //OpenerHasFailed = true;
+                            //}
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
                             return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
@@ -341,10 +357,6 @@ public class MCH_KirboComplete : MCH_Base
                         case 9:
                             return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 10:
-                            if (AirAnchor.IsCoolingDown)
-                            {
-                                OpenerHasFailed = true;
-                            }
                             return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 11:
                             return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
@@ -377,10 +389,6 @@ public class MCH_KirboComplete : MCH_Base
                         case 25:
                             return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 26:
-                            if (Drill.IsCoolingDown)
-                            {
-                                OpenerHasFailed = true;
-                            }
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 27:
                             OpenerHasFinished = true;
@@ -393,20 +401,12 @@ public class MCH_KirboComplete : MCH_Base
                     switch (Openerstep)
                     {
                         case 0:
-                            if (AirAnchor.IsCoolingDown)
-                            {
-                                OpenerHasFailed = true;
-                            }
                             return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 1:
                             return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 2:
                             return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
                         case 3:
-                            if (Drill.IsCoolingDown)
-                            {
-                                OpenerHasFailed = true;
-                            }
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
                             return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
@@ -443,6 +443,7 @@ public class MCH_KirboComplete : MCH_Base
                             break;
                     }
                     break;
+
             }
         }
         act = null;
@@ -469,6 +470,7 @@ public class MCH_KirboComplete : MCH_Base
         bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
         bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
         bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);
+        bool TargetIsNotPlayer = Target != Player;
 
         // Config checks
         bool guardCancel = Configs.GetBool("GuardCancel");
@@ -499,7 +501,8 @@ public class MCH_KirboComplete : MCH_Base
                 //{
                 //return true;
                 //}
-                if (PvP_MarksmansSpite.Target.CurrentHp <= marksmanRifleThreshold && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse))
+                if (Target.CurrentHp <= marksmanRifleThreshold && TargetIsNotPlayer && !hasGuard && !hasHallowedGround && !hasUndeadRedemption
+                    && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse))
                 {
                     return true;
                 }
@@ -538,7 +541,7 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Opener(out act);
         }
-        if (!OpenerInProgress || OpenerHasFailed || OpenerHasFinished)
+        if (!OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished*/)
         {
             if (AutoCrossbow.CanUse(out act, (CanUseOption)1, 2) && ObjectHelper.DistanceToPlayer(HostileTarget) <= 12f)
             {
@@ -680,29 +683,28 @@ public class MCH_KirboComplete : MCH_Base
         #endregion
 
         #region PVE
-        TerritoryContentType Content = TerritoryContentType;
-        bool Dungeon = (int)Content == 2;
-        bool Roulette = (int)Content == 1;
-        bool Deepdungeon = (int)Content == 21;
-        bool VCDungeonFinder = (int)Content == 30;
-        bool FATEs = (int)Content == 8;
-        bool Eureka = (int)Content == 26;
-        bool UltimateRaids = (int)Content == 28;
+        //TerritoryContentType Content = TerritoryContentType;
+        //bool Dungeon = (int)Content == 2;
+        //bool Roulette = (int)Content == 1;
+        //bool Deepdungeon = (int)Content == 21;
+        //bool VCDungeonFinder = (int)Content == 30;
+        //bool FATEs = (int)Content == 8;
+        //bool Eureka = (int)Content == 26;
+        //bool UltimateRaids = (int)Content == 28;
 
         if (ShouldUseBurstMedicine(out act))
         {
             return true;
         }
-
-        if (OpenerInProgress && !OpenerHasFailed && !OpenerHasFinished)
+        if (OpenerInProgress /*&& !OpenerHasFailed && !OpenerHasFinished*/)
         {
             return Opener(out act);
         }
-        if (Configs.GetBool("BatteryStuck") && !OpenerInProgress && Battery == 100 && RookAutoturret.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == ChainSaw || nextGCD == AirAnchor || nextGCD == CleanShot))
+        if (Configs.GetBool("BatteryStuck") && /*!OpenerInProgress &&*/ Battery == 100 && RookAutoturret.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == ChainSaw || nextGCD == AirAnchor || nextGCD == CleanShot))
         {
             return true;
         }
-        if (Configs.GetBool("HeatStuck") && !OpenerInProgress && Heat == 100 && Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == SplitShot || nextGCD == SlugShot || nextGCD == CleanShot))
+        if (Configs.GetBool("HeatStuck") && /*!OpenerInProgress &&*/ Heat == 100 && Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == SplitShot || nextGCD == SlugShot || nextGCD == CleanShot))
         {
             return true;
         }
@@ -751,7 +753,7 @@ public class MCH_KirboComplete : MCH_Base
         }
 
         // LvL 90+
-        if ((!OpenerInProgress || OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90)
+        if (/*(*/!OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90*/)
         {
             if (Wildfire.CanUse(out act, (CanUseOption)16) && nextGCD == ChainSaw && Heat >= 50)
             {
@@ -822,7 +824,7 @@ public class MCH_KirboComplete : MCH_Base
         }
 
         // LvL 30-89 and Casual Content
-        if (Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || Player.Level < 90)
+        if (/*Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || */Player.Level < 90)
         {
             if ((IsLastAbility(false, Hypercharge) || Heat >= 50) && HostileTarget.IsBossFromIcon()
                 && Wildfire.CanUse(out act, CanUseOption.OnLastAbility)) return true;
@@ -1185,6 +1187,7 @@ public class MCH_KirboComplete : MCH_Base
         ToolKitCheck();
         StateOfOpener();
     }
+
     private void ToolKitCheck()
     {
         bool WillHaveDrill = Drill.WillHaveOneCharge(5f);
@@ -1221,6 +1224,8 @@ public class MCH_KirboComplete : MCH_Base
             OpenerInProgress = false;
         }
     }
+
+    // Used by Reset button to in Displaystatus
     private void ResetRotationProperties()
     {
         Openerstep = 0;
@@ -1228,11 +1233,19 @@ public class MCH_KirboComplete : MCH_Base
         OpenerHasFailed = false;
         OpenerActionsAvailable = false;
         OpenerInProgress = false;
+        Serilog.Log.Warning($"Openerstep = {Openerstep}");
+        Serilog.Log.Warning($"OpenerHasFinished = {OpenerHasFinished}");
+        Serilog.Log.Warning($"OpenerHasFailed = {OpenerHasFailed}");
+        Serilog.Log.Warning($"OpenerActionsAvailable = {OpenerActionsAvailable}");
+        Serilog.Log.Warning($"OpenerInProgress = {OpenerInProgress}");
     }
+
     public void HandleOpenerAvailability()
     {
         bool Lvl90 = Player.Level >= 90;
         bool HasChainSaw = !ChainSaw.IsCoolingDown;
+        bool HasAirAnchor = !AirAnchor.IsCoolingDown;
+        bool HasDrill = !Drill.IsCoolingDown;
         bool HasBarrelStabilizer = !BarrelStabilizer.IsCoolingDown;
         bool HasRicochet = Ricochet.CurrentCharges == 3;
         bool HasWildfire = !Wildfire.IsCoolingDown;
@@ -1241,7 +1254,7 @@ public class MCH_KirboComplete : MCH_Base
         bool NoHeat = Heat == 0;
         bool NoBattery = Battery == 0;
         bool Openerstep0 = Openerstep == 0;
-        OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
+        OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
     }
 
 }
