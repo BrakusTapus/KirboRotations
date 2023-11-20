@@ -1,14 +1,4 @@
-﻿using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.IoC;
-using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using Lumina.Data.Parsing;
-using Lumina.Data.Parsing.Layer;
-
-namespace KirboRotations.Ranged;
+﻿namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.Wildfire)]
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
@@ -22,7 +12,7 @@ public class MCH_KirboComplete : MCH_Base
     public override string RotationName => "Kirbo's Machinist";
 
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
-#pragma warning disable CS0618 // Type or member is obsolete
+    #pragma warning disable CS0618 // Type or member is obsolete
     #endregion
 
     #region New IBaseActions
@@ -68,13 +58,12 @@ public class MCH_KirboComplete : MCH_Base
         {
             Targets = Targets.Where(b => b.YalmDistanceX < 50 &&
             (b.CurrentHp + b.CurrentMp * 6) < 50000 &&
-            !b.HasStatus(false, (StatusID)3054,StatusID.PvP_UndeadRedemption,StatusID.PvP_HallowedGround)).ToArray();
+            !b.HasStatus(false, (StatusID)1240, (StatusID)1308, (StatusID)2861, (StatusID)3255, (StatusID)3054, (StatusID)3054, (StatusID)3039, (StatusID)1312)).ToArray();
 
             if (Targets.Any())
             {
                 return Targets.OrderBy(ObjectHelper.GetHealthRatio).Last();
             }
-
             return null;
         },
         ActionCheck = (BattleChara b, bool m) => LimitBreakLevel >= 1
@@ -84,12 +73,12 @@ public class MCH_KirboComplete : MCH_Base
     {
         ChoiceTarget = (Targets, mustUse) =>
         {
-            Targets = Targets.Where(b => b.YalmDistanceX < 25 && !b.HasStatus(false, (StatusID)3054, StatusID.PvP_UndeadRedemption, StatusID.PvP_HallowedGround)).ToArray();
+            Targets = Targets.Where(b => b.YalmDistanceX < 25 && 
+            !b.HasStatus(false, (StatusID)1240, (StatusID)1308, (StatusID)2861, (StatusID)3255, (StatusID)3054, (StatusID)3054, (StatusID)3039, (StatusID)1312)).ToArray();
             if (Targets.Any())
             {
                 return Targets.OrderBy(ObjectHelper.GetHealthRatio).First();
             }
-
             return null;
         },
     };
@@ -219,7 +208,8 @@ public class MCH_KirboComplete : MCH_Base
         .SetInt(CombatType.PvP, "MarksmanRifleThreshold", 32000, "Marksman Rifle HP Threshold\n(Doule click or hold CTRL and click to set value)", 0, 75000)
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
         .SetBool(CombatType.PvP, "PreventActionWaste", true, "Turn on to prevent using actions on targets with invulns\n(For example: DRK with Undead Redemption)")
-        .SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)");
+        .SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)")
+        .SetBool(CombatType.PvP, "DrillOnGuard", true, "Try to use a Analysis buffed Drill on a Target with Guard\nThank you Const Mar for the suggestion!");
     #endregion
 
     #region Countdown Logic
@@ -553,22 +543,41 @@ public class MCH_KirboComplete : MCH_Base
         #region PvP
         // Status checks
         bool TargetIsNotPlayer = Target != Player;
-        bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard);
-        bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
-        bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
-        bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);        
+        bool hasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool tarHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && TargetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && TargetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && TargetIsNotPlayer;
 
         // Config checks
+        int marksmanRifleThreshold = Configs.GetInt("MarksmanRifleThreshold");
         bool guardCancel = Configs.GetBool("GuardCancel");
         bool preventActionWaste = Configs.GetBool("PreventActionWaste");
         bool safetyCheck = Configs.GetBool("SafetyCheck");
-        int marksmanRifleThreshold = Configs.GetInt("MarksmanRifleThreshold");
+        bool drillOnGuard = Configs.GetBool("DrillOnGuard");
+        
 
         if (Methods.InPvP())
         {
             if (guardCancel && Player.HasStatus(true, StatusID.PvP_Guard))
             {
                 return false;
+            }
+
+            if (drillOnGuard && tarHasGuard)
+            {
+                if (!Player.HasStatus(true, StatusID.PvP_DrillPrimed))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges == 0 && !Player.HasStatus(true, StatusID.PvP_Analysis))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && Player.HasStatus(true, StatusID.PvP_Analysis) && PvP_Drill.CanUse(out act, CanUseOption.MustUseEmpty))
+                {
+                    return true;
+                }
             }
 
             if (safetyCheck && hasChiten)
@@ -698,15 +707,18 @@ public class MCH_KirboComplete : MCH_Base
 
         #region PvP
         // Status checks
-        bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard);
-        bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
-        bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
-        bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);
+        bool TargetIsNotPlayer = Target != Player;
+        bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool tarHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten) && TargetIsNotPlayer;
+        bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround) && TargetIsNotPlayer;
+        bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption) && TargetIsNotPlayer;
 
         // Config checks
         bool guardCancel = Configs.GetBool("GuardCancel");
         bool preventActionWaste = Configs.GetBool("PreventActionWaste");
         bool safetyCheck = Configs.GetBool("SafetyCheck");
+        bool drillOnGuard = Configs.GetBool("DrillOnGuard");
 
         if (Methods.InPvP())
         {
@@ -715,22 +727,28 @@ public class MCH_KirboComplete : MCH_Base
                 return false;
             }
 
+            if (drillOnGuard && tarHasGuard)
+            {
+                if (!Player.HasStatus(true, StatusID.PvP_DrillPrimed))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges == 0 && !Player.HasStatus(true, StatusID.PvP_Analysis))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges >= 1 && PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty))
+                {
+                    return true;
+                }
+            }
+
             if (safetyCheck && hasChiten)
             {
                 return false;
             }
 
             if (preventActionWaste && (hasGuard || hasHallowedGround || hasUndeadRedemption))
-            {
-                return false;
-            }
-
-            if (Configs.GetBool("SafetyCheck") && hasChiten)
-            {
-                return false;
-            }
-
-            if (Configs.GetBool("PreventActionWaste") && (hasGuard || hasHallowedGround || hasUndeadRedemption))
             {
                 return false;
             }
@@ -752,12 +770,22 @@ public class MCH_KirboComplete : MCH_Base
                     return PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty);
                 }
 
-                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && IsPvPOverheated)
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed))
                 {
                     return true;
                 }
 
-                if (Player.HasStatus(true, StatusID.PvP_ChainSawPrimed) && IsPvPOverheated)
+                if (Player.HasStatus(true, StatusID.PvP_ChainSawPrimed))
+                {
+                    return true;
+                }
+
+                if (Player.HasStatus(true, StatusID.PvP_BioblasterPrimed))
+                {
+                    return true;
+                }
+
+                if (Player.HasStatus(true, StatusID.PvP_AirAnchorPrimed))
                 {
                     return true;
                 }
@@ -1343,6 +1371,8 @@ public class MCH_KirboComplete : MCH_Base
         bool NoBattery = Battery == 0;
         bool Openerstep0 = Openerstep == 0;
         OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
+
+        // Future Opener conditions for ULTS
     }
     #endregion
 
