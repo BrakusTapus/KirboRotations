@@ -6,11 +6,8 @@ public class MCH_KirboComplete : MCH_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.Both;
-
     public override string GameVersion => "6.51";
-
     public override string RotationName => "Kirbo's Machinist";
-
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
     #pragma warning disable CS0618 // Type or member is obsolete
     #endregion
@@ -20,22 +17,18 @@ public class MCH_KirboComplete : MCH_Base
     {
         ActionCheck = (b, m) => !IsOverheated,
     };
-
     private static new IBaseAction AirAnchor { get; } = new BaseAction(ActionID.AirAnchor)
     {
         ActionCheck = (b, m) => !IsOverheated,
     };
-
     private static new IBaseAction ChainSaw { get; } = new BaseAction(ActionID.ChainSaw)
     {
         ActionCheck = (b, m) => !IsOverheated,
     };
-
     private static new IBaseAction Wildfire { get; } = new BaseAction(ActionID.Wildfire)
     {
         ActionCheck = (BattleChara b, bool m) => ((CustomRotation.Player.HasStatus(true, StatusID.Overheated) && HeatStacks > 4) || Heat >= 45) && CustomRotation.InCombat
     };
-
     private static new IBaseAction Reassemble { get; } = new BaseAction(ActionID.Reassemble)
     {
         StatusProvide = new StatusID[1] { StatusID.Reassemble },
@@ -53,9 +46,9 @@ public class MCH_KirboComplete : MCH_Base
     #endregion
 
     #region New PvP IBaseActions
-    // Thank you Rabbs!
     private static new IBaseAction PvP_MarksmansSpite { get; } = new BaseAction(ActionID.PvP_MarksmansSpite)
     {
+        // Thank you Rabbs!
         ChoiceTarget = (Targets, mustUse) =>
         {
             Targets = Targets.Where(b => b.YalmDistanceX < 50 &&
@@ -185,23 +178,16 @@ public class MCH_KirboComplete : MCH_Base
 
     #region Opener Related Properties
     private int Openerstep { get; set; }
-
     private bool OpenerHasFinished { get; set; }
-
     private bool OpenerHasFailed { get; set; }
-
     private bool OpenerActionsAvailable { get; set; }
-
     private bool OpenerInProgress { get; set; }
-
     private bool Flag { get; set; }
     #endregion
 
     #region Action Related Properties
     private bool WillhaveTool { get; set; }
-
     private bool InBurst { get; set; }
-
     private static byte HeatStacks
     {
         get
@@ -210,7 +196,6 @@ public class MCH_KirboComplete : MCH_Base
             return stacks == byte.MaxValue ? (byte)5 : stacks;
         }
     }
-
     private static byte PvP_HeatStacks
     {
         get
@@ -219,7 +204,6 @@ public class MCH_KirboComplete : MCH_Base
             return pvp_heatstacks == byte.MaxValue ? (byte)5 : pvp_heatstacks;
         }
     }
-
     private bool IsPvPOverheated => Player.HasStatus(true, StatusID.PvP_Overheated);
     #endregion
 
@@ -727,6 +711,7 @@ public class MCH_KirboComplete : MCH_Base
         }
         return base.GeneralGCD(out act);
         #endregion
+
     }
     #endregion
 
@@ -1021,6 +1006,7 @@ public class MCH_KirboComplete : MCH_Base
 
         return base.EmergencyAbility(nextGCD, out act);
         #endregion
+
     }
     #endregion
 
@@ -1317,6 +1303,7 @@ public class MCH_KirboComplete : MCH_Base
     #endregion
 
     #region PvP Helper Methods
+    // Analysis Condition
     private bool ShouldUseAnalysis(out IAction act)
     {
         act = null;
@@ -1337,6 +1324,7 @@ public class MCH_KirboComplete : MCH_Base
     #endregion
 
     #region Extra Helper Methods
+    // Updates Status of other extra helper methods on every frame
     protected override void UpdateInfo()
     {
         HandleOpenerAvailability();
@@ -1344,6 +1332,7 @@ public class MCH_KirboComplete : MCH_Base
         StateOfOpener();
     }
 
+    // Checks if any major tool skill will almost come off CD (only at lvl 90), and sets "InBurst" to true if Player has Wildfire active
     private void ToolKitCheck()
     {
         bool WillHaveDrill = Drill.WillHaveOneCharge(5f);
@@ -1357,6 +1346,7 @@ public class MCH_KirboComplete : MCH_Base
         InBurst = Player.HasStatus(true, StatusID.Wildfire);
     }
 
+    // Controls various Opener properties depending on various conditions
     public void StateOfOpener()
     {
         if (Player.IsDead)
@@ -1396,6 +1386,7 @@ public class MCH_KirboComplete : MCH_Base
         Serilog.Log.Warning($"OpenerInProgress = {OpenerInProgress}");
     }
 
+    // Used to check OpenerAvailability
     public void HandleOpenerAvailability()
     {
         bool Lvl90 = Player.Level >= 90;
