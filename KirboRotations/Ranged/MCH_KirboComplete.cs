@@ -15,7 +15,7 @@ public class MCH_KirboComplete : MCH_Base
     #pragma warning disable CS0618 // Type or member is obsolete
     #endregion
 
-    #region New IBaseActions
+    #region New PvE IBaseActions
     private static new IBaseAction Drill { get; } = new BaseAction(ActionID.Drill)
     {
         ActionCheck = (b, m) => !IsOverheated,
@@ -50,14 +50,16 @@ public class MCH_KirboComplete : MCH_Base
     {
         ActionCheck = (BattleChara b, bool m) => Heat <= 45 && CustomRotation.InCombat && CustomRotation.Target.IsTargetable && CustomRotation.Target != Player
     };
+    #endregion
 
+    #region New PvP IBaseActions
     // Thank you Rabbs!
-    private static new BaseAction PvP_MarksmansSpite { get; } = new(ActionID.PvP_MarksmansSpite)
+    private static new IBaseAction PvP_MarksmansSpite { get; } = new BaseAction(ActionID.PvP_MarksmansSpite)
     {
         ChoiceTarget = (Targets, mustUse) =>
         {
             Targets = Targets.Where(b => b.YalmDistanceX < 50 &&
-            (b.CurrentHp + b.CurrentMp * 6) < 50000 &&
+            (b.CurrentHp /*+ b.CurrentMp * 6*/) < 40000 &&
             !b.HasStatus(false, (StatusID)1240, (StatusID)1308, (StatusID)2861, (StatusID)3255, (StatusID)3054, (StatusID)3054, (StatusID)3039, (StatusID)1312)).ToArray();
 
             if (Targets.Any())
@@ -68,8 +70,27 @@ public class MCH_KirboComplete : MCH_Base
         },
         ActionCheck = (BattleChara b, bool m) => LimitBreakLevel >= 1
     };
-
-    private static new BaseAction PvP_BlastCharge { get; } = new(ActionID.PvP_BlastCharge)
+    private static new IBaseAction PvP_Drill { get; } = new BaseAction(ActionID.PvP_Drill)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_DrillPrimed},
+        StatusProvide = new StatusID[1] { StatusID.PvP_BioblasterPrimed },
+    };
+    private static new IBaseAction PvP_Bioblaster { get; } = new BaseAction(ActionID.PvP_Bioblaster)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_BioblasterPrimed },
+        StatusProvide = new StatusID[1] { StatusID.PvP_AirAnchorPrimed },
+    };
+    private static new IBaseAction PvP_AirAnchor { get; } = new BaseAction(ActionID.PvP_AirAnchor)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_AirAnchorPrimed },
+        StatusProvide = new StatusID[1] { StatusID.PvP_ChainSawPrimed },
+    };
+    private static new IBaseAction PvP_ChainSaw { get; } = new BaseAction(ActionID.PvP_ChainSaw)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_ChainSawPrimed },
+        StatusProvide = new StatusID[1] { StatusID.PvP_DrillPrimed },
+    };
+    private static new IBaseAction PvP_BlastCharge { get; } = new BaseAction(ActionID.PvP_BlastCharge)
     {
         ChoiceTarget = (Targets, mustUse) =>
         {
@@ -82,13 +103,17 @@ public class MCH_KirboComplete : MCH_Base
             return null;
         },
     };
+    private static new IBaseAction PvP_Analysis { get; } = new BaseAction(ActionID.PvP_Analysis)
+    {
+        StatusProvide = new StatusID[1] { StatusID.PvP_Analysis },
+        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.PvP_Analysis) && CustomRotation.HasHostilesInRange
+    };
     #endregion
 
     #region Debug window stuff
     public override bool ShowStatus => true;
     public override void DisplayStatus()
     {
-
         bool inPvP = Methods.InPvP();
         try
         {
@@ -205,11 +230,13 @@ public class MCH_KirboComplete : MCH_Base
         .SetBool(CombatType.PvE, "HeatStuck", false, "Heat overcap protection\n(Will try and use HyperCharge if Heat is at 100 and next skill increases Heat)")
         .SetBool(CombatType.PvE, "DumpSkills", false, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
         //.SetBool(CombatType.PvP, "LBInPvP", true, "Use the LB in PvP when Target is killable by it")
-        .SetInt(CombatType.PvP, "MarksmanRifleThreshold", 32000, "Marksman Rifle HP Threshold\n(Doule click or hold CTRL and click to set value)", 0, 75000)
+        //.SetInt(CombatType.PvP, "MarksmanRifleThreshold", 32000, "Marksman Rifle HP Threshold\n(Doule click or hold CTRL and click to set value)", 0, 75000)
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
         .SetBool(CombatType.PvP, "PreventActionWaste", true, "Turn on to prevent using actions on targets with invulns\n(For example: DRK with Undead Redemption)")
         .SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)")
-        .SetBool(CombatType.PvP, "DrillOnGuard", true, "Try to use a Analysis buffed Drill on a Target with Guard\nThank you Const Mar for the suggestion!");
+        .SetBool(CombatType.PvP, "DrillOnGuard", true, "Try to use a Analysis buffed Drill on a Target with Guard\n(Thank you Const Mar for the suggestion!)")
+        .SetBool(CombatType.PvP, "LowHPNoBlastCharge", true, "Prevents the use of Blast Charge if player is moving with low HP\n(HP Threshold set in next option)")
+        .SetInt(CombatType.PvP, "LowHPThreshold", 20000, "HP Threshold for the 'LowHPNoBlastCharge' option", 0, 52500);
     #endregion
 
     #region Countdown Logic
@@ -551,11 +578,11 @@ public class MCH_KirboComplete : MCH_Base
 
         // Config checks
         int marksmanRifleThreshold = Configs.GetInt("MarksmanRifleThreshold");
+        int lowHPThreshold = Configs.GetInt("LowHPThreshold");
         bool guardCancel = Configs.GetBool("GuardCancel");
         bool preventActionWaste = Configs.GetBool("PreventActionWaste");
         bool safetyCheck = Configs.GetBool("SafetyCheck");
-        bool drillOnGuard = Configs.GetBool("DrillOnGuard");
-        
+        bool drillOnGuard = Configs.GetBool("DrillOnGuard");        
 
         if (Methods.InPvP())
         {
@@ -617,15 +644,18 @@ public class MCH_KirboComplete : MCH_Base
                 {
                     if (PvP_ChainSaw.CanUse(out act, CanUseOption.MustUseEmpty, 1)) return true;
                 }
-            }
-
-            if (PvP_Scattergun.CanUse(out act, CanUseOption.MustUseEmpty, 1) && HostileTarget.DistanceToPlayer() < 12 && !IsPvPOverheated)
-            {
-                return true;
+                if (PvP_Scattergun.CanUse(out act, CanUseOption.MustUseEmpty, 1) && HostileTarget.DistanceToPlayer() < 12)
+                {
+                    return true;
+                }
             }
 
             if (PvP_BlastCharge.CanUse(out act, CanUseOption.IgnoreCastCheck))
             {
+                if (Player.CurrentHp <= lowHPThreshold && IsMoving && !IsPvPOverheated) // Maybe add InCombat as well
+                {
+                    return false;
+                }
                 return true;
             }
         }
@@ -1019,7 +1049,6 @@ public class MCH_KirboComplete : MCH_Base
             // Attempt to use Burst Medicine.
             return UseBurstMedicine(out act, false);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
@@ -1043,7 +1072,6 @@ public class MCH_KirboComplete : MCH_Base
         {
             return false;
         }
-
         // If none of the conditions are met for any rotation variant, return false.
         return false;
     }
@@ -1095,7 +1123,6 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Hypercharge.CanUse(out act, CanUseOption.MustUse);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
@@ -1110,7 +1137,6 @@ public class MCH_KirboComplete : MCH_Base
         {
             return false;
         }
-
 
         // Check the cooldowns of your main abilities.
         bool isDrillReadySoon = Drill.WillHaveOneCharge(7.5f);
@@ -1129,7 +1155,6 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Wildfire.CanUse(out act, CanUseOption.OnLastAbility);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
@@ -1158,10 +1183,8 @@ public class MCH_KirboComplete : MCH_Base
             {
                 return true;
             }
-
             return false;
         }
-
         return false;
     }
 
@@ -1193,7 +1216,6 @@ public class MCH_KirboComplete : MCH_Base
         {
             return BarrelStabilizer.CanUse(out act, CanUseOption.MustUse);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
@@ -1247,7 +1269,6 @@ public class MCH_KirboComplete : MCH_Base
                 return RookAutoturret.CanUse(out act, CanUseOption.MustUse);
             }
         }
-
         // If none of the conditions are met, return false.
         return false;
     }
@@ -1289,10 +1310,29 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Ricochet.HasOneCharge && Ricochet.CanUse(out act, CanUseOption.MustUseEmpty);
         }
-
         // If none of the above conditions are met, default to using GaussRound.
         // This is a fallback in case other conditions fail to determine a clear action.
         return GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
+    }
+    #endregion
+
+    #region PvP Helper Methods
+    private bool ShouldUseAnalysis(out IAction act)
+    {
+        act = null;
+
+        bool hasEnemiesInRange = HasHostilesInRange && CurrentTarget.CanSee();
+        bool drillPrimeAndHasAnalysis = Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges > 0;
+
+        if (Player.HasStatus(true, StatusID.PvP_Analysis))
+        {
+            return false;
+        }
+        if (hasEnemiesInRange && drillPrimeAndHasAnalysis)
+        {
+            return PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty);
+        }
+        return false;
     }
     #endregion
 
