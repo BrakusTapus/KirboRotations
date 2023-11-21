@@ -9,10 +9,11 @@ public class MCH_KirboComplete : MCH_Base
     public override string GameVersion => "6.51";
     public override string RotationName => "Kirbo's Machinist";
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
-    #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0618 // Type or member is obsolete
     #endregion
 
     #region New PvE IBaseActions
+    private static new IBaseAction Dismantle { get; } = new BaseAction(ActionID.Dismantle, ActionOption.None | ActionOption.Defense);
     private static new IBaseAction Drill { get; } = new BaseAction(ActionID.Drill)
     {
         ActionCheck = (b, m) => !IsOverheated,
@@ -96,10 +97,10 @@ public class MCH_KirboComplete : MCH_Base
             return null;
         },
     };
-    private static new IBaseAction PvP_Analysis { get; } = new BaseAction(ActionID.PvP_Analysis)
+    private static new IBaseAction PvP_Analysis { get; } = new BaseAction(ActionID.PvP_Analysis, ActionOption.Friendly)
     {
         StatusProvide = new StatusID[1] { StatusID.PvP_Analysis },
-        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.PvP_Analysis) && CustomRotation.HasHostilesInRange
+        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.PvP_Analysis) && CustomRotation.HasHostilesInRange,
     };
     #endregion
 
@@ -722,7 +723,7 @@ public class MCH_KirboComplete : MCH_Base
 
         #region PvP
         // Status checks
-        bool TargetIsNotPlayer = Target != Player;
+        bool TargetIsNotPlayer = CurrentTarget != Player;
         bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
         bool tarHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
         bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten) && TargetIsNotPlayer;
@@ -773,40 +774,31 @@ public class MCH_KirboComplete : MCH_Base
                 return true;
             }
 
-            if (!Player.HasStatus(true, StatusID.PvP_Analysis) && PvP_Analysis.CurrentCharges >= 1)
+            if (PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty) && !Player.HasStatus(true, StatusID.PvP_Analysis) && PvP_Analysis.CurrentCharges > 0 && NumberOfAllHostilesInRange > 0)
             {
-                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && NumberOfHostilesInRange > 0)
-                {
-                    return true;
-                }
-
                 if (nextGCD == PvP_Drill || nextGCD == PvP_ChainSaw)
                 {
-                    return PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty);
+                    return true;
                 }
-
-                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed))
+                else if (Player.HasStatus(true, StatusID.PvP_DrillPrimed))
                 {
                     return true;
                 }
-
-                if (Player.HasStatus(true, StatusID.PvP_ChainSawPrimed))
+                else if (Player.HasStatus(true, StatusID.PvP_ChainSawPrimed))
                 {
                     return true;
                 }
-
-                if (Player.HasStatus(true, StatusID.PvP_BioblasterPrimed))
+                else if (Player.HasStatus(true, StatusID.PvP_BioblasterPrimed))
                 {
                     return true;
                 }
-
-                if (Player.HasStatus(true, StatusID.PvP_AirAnchorPrimed))
+                else if (Player.HasStatus(true, StatusID.PvP_AirAnchorPrimed))
                 {
                     return true;
                 }
             }
 
-            if (PvP_BishopAutoTurret.CanUse(out act, CanUseOption.MustUse) && HasHostilesInRange)
+            if (PvP_BishopAutoTurret.CanUse(out act, CanUseOption.MustUse))
             {
                 return true;
             }

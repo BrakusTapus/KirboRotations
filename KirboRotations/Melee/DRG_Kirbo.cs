@@ -1,6 +1,6 @@
-﻿namespace BaseRotations.Melee;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 
-using Dalamud.Game.ClientState.Objects.SubKinds;
+namespace KirboRotations.Melee;
 
 [BetaRotation]
 [RotationDesc(ActionID.DragonSight)]
@@ -71,7 +71,7 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_HorridRoar { get; } = new BaseAction(ActionID.PvP_HorridRoar)
+    public static IBaseAction PvP_HorridRoar { get; } = new BaseAction(ActionID.PvP_HorridRoar, ActionOption.Friendly)
     {
         FilterForHostiles = tars => tars.Where(t => t is PlayerCharacter),
     };

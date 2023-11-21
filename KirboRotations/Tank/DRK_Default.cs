@@ -10,7 +10,7 @@ public sealed class DRK_Default : DRK_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Balance";
+    public override string RotationName => "Kirbo's Default";
 
     public override string Description => "Please contact Nore#7219 on Discord for questions about this rotation.";
 

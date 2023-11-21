@@ -13,7 +13,7 @@ public sealed class NIN_Default : NIN_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Standard";
+    public override string RotationName => "Kirbo's Default";
 
     private static INinAction _ninActionAim = null;
     private static bool InTrickAttack => TrickAttack.IsCoolingDown && !TrickAttack.ElapsedAfter(17);

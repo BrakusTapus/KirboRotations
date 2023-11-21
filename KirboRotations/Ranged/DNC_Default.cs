@@ -11,7 +11,7 @@ public sealed class DNC_Default : DNC_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Default";
+    public override string RotationName => "Kirbo's Default";
 
     protected override IAction CountDownAction(float remainTime)
     {
@@ -116,6 +116,13 @@ public sealed class DNC_Default : DNC_Base
 
     private static bool UseStandardStep(out IAction act)
     {
+        TerritoryContentType Content = TerritoryContentType;
+        bool None = (int)Content == 0;
+
+        act = null;
+
+        if (None) return false;
+
         if (!StandardStep.CanUse(out act, CanUseOption.MustUse)) return false;
         if (Player.WillStatusEndGCD(2, 0, true, StatusID.StandardFinish)) return true;
 

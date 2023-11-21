@@ -24,15 +24,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Healer\SGE_Default.cs" />
+	  <Compile Remove="Magical\BLU_Default.cs" />
+	  <Compile Remove="Magical\BLU_Extra.cs" />
 	  <Compile Remove="Melee\DRG_Kirbo.cs" />
-	  <Compile Remove="Melee\MNK_Default.cs" />
-	  <Compile Remove="Melee\NIN_Default.cs" />
-	  <Compile Remove="Ranged\BRD_Default.cs" />
-	  <Compile Remove="Ranged\DNC_Default.cs" />
-	  <Compile Remove="Ranged\MCH_Default.cs" />
-	  <Compile Remove="Tank\DRK_Default.cs" />
-	  <Compile Remove="Tank\PLD_Default.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -89,23 +83,16 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Magical\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="Healer\SGE_Default.cs" />
+	  <None Include="Magical\BLU_Extra.cs" />
 	  <None Include="Melee\DRG_Kirbo.cs" />
-	  <None Include="Melee\MNK_Default.cs" />
-	  <None Include="Melee\NIN_Default.cs" />
-	  <None Include="Ranged\BRD_Default.cs" />
-	  <None Include="Ranged\DNC_Default.cs" />
-	  <None Include="Ranged\MCH_Default.cs" />
-	  <None Include="Tank\DRK_Default.cs" />
-	  <None Include="Tank\PLD_Default.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <PackageReference Include="RotationSolver.Basic" Version="3.5.41" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Magical\BLU_Default.cs" />
 	</ItemGroup>
 
 </Project>

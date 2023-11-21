@@ -13,7 +13,7 @@ public sealed class SGE_Default : SGE_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Default";
+    public override string RotationName => "Kirbo's Default";
 
     public override string Description => "Kirbo Revived SGE\nPlease contact Nore#7219 on Discord for questions about this rotation.";
 

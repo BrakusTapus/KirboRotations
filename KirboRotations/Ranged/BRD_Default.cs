@@ -7,7 +7,7 @@ public sealed class BRD_Default : BRD_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Default";
+    public override string RotationName => "Kirbo's Default";
 
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
             .SetBool(CombatType.PvE, "BindWAND", false, @"Use Raging Strikes on ""Wanderer's Minuet""")

@@ -9,7 +9,7 @@ public sealed class MNK_Default : MNK_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Lunar Solar";
+    public override string RotationName => "Kirbo's Default";
 
     protected override IRotationConfigSet CreateConfiguration()
     {

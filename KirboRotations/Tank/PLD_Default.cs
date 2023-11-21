@@ -1,4 +1,6 @@
-﻿namespace KirboRotations.Tank;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+
+namespace KirboRotations.Tank;
 
 [LinkDescription("https://xiv.sleepyshiba.com/pld/img/63-60stentative2.png")]
 [RotationDesc("The whole rotation's burst\nis base on:")]
@@ -15,9 +17,17 @@ public class PLD_Default : PLD_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Tentative v1.2";
+    public override string RotationName => "Kirbo's Default";
 
-    public override string Description => "Please work well!";
+    public override string Description => "Revived default version";
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static new IBaseAction Requiescat { get; } = new BaseAction(ActionID.Requiescat, ActionOption.Attack)
+    {
+        FilterForHostiles = tars => tars.Where(t => t is PlayerCharacter),
+    };
 
     protected override IRotationConfigSet CreateConfiguration()
     {

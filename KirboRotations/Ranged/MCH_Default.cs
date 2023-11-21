@@ -14,7 +14,7 @@ public sealed class MCH_Default : MCH_Base
 
     public override string GameVersion => "6.51";
 
-    public override string RotationName => "Delayed Tools Opener";
+    public override string RotationName => "Kirbo's Default";
 
     protected override IAction CountDownAction(float remainTime)
     {
@@ -27,7 +27,23 @@ public sealed class MCH_Default : MCH_Base
         if (remainTime < 5 && Reassemble.CanUse(out act, CanUseOption.EmptyOrSkipCombo | CanUseOption.IgnoreClippingCheck)) return act;
         return base.CountDownAction(remainTime);
     }
-    
+
+    private static new IBaseAction Dismantle { get; } = new BaseAction(ActionID.Dismantle, ActionOption.None | ActionOption.Defense);
+
+    /*private static new BaseAction Dismantle { get; } = new(ActionID.Dismantle)
+    {
+        ChoiceTarget = (Targets, mustUse) =>
+        {
+            if (Targets != null &&
+                Targets.YalmDistanceX < 25 &&
+                !Targets.HasStatus(false, StatusID.Dismantled, StatusID.Reprisal))
+            {
+                return Targets;
+            }
+            return null;
+        },
+    };*/
+
     protected override IRotationConfigSet CreateConfiguration()
     {
         return base.CreateConfiguration()
@@ -63,25 +79,13 @@ public sealed class MCH_Default : MCH_Base
 
         return base.GeneralGCD(out act);
     }
-    /*private static new BaseAction Dismantle { get; } = new(ActionID.Dismantle)
-    {
-        ChoiceTarget = (Targets, mustUse) =>
-        {
-            if (Targets != null &&
-                Targets.YalmDistanceX < 25 &&
-                !Targets.HasStatus(false, StatusID.Dismantled, StatusID.Reprisal))
-            {
-                return Targets;
-            }
-            return null;
-        },
-    };*/
+
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
-        if (Dismantle.CanUse(out act, CanUseOption.MustUse)/*&& CurrentTarget.IsCasting*/)
-        {
-            return true;
-        }
+      //if (Dismantle.CanUse(out act, CanUseOption.MustUse)/*&& CurrentTarget.IsCasting*/)
+      //{
+      //    return true;
+      //}
 
         if (Configs.GetBool("MCH_Reassemble") && ChainSaw.EnoughLevel && nextGCD.IsTheSameTo(true, ChainSaw))
         {
