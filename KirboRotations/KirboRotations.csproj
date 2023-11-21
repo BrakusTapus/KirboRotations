@@ -5,7 +5,7 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Authors>Kirbo</Authors>
-		<Version>1.0.0.4</Version>
+		<Version>1.0.0.5</Version>
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>AnyCPU</Platforms>
 		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
@@ -24,11 +24,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Ranged\Simple_MCH.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
+	  <Compile Remove="Magical\BLU_Default.cs" />
+	  <Compile Remove="Magical\BLU_Extra.cs" />
+	  <Compile Remove="Melee\DRG_Kirbo.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -69,6 +67,7 @@
 		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
 		<Using Include="Dalamud.Interface" />
 		<Using Include="ImGuiNET" />
+		<Using Include="KirboRotations.Utility" />
 		<Using Include="Newtonsoft.Json" />
 		<Using Include="RotationSolver.Basic" />
 		<Using Include="RotationSolver.Basic.Actions" />
@@ -78,19 +77,22 @@
 		<Using Include="RotationSolver.Basic.Helpers" />
 		<Using Include="RotationSolver.Basic.Rotations" />
 		<Using Include="RotationSolver.Basic.Rotations.Basic" />
+		<Using Include="System.ComponentModel" />
 		<Using Include="System.Numerics" />
 		<Using Include="System.Reflection" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Tank\" />
-		<Folder Include="Healer\" />
-		<Folder Include="Melee\" />
-		<Folder Include="Magical\" />
+	  <None Include="Magical\BLU_Extra.cs" />
+	  <None Include="Melee\DRG_Kirbo.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="Ranged\Simple_MCH.cs" />
+	  <PackageReference Include="RotationSolver.Basic" Version="3.5.41" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="Magical\BLU_Default.cs" />
 	</ItemGroup>
 
 </Project>

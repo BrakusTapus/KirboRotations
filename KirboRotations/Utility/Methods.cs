@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using Dalamud.Game.ClientState.Objects;
+using FFXIVClientStructs.FFXIV.Client.Game;
 
 namespace KirboRotations.Utility;
 
@@ -11,7 +12,7 @@ public static class Methods
         if (Flag)
         {
             ResetBoolAfterDelay();
-         //PluginLog.Debug($"Resetting Flag > {Flag}");
+            Serilog.Log.Debug($"Resetting Flag > {Flag}");
         }
     }
 
@@ -19,13 +20,11 @@ public static class Methods
     {
         Thread.Sleep(300); // Delay for resetting the bool
         Flag = false; // Reset the bool
-      //PluginLog.Debug($"flag is {Flag}");
+        Serilog.Log.Debug($"flag is {Flag}");
     }
 
-	/// <summary> Checks if the player is in a PVP enabled zone. </summary>
-	/// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
-	public static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
-
-
+    /// <summary> Checks if the player is in a PVP enabled zone. </summary>
+    /// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
+    internal static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
 
 }

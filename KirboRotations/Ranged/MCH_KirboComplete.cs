@@ -1,97 +1,194 @@
-﻿using KirboRotations.Utility;
-
-namespace KirboRotations.Ranged;
+﻿namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.Wildfire)]
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
 public class MCH_KirboComplete : MCH_Base
 {
-
-    public override string GameVersion => "6.51";
-
-    public override string RotationName => "Kirbo's Machinist";
-
-    public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
-
+    #region Rotation Info
     public override CombatType Type => CombatType.Both;
+    public override string GameVersion => "6.51";
+    public override string RotationName => "Kirbo's Machinist";
+    public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
+#pragma warning disable CS0618 // Type or member is obsolete
+    #endregion
 
-    private bool InBurst { get; set; }
+    #region New PvE IBaseActions
+    private static new IBaseAction Dismantle { get; } = new BaseAction(ActionID.Dismantle, ActionOption.None | ActionOption.Defense);
+    private static new IBaseAction Drill { get; } = new BaseAction(ActionID.Drill)
+    {
+        ActionCheck = (b, m) => !IsOverheated,
+    };
+    private static new IBaseAction AirAnchor { get; } = new BaseAction(ActionID.AirAnchor)
+    {
+        ActionCheck = (b, m) => !IsOverheated,
+    };
+    private static new IBaseAction ChainSaw { get; } = new BaseAction(ActionID.ChainSaw)
+    {
+        ActionCheck = (b, m) => !IsOverheated,
+    };
+    private static new IBaseAction Wildfire { get; } = new BaseAction(ActionID.Wildfire)
+    {
+        ActionCheck = (BattleChara b, bool m) => ((CustomRotation.Player.HasStatus(true, StatusID.Overheated) && HeatStacks > 4) || Heat >= 45) && CustomRotation.InCombat
+    };
+    private static new IBaseAction Reassemble { get; } = new BaseAction(ActionID.Reassemble)
+    {
+        StatusProvide = new StatusID[1] { StatusID.Reassemble },
+        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.Reassemble) && CustomRotation.HasHostilesInRange
+    };
+    private static new IBaseAction Hypercharge { get; } = new BaseAction(ActionID.Hypercharge, ActionOption.UseResources)
+    {
+        StatusProvide = new StatusID[1] { StatusID.Overheated },
+        ActionCheck = (BattleChara b, bool m) => !IsOverheated && Heat >= 50 && CustomRotation.IsLongerThan(10f)
+    };
+    private static new IBaseAction BarrelStabilizer { get; } = new BaseAction(ActionID.BarrelStabilizer)
+    {
+        ActionCheck = (BattleChara b, bool m) => Heat <= 45 && CustomRotation.InCombat && CustomRotation.Target.IsTargetable && CustomRotation.Target != Player
+    };
+    #endregion
 
+    #region New PvP IBaseActions
+    private static new IBaseAction PvP_MarksmansSpite { get; } = new BaseAction(ActionID.PvP_MarksmansSpite)
+    {
+        // Thank you Rabbs!
+        ChoiceTarget = (Targets, mustUse) =>
+        {
+            Targets = Targets.Where(b => b.YalmDistanceX < 50 &&
+            (b.CurrentHp /*+ b.CurrentMp * 6*/) < 40000 &&
+            !b.HasStatus(false, (StatusID)1240, (StatusID)1308, (StatusID)2861, (StatusID)3255, (StatusID)3054, (StatusID)3054, (StatusID)3039, (StatusID)1312)).ToArray();
+
+            if (Targets.Any())
+            {
+                return Targets.OrderBy(ObjectHelper.GetHealthRatio).Last();
+            }
+            return null;
+        },
+        ActionCheck = (BattleChara b, bool m) => LimitBreakLevel >= 1
+    };
+    private static new IBaseAction PvP_Drill { get; } = new BaseAction(ActionID.PvP_Drill)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_DrillPrimed},
+        StatusProvide = new StatusID[1] { StatusID.PvP_BioblasterPrimed },
+    };
+    private static new IBaseAction PvP_Bioblaster { get; } = new BaseAction(ActionID.PvP_Bioblaster)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_BioblasterPrimed },
+        StatusProvide = new StatusID[1] { StatusID.PvP_AirAnchorPrimed },
+    };
+    private static new IBaseAction PvP_AirAnchor { get; } = new BaseAction(ActionID.PvP_AirAnchor)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_AirAnchorPrimed },
+        StatusProvide = new StatusID[1] { StatusID.PvP_ChainSawPrimed },
+    };
+    private static new IBaseAction PvP_ChainSaw { get; } = new BaseAction(ActionID.PvP_ChainSaw)
+    {
+        StatusNeed = new StatusID[1] { StatusID.PvP_ChainSawPrimed },
+        StatusProvide = new StatusID[1] { StatusID.PvP_DrillPrimed },
+    };
+    private static new IBaseAction PvP_BlastCharge { get; } = new BaseAction(ActionID.PvP_BlastCharge)
+    {
+        ChoiceTarget = (Targets, mustUse) =>
+        {
+            Targets = Targets.Where(b => b.YalmDistanceX < 25 && 
+            !b.HasStatus(false, (StatusID)1240, (StatusID)1308, (StatusID)2861, (StatusID)3255, (StatusID)3054, (StatusID)3054, (StatusID)3039, (StatusID)1312)).ToArray();
+            if (Targets.Any())
+            {
+                return Targets.OrderBy(ObjectHelper.GetHealthRatio).First();
+            }
+            return null;
+        },
+    };
+    private static new IBaseAction PvP_Analysis { get; } = new BaseAction(ActionID.PvP_Analysis, ActionOption.Friendly)
+    {
+        StatusProvide = new StatusID[1] { StatusID.PvP_Analysis },
+        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.PvP_Analysis) && CustomRotation.HasHostilesInRange,
+    };
+    #endregion
+
+    #region Debug window stuff
     public override bool ShowStatus => true;
-
     public override void DisplayStatus()
     {
         bool inPvP = Methods.InPvP();
-
-        ImGui.Separator();
-        ImGui.Text("GCD remain: " + WeaponRemain);
-        ImGui.Text("HeatStacks: " + HeatStacks);
-        //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-        ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
-        ImGui.Separator();
-        ImGui.Spacing();
-        if (!inPvP)
+        try
         {
-            int rotationSelection = Configs.GetCombo("RotationSelection");
-            string rotationText = "Unknown";
-
-            switch (rotationSelection)
+            ImGui.Separator();
+            ImGui.Text("GCD remain: " + Drill);
+            ImGui.Text("GCD remain: " + WeaponRemain);
+            ImGui.Text("HeatStacks: " + HeatStacks);
+            ImGui.Separator();
+            ImGui.Spacing();
+            //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
+            ImGui.Text("Target: " + Target.Name);
+            ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
+            ImGui.Separator();
+            ImGui.Spacing();
+            if (!inPvP)
             {
-                case 0:
-                    rotationText = "Early AA";
-                    break;
-                case 1:
-                    rotationText = "Delayed Tools";
-                    break;
-                case 2:
-                    rotationText = "Early All";
-                    break;
+                int rotationSelection = Configs.GetCombo("RotationSelection");
+                string rotationText = "Unknown";
+
+                switch (rotationSelection)
+                {
+                    case 0:
+                        rotationText = "Early AA";
+                        break;
+                    case 1:
+                        rotationText = "Delayed Tools";
+                        break;
+                    case 2:
+                        rotationText = "Early All";
+                        break;
+                }
+                ImGui.Text($"Rotation Selection: {rotationText}");
+                ImGui.Text("Openerstep: " + Openerstep);
+                ImGui.Text("OpenerActionsAvailable: " + OpenerActionsAvailable);
+                ImGui.Text("OpenerInProgress: " + OpenerInProgress);
+                ImGui.Text("OpenerHasFailed: " + OpenerHasFailed);
+                ImGui.Text("OpenerHasFinished: " + OpenerHasFinished);
+                ImGui.Text("Flag: " + Flag);
             }
-            ImGui.Text($"Rotation Selection: {rotationText}");
-            ImGui.Text("Openerstep: " + Openerstep);
-            ImGui.Text("OpenerActionsAvailable: " + OpenerActionsAvailable);
-            ImGui.Text("OpenerInProgress: " + OpenerInProgress);
-            ImGui.Text("OpenerHasFailed: " + OpenerHasFailed);
-            ImGui.Text("OpenerHasFinished: " + OpenerHasFinished);
-        }
-        else
-        {
-            ImGui.Text("IsPvPOverheated: " + IsPvPOverheated);
-            ImGui.Text("PvP_HeatStacks: " + PvP_HeatStacks);
-            ImGui.Text("PvP_Analysis CurrentCharges: " + PvP_Analysis.CurrentCharges);
-            ImGui.Text($"Target.HealthRatio: {Target.CurrentHp}");
-        }
-        ImGui.Spacing();
-        ImGui.Separator();
-        ImGui.Spacing();
+            else
+            {
+                ImGui.Text("IsPvPOverheated: " + IsPvPOverheated);
+                ImGui.Text("PvP_HeatStacks: " + PvP_HeatStacks);
+                ImGui.Text("PvP_Analysis CurrentCharges: " + PvP_Analysis.CurrentCharges);
+            }
+            ImGui.Spacing();
+            ImGui.Separator();
+            ImGui.Spacing();
 
-        // Calculate the remaining vertical space in the window
-        float remainingSpace = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing(); // Subtracting button height with spacing
-        if (remainingSpace > 0)
-        {
-            ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace);
-        }
+            // Calculate the remaining vertical space in the window
+            float remainingSpace = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing(); // Subtracting button height with spacing
+            if (remainingSpace > 0)
+            {
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace);
+            }
 
-        // Add a button for resetting rotation properties
-        if (ImGui.Button("Reset Rotation"))
+            // Add a button for resetting rotation properties
+            if (ImGui.Button("Reset Rotation"))
+            {
+                ResetRotationProperties();
+            }
+        }
+        catch
         {
-            ResetRotationProperties();
+            Serilog.Log.Warning("Something wrong with DisplayStatus");
         }
     }
+    #endregion
+
+    #region Opener Related Properties
     private int Openerstep { get; set; }
-
     private bool OpenerHasFinished { get; set; }
-
     private bool OpenerHasFailed { get; set; }
-
     private bool OpenerActionsAvailable { get; set; }
-
     private bool OpenerInProgress { get; set; }
-
-    private bool WillhaveTool { get; set; }
-
     private bool Flag { get; set; }
+    #endregion
 
+    #region Action Related Properties
+    private bool WillhaveTool { get; set; }
+    private bool InBurst { get; set; }
     private static byte HeatStacks
     {
         get
@@ -100,7 +197,6 @@ public class MCH_KirboComplete : MCH_Base
             return stacks == byte.MaxValue ? (byte)5 : stacks;
         }
     }
-
     private static byte PvP_HeatStacks
     {
         get
@@ -109,41 +205,52 @@ public class MCH_KirboComplete : MCH_Base
             return pvp_heatstacks == byte.MaxValue ? (byte)5 : pvp_heatstacks;
         }
     }
-
     private bool IsPvPOverheated => Player.HasStatus(true, StatusID.PvP_Overheated);
+    #endregion
 
+    #region Rotation Config
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
-        .SetCombo(CombatType.PvE, "RotationSelection", 1, "Select which Rotation will be used. (Openers will only be followed at level 90)", "Early AA", "Delayed Tools", "Early All")
+        .SetCombo(CombatType.PvE, "RotationSelection", 1, "Select which Rotation will be used. (Openers will only be followed at level 90)", "Early AA", "Delayed Tools"/*, "Early All"*/)
         .SetBool(CombatType.PvE, "BatteryStuck", false, "Battery overcap protection\n(Will try and use Rook AutoTurret if Battery is at 100 and next skill increases Battery)")
         .SetBool(CombatType.PvE, "HeatStuck", false, "Heat overcap protection\n(Will try and use HyperCharge if Heat is at 100 and next skill increases Heat)")
         .SetBool(CombatType.PvE, "DumpSkills", false, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
         //.SetBool(CombatType.PvP, "LBInPvP", true, "Use the LB in PvP when Target is killable by it")
-        .SetInt(CombatType.PvP, "MarksmanRifleThreshold", 32000, "Marksman Rifle HP Threshold\n(Doule click or hold CTRL and click to set value)", 0, 75000)
+        //.SetInt(CombatType.PvP, "MarksmanRifleThreshold", 32000, "Marksman Rifle HP Threshold\n(Doule click or hold CTRL and click to set value)", 0, 75000)
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
         .SetBool(CombatType.PvP, "PreventActionWaste", true, "Turn on to prevent using actions on targets with invulns\n(For example: DRK with Undead Redemption)")
-        .SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)");
+        .SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)")
+        .SetBool(CombatType.PvP, "DrillOnGuard", true, "Try to use a Analysis buffed Drill on a Target with Guard\n(Thank you Const Mar for the suggestion!)")
+        .SetBool(CombatType.PvP, "LowHPNoBlastCharge", true, "Prevents the use of Blast Charge if player is moving with low HP\n(HP Threshold set in next option)")
+        .SetInt(CombatType.PvP, "LowHPThreshold", 20000, "HP Threshold for the 'LowHPNoBlastCharge' option", 0, 52500);
+    #endregion
 
+    #region Countdown Logic
     protected override IAction CountDownAction(float remainTime)
     {
-        TerritoryContentType Content = TerritoryContentType;
-        bool UltimateRaids = (int)Content == 28;
+        TerritoryContentType Content = TerritoryContentType; // Not implemented yet
+        bool UltimateRaids = (int)Content == 28;             // Not implemented yet
 
+        // If 'OpenerActionsAvailable' is true (see method 'HandleOpenerAvailability' for conditions) proceed to using Action logic during countdown
         if (OpenerActionsAvailable)
         {
-            switch (Configs.GetCombo("RotationSelection")) // Select CountDownAction Depending on which Rotation will be used
+            // Selects action logic depending on which rotation has been selected (Default: Delayed Tool)
+            switch (Configs.GetCombo("RotationSelection"))
             {
 
                 case 0: // Early AA
+                    // Use AirAnchor when the remaining countdown time is less or equal to AirAnchor's AnimationLock AND player has the Reassemble Status, also sets OpenerInProgress to 'True'
                     if (remainTime <= AirAnchor.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && AirAnchor.CanUse(out _))
                     {
                         OpenerInProgress = true;
                         return AirAnchor;
                     }
+                    // Use Tincture if Tincture use is enabled and the countdown time is less or equal to AirAnchor+Tincture animationlock (1.8s)
                     IAction act0;
                     if (remainTime <= TinctureOfDexterity8.AnimationLockTime + AirAnchor.AnimationLockTime && UseBurstMedicine(out act0, false))
                     {
                         return act0;
                     }
+                    // Use Reassemble if countdown timer is 5s or less and Player has more then 1 Reassemble Charges AND does not already have the Reassemble Status
                     if (remainTime <= 5f && Reassemble.CurrentCharges > 1 && !Player.HasStatus(true, StatusID.Reassemble))
                     {
                         return Reassemble;
@@ -151,29 +258,31 @@ public class MCH_KirboComplete : MCH_Base
                     break;
 
                 case 1: // Delayed Tools
+                    // Use SplitShot when the remaining countdown time is less or equal to SplitShot's AnimationLock, also sets OpenerInProgress to 'True'
                     if (remainTime <= SplitShot.AnimationLockTime && SplitShot.CanUse(out _))
                     {
                         OpenerInProgress = true;
                         return SplitShot;
                     }
+                    // Use Tincture if Tincture use is enabled and the countdown time is less or equal to SplitShot+Tincture animationlock (1.8s)
                     IAction act1;
-                    if (remainTime <= SplitShot.AnimationLockTime + TinctureOfDexterity8.AnimationLockTime + 0.2 && UseBurstMedicine(out act1, false))
+                    if (remainTime <= SplitShot.AnimationLockTime + TinctureOfDexterity8.AnimationLockTime && UseBurstMedicine(out act1, false))
                     {
                         return act1;
                     }
                     break;
 
-                case 2: // Early All
-                    if (remainTime <= AirAnchor.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && AirAnchor.CanUse(out _))
-                    {
-                        OpenerInProgress = true;
-                        return AirAnchor;
-                    }
-                    if (remainTime <= 5f && Reassemble.CurrentCharges > 1 && !Player.HasStatus(true, StatusID.Reassemble))
-                    {
-                        return Reassemble;
-                    }
-                    break;
+              //case 2: // Early All
+              //    if (remainTime <= AirAnchor.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && AirAnchor.CanUse(out _))
+              //    {
+              //        OpenerInProgress = true;
+              //        return AirAnchor;
+              //    }
+              //    if (remainTime <= 5f && Reassemble.CurrentCharges > 1 && !Player.HasStatus(true, StatusID.Reassemble))
+              //    {
+              //        return Reassemble;
+              //    }
+              //    break;
             }
         }
         if (Player.Level < 90)
@@ -219,11 +328,13 @@ public class MCH_KirboComplete : MCH_Base
         }
         return base.CountDownAction(remainTime);
     }
+    #endregion
 
+    #region Opener Logic
     private bool Opener(out IAction act)
     {
         act = default(IAction);
-        while (OpenerInProgress && (!OpenerHasFinished || !OpenerHasFailed))
+        while (OpenerInProgress /* && (!OpenerHasFinished || !OpenerHasFailed)*/)
         {
             if (TimeSinceLastAction.TotalSeconds > 3.0 && !Flag)
             {
@@ -241,7 +352,7 @@ public class MCH_KirboComplete : MCH_Base
             }
             switch (Configs.GetCombo("RotationSelection"))
             {
-                case 0: //Early AA
+                case 0: // Early AA
                     switch (Openerstep)
                     {
                         case 0:
@@ -305,7 +416,7 @@ public class MCH_KirboComplete : MCH_Base
                             break;
                     }
                     break;
-                case 1: //Delayed Tools
+                case 1: // Delayed Tools
                     switch (Openerstep)
                     {
                         case 0:
@@ -315,6 +426,10 @@ public class MCH_KirboComplete : MCH_Base
                         case 2:
                             return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 3:
+                            //if (Drill.IsCoolingDown)
+                            //{
+                            //OpenerHasFailed = true;
+                            //}
                             return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
                             return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
@@ -415,12 +530,12 @@ public class MCH_KirboComplete : MCH_Base
                             break;
                     }
                     break;
+
             }
         }
         act = null;
         return false;
     }
-
     private bool OpenerStep(bool condition, bool result)
     {
         if (condition)
@@ -430,29 +545,51 @@ public class MCH_KirboComplete : MCH_Base
         }
         return result;
     }
+    #endregion
 
+    #region GCD Logic
     protected override bool GeneralGCD(out IAction act)
     {
         act = null;
 
         #region PvP
         // Status checks
-        bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard);
-        bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
-        bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
-        bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);
+        bool TargetIsNotPlayer = Target != Player;
+        bool hasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool tarHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && TargetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && TargetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && TargetIsNotPlayer;
 
         // Config checks
+        int marksmanRifleThreshold = Configs.GetInt("MarksmanRifleThreshold");
+        int lowHPThreshold = Configs.GetInt("LowHPThreshold");
         bool guardCancel = Configs.GetBool("GuardCancel");
         bool preventActionWaste = Configs.GetBool("PreventActionWaste");
         bool safetyCheck = Configs.GetBool("SafetyCheck");
-        int marksmanRifleThreshold = Configs.GetInt("MarksmanRifleThreshold");
+        bool drillOnGuard = Configs.GetBool("DrillOnGuard");        
 
         if (Methods.InPvP())
         {
             if (guardCancel && Player.HasStatus(true, StatusID.PvP_Guard))
             {
                 return false;
+            }
+
+            if (drillOnGuard && tarHasGuard)
+            {
+                if (!Player.HasStatus(true, StatusID.PvP_DrillPrimed))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges == 0 && !Player.HasStatus(true, StatusID.PvP_Analysis))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && Player.HasStatus(true, StatusID.PvP_Analysis) && PvP_Drill.CanUse(out act, CanUseOption.MustUseEmpty))
+                {
+                    return true;
+                }
             }
 
             if (safetyCheck && hasChiten)
@@ -467,11 +604,12 @@ public class MCH_KirboComplete : MCH_Base
 
             if (!IsPvPOverheated)
             {
-                //if (HostileTarget && Configs.GetBool("LBInPvP") && HostileTarget.CurrentHp < 32000 && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse))
+                //if (Target.CurrentHp <= marksmanRifleThreshold && TargetIsNotPlayer && !hasGuard && !hasHallowedGround && !hasUndeadRedemption
+                //    && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse))
                 //{
-                //return true;
+                //    return true;
                 //}
-                if (PvP_MarksmansSpite.Target.CurrentHp <= marksmanRifleThreshold && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse))
+                if (!hasHallowedGround && !hasUndeadRedemption && PvP_MarksmansSpite.CanUse(out act, CanUseOption.MustUse))
                 {
                     return true;
                 }
@@ -491,15 +629,18 @@ public class MCH_KirboComplete : MCH_Base
                 {
                     if (PvP_ChainSaw.CanUse(out act, CanUseOption.MustUseEmpty, 1)) return true;
                 }
-            }
-
-            if (PvP_Scattergun.CanUse(out act, CanUseOption.MustUseEmpty, 1) && HostileTarget.DistanceToPlayer() < 12 && !IsPvPOverheated)
-            {
-                return true;
+                if (PvP_Scattergun.CanUse(out act, CanUseOption.MustUseEmpty, 1) && HostileTarget.DistanceToPlayer() < 12)
+                {
+                    return true;
+                }
             }
 
             if (PvP_BlastCharge.CanUse(out act, CanUseOption.IgnoreCastCheck))
             {
+                if (Player.CurrentHp <= lowHPThreshold && IsMoving && !IsPvPOverheated) // Maybe add InCombat as well
+                {
+                    return false;
+                }
                 return true;
             }
         }
@@ -510,7 +651,7 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Opener(out act);
         }
-        if (!OpenerInProgress || OpenerHasFailed || OpenerHasFinished)
+        if (!OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished*/)
         {
             if (AutoCrossbow.CanUse(out act, (CanUseOption)1, 2) && ObjectHelper.DistanceToPlayer(HostileTarget) <= 12f)
             {
@@ -571,29 +712,51 @@ public class MCH_KirboComplete : MCH_Base
         }
         return base.GeneralGCD(out act);
         #endregion
-    }
 
+    }
+    #endregion
+
+    #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
         act = null;
 
         #region PvP
         // Status checks
-        bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard);
-        bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten);
-        bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround);
-        bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);
+        bool TargetIsNotPlayer = CurrentTarget != Player;
+        bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool tarHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten) && TargetIsNotPlayer;
+        bool hasHallowedGround = HostileTarget.HasStatus(false, StatusID.PvP_HallowedGround) && TargetIsNotPlayer;
+        bool hasUndeadRedemption = HostileTarget.HasStatus(false, StatusID.PvP_UndeadRedemption) && TargetIsNotPlayer;
 
         // Config checks
         bool guardCancel = Configs.GetBool("GuardCancel");
         bool preventActionWaste = Configs.GetBool("PreventActionWaste");
         bool safetyCheck = Configs.GetBool("SafetyCheck");
+        bool drillOnGuard = Configs.GetBool("DrillOnGuard");
 
         if (Methods.InPvP())
         {
             if (guardCancel && Player.HasStatus(true, StatusID.PvP_Guard))
             {
                 return false;
+            }
+
+            if (drillOnGuard && tarHasGuard)
+            {
+                if (!Player.HasStatus(true, StatusID.PvP_DrillPrimed))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges == 0 && !Player.HasStatus(true, StatusID.PvP_Analysis))
+                {
+                    return false;
+                }
+                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges >= 1 && PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty))
+                {
+                    return true;
+                }
             }
 
             if (safetyCheck && hasChiten)
@@ -606,45 +769,36 @@ public class MCH_KirboComplete : MCH_Base
                 return false;
             }
 
-            if (Configs.GetBool("SafetyCheck") && hasChiten)
-            {
-                return false;
-            }
-
-            if (Configs.GetBool("PreventActionWaste") && (hasGuard || hasHallowedGround || hasUndeadRedemption))
-            {
-                return false;
-            }
-
             if (IsPvPOverheated && !Player.WillStatusEnd(3.5f, true, StatusID.PvP_Overheated) && HostileTarget.DistanceToPlayer() < 20 && PvP_Wildfire.CanUse(out act, CanUseOption.MustUse))
             {
                 return true;
             }
 
-            if (!Player.HasStatus(true, StatusID.PvP_Analysis) && PvP_Analysis.CurrentCharges >= 1)
+            if (PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty) && !Player.HasStatus(true, StatusID.PvP_Analysis) && PvP_Analysis.CurrentCharges > 0 && NumberOfAllHostilesInRange > 0)
             {
-                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && NumberOfHostilesInRange > 0)
-                {
-                    return true;
-                }
-
                 if (nextGCD == PvP_Drill || nextGCD == PvP_ChainSaw)
                 {
-                    return PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty);
+                    return true;
                 }
-
-                if (Player.HasStatus(true, StatusID.PvP_DrillPrimed) && IsPvPOverheated)
+                else if (Player.HasStatus(true, StatusID.PvP_DrillPrimed))
                 {
                     return true;
                 }
-
-                if (Player.HasStatus(true, StatusID.PvP_ChainSawPrimed) && IsPvPOverheated)
+                else if (Player.HasStatus(true, StatusID.PvP_ChainSawPrimed))
+                {
+                    return true;
+                }
+                else if (Player.HasStatus(true, StatusID.PvP_BioblasterPrimed))
+                {
+                    return true;
+                }
+                else if (Player.HasStatus(true, StatusID.PvP_AirAnchorPrimed))
                 {
                     return true;
                 }
             }
 
-            if (PvP_BishopAutoTurret.CanUse(out act, CanUseOption.MustUse) && HasHostilesInRange)
+            if (PvP_BishopAutoTurret.CanUse(out act, CanUseOption.MustUse))
             {
                 return true;
             }
@@ -652,29 +806,28 @@ public class MCH_KirboComplete : MCH_Base
         #endregion
 
         #region PVE
-        TerritoryContentType Content = TerritoryContentType;
-        bool Dungeon = (int)Content == 2;
-        bool Roulette = (int)Content == 1;
-        bool Deepdungeon = (int)Content == 21;
-        bool VCDungeonFinder = (int)Content == 30;
-        bool FATEs = (int)Content == 8;
-        bool Eureka = (int)Content == 26;
-        bool UltimateRaids = (int)Content == 28;
+        //TerritoryContentType Content = TerritoryContentType;
+        //bool Dungeon = (int)Content == 2;
+        //bool Roulette = (int)Content == 1;
+        //bool Deepdungeon = (int)Content == 21;
+        //bool VCDungeonFinder = (int)Content == 30;
+        //bool FATEs = (int)Content == 8;
+        //bool Eureka = (int)Content == 26;
+        //bool UltimateRaids = (int)Content == 28;
 
         if (ShouldUseBurstMedicine(out act))
         {
             return true;
         }
-
-        if (OpenerInProgress && !OpenerHasFailed && !OpenerHasFinished)
+        if (OpenerInProgress /*&& !OpenerHasFailed && !OpenerHasFinished*/)
         {
             return Opener(out act);
         }
-        if (Configs.GetBool("BatteryStuck") && !OpenerInProgress && Battery == 100 && RookAutoturret.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == ChainSaw || nextGCD == AirAnchor || nextGCD == CleanShot))
+        if (Configs.GetBool("BatteryStuck") && /*!OpenerInProgress &&*/ Battery == 100 && RookAutoturret.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == ChainSaw || nextGCD == AirAnchor || nextGCD == CleanShot))
         {
             return true;
         }
-        if (Configs.GetBool("HeatStuck") && !OpenerInProgress && Heat == 100 && Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == SplitShot || nextGCD == SlugShot || nextGCD == CleanShot))
+        if (Configs.GetBool("HeatStuck") && /*!OpenerInProgress &&*/ Heat == 100 && Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty) && (nextGCD == SplitShot || nextGCD == SlugShot || nextGCD == CleanShot))
         {
             return true;
         }
@@ -723,7 +876,7 @@ public class MCH_KirboComplete : MCH_Base
         }
 
         // LvL 90+
-        if ((!OpenerInProgress || OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90)
+        if (/*(*/!OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90*/)
         {
             if (Wildfire.CanUse(out act, (CanUseOption)16) && nextGCD == ChainSaw && Heat >= 50)
             {
@@ -794,7 +947,7 @@ public class MCH_KirboComplete : MCH_Base
         }
 
         // LvL 30-89 and Casual Content
-        if (Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || Player.Level < 90)
+        if (/*Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || */Player.Level < 90)
         {
             if ((IsLastAbility(false, Hypercharge) || Heat >= 50) && HostileTarget.IsBossFromIcon()
                 && Wildfire.CanUse(out act, CanUseOption.OnLastAbility)) return true;
@@ -845,30 +998,40 @@ public class MCH_KirboComplete : MCH_Base
 
         return base.EmergencyAbility(nextGCD, out act);
         #endregion
-    }
 
-    #region PvE Methods
+    }
+    #endregion
+
+    #region PvE Helper Methods
+    // Tincture Conditions
     private bool ShouldUseBurstMedicine(out IAction act)
     {
         act = null; // Default to null if Burst Medicine cannot be used.
 
+        // Don't use Tincture if player has the 'Weakness' status 
         if (Player.HasStatus(true, StatusID.Weakness))
         {
             return false;
         }
 
-        // Check if the conditions for using Burst Medicine are met.
+        // Check if the conditions for using Burst Medicine are met:
+        // Wildfire's CD is less then 20s
+        // Combat has been ongoing for atleast 60s
+        // Atleast 1.2s left in oGCD window
+        // Again as a double fail safe, Player does not have the weakness debuff
+        // TinctureTier 6/7/8 are NOT on cooldown (Should be fine as when either 1 is on cooldown the others are as well, might remove lower tier tinctures at some point)
+        // Drill's CD is 3s or less 
         if (Wildfire.WillHaveOneCharge(20) && CombatTime > 60 && NextAbilityToNextGCD > 1.2 && !Player.HasStatus(true, StatusID.Weakness)
             && !TinctureOfDexterity6.IsCoolingDown && !TinctureOfDexterity7.IsCoolingDown && !TinctureOfDexterity8.IsCoolingDown && Drill.WillHaveOneCharge(3))
         {
             // Attempt to use Burst Medicine.
             return UseBurstMedicine(out act, false);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
 
+    // Reassemble Conditions
     private bool ShouldUseReassemble(IAction nextGCD, out IAction act)
     {
         act = null; // Default to null if Reassemble cannot be used.
@@ -887,10 +1050,11 @@ public class MCH_KirboComplete : MCH_Base
         {
             return false;
         }
-
         // If none of the conditions are met for any rotation variant, return false.
         return false;
     }
+
+    // Hypercharge Conditions
     private bool ShouldUseHypercharge(out IAction act)
     {
         act = null; // Default to null if Hypercharge cannot be used.
@@ -937,10 +1101,11 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Hypercharge.CanUse(out act, CanUseOption.MustUse);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
+
+    // Wildfire set 1 Conditions
     private bool ShouldUseWildfire(out IAction act)
     {
         act = null; // Default to null if Wildfire cannot be used.
@@ -950,7 +1115,6 @@ public class MCH_KirboComplete : MCH_Base
         {
             return false;
         }
-
 
         // Check the cooldowns of your main abilities.
         bool isDrillReadySoon = Drill.WillHaveOneCharge(7.5f);
@@ -969,10 +1133,11 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Wildfire.CanUse(out act, CanUseOption.OnLastAbility);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
+
+    // Wildfire set 2 Conditions
     private bool ShouldUseWildfire(IAction nextGCD, out IAction act)
     {
         if (Wildfire.CanUse(out act, CanUseOption.OnLastAbility))
@@ -996,12 +1161,12 @@ public class MCH_KirboComplete : MCH_Base
             {
                 return true;
             }
-
             return false;
         }
-
         return false;
     }
+
+    // BarrelStabilizer Conditions
     private bool ShouldUseBarrelStabilizer(out IAction act)
     {
         act = null; // Default to null if Barrel Stabilizer cannot be used.
@@ -1029,10 +1194,11 @@ public class MCH_KirboComplete : MCH_Base
         {
             return BarrelStabilizer.CanUse(out act, CanUseOption.MustUse);
         }
-
         // If the conditions are not met, return false.
         return false;
     }
+
+    // RookAutoturret Condition
     private bool ShouldUseRookAutoturret(IAction nextGCD, out IAction act)
     {
         act = null; // Default to null if Rook Autoturret cannot be used.
@@ -1081,10 +1247,11 @@ public class MCH_KirboComplete : MCH_Base
                 return RookAutoturret.CanUse(out act, CanUseOption.MustUse);
             }
         }
-
         // If none of the conditions are met, return false.
         return false;
     }
+
+    // GaussRound & Ricochet Condition
     private bool ShouldUseGaussroundOrRicochet(out IAction act)
     {
         act = null; // Initialize the action as null.
@@ -1121,42 +1288,43 @@ public class MCH_KirboComplete : MCH_Base
         {
             return Ricochet.HasOneCharge && Ricochet.CanUse(out act, CanUseOption.MustUseEmpty);
         }
-
         // If none of the above conditions are met, default to using GaussRound.
         // This is a fallback in case other conditions fail to determine a clear action.
         return GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
     }
     #endregion
 
-    //  protected override bool AttackAbility(out IAction act)
-    //	{
-    //		#region PVE
-    //		if(OpenerInProgress)
-    //		{
-    //			return Opener(out act);
-    //		}
-    //		if(GaussRound.CurrentCharges >= Ricochet.CurrentCharges)
-    //		{
-    //			if(GaussRound.CanUse(out act, CanUseOption.MustUseEmpty))
-    //			{
-    //				return true;
-    //			}
-    //		}
-    //		else if(Ricochet.CanUse(out act, (CanUseOption)19))
-    //		{
-    //			return true;
-    //		}
-    //		act = null;
-    //		return false;
-    //		#endregion
-    //	}
+    #region PvP Helper Methods
+    // Analysis Condition
+    private bool ShouldUseAnalysis(out IAction act)
+    {
+        act = null;
 
+        bool hasEnemiesInRange = HasHostilesInRange && CurrentTarget.CanSee();
+        bool drillPrimeAndHasAnalysis = Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges > 0;
+
+        if (Player.HasStatus(true, StatusID.PvP_Analysis))
+        {
+            return false;
+        }
+        if (hasEnemiesInRange && drillPrimeAndHasAnalysis)
+        {
+            return PvP_Analysis.CanUse(out act, CanUseOption.MustUseEmpty);
+        }
+        return false;
+    }
+    #endregion
+
+    #region Extra Helper Methods
+    // Updates Status of other extra helper methods on every frame
     protected override void UpdateInfo()
     {
         HandleOpenerAvailability();
         ToolKitCheck();
         StateOfOpener();
     }
+
+    // Checks if any major tool skill will almost come off CD (only at lvl 90), and sets "InBurst" to true if Player has Wildfire active
     private void ToolKitCheck()
     {
         bool WillHaveDrill = Drill.WillHaveOneCharge(5f);
@@ -1170,6 +1338,7 @@ public class MCH_KirboComplete : MCH_Base
         InBurst = Player.HasStatus(true, StatusID.Wildfire);
     }
 
+    // Controls various Opener properties depending on various conditions
     public void StateOfOpener()
     {
         if (Player.IsDead)
@@ -1193,6 +1362,8 @@ public class MCH_KirboComplete : MCH_Base
             OpenerInProgress = false;
         }
     }
+
+    // Used by Reset button to in Displaystatus
     private void ResetRotationProperties()
     {
         Openerstep = 0;
@@ -1200,11 +1371,20 @@ public class MCH_KirboComplete : MCH_Base
         OpenerHasFailed = false;
         OpenerActionsAvailable = false;
         OpenerInProgress = false;
+        Serilog.Log.Warning($"Openerstep = {Openerstep}");
+        Serilog.Log.Warning($"OpenerHasFinished = {OpenerHasFinished}");
+        Serilog.Log.Warning($"OpenerHasFailed = {OpenerHasFailed}");
+        Serilog.Log.Warning($"OpenerActionsAvailable = {OpenerActionsAvailable}");
+        Serilog.Log.Warning($"OpenerInProgress = {OpenerInProgress}");
     }
+
+    // Used to check OpenerAvailability
     public void HandleOpenerAvailability()
     {
         bool Lvl90 = Player.Level >= 90;
         bool HasChainSaw = !ChainSaw.IsCoolingDown;
+        bool HasAirAnchor = !AirAnchor.IsCoolingDown;
+        bool HasDrill = !Drill.IsCoolingDown;
         bool HasBarrelStabilizer = !BarrelStabilizer.IsCoolingDown;
         bool HasRicochet = Ricochet.CurrentCharges == 3;
         bool HasWildfire = !Wildfire.IsCoolingDown;
@@ -1213,7 +1393,10 @@ public class MCH_KirboComplete : MCH_Base
         bool NoHeat = Heat == 0;
         bool NoBattery = Battery == 0;
         bool Openerstep0 = Openerstep == 0;
-        OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
+        OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
+
+        // Future Opener conditions for ULTS
     }
+    #endregion
 
 }
