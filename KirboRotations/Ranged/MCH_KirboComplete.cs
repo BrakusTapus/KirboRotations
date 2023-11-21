@@ -118,7 +118,7 @@ public class MCH_KirboComplete : MCH_Base
             ImGui.Separator();
             ImGui.Spacing();
             //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-            ImGui.Text("Target: " + Target.Name);
+            ImGui.Text("Target: " + CurrentTarget.Name);
             ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
             ImGui.Separator();
             ImGui.Spacing();
