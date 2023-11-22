@@ -121,7 +121,7 @@ public sealed class DNC_Default : DNC_Base
 
         act = null;
 
-        if (None) return false;
+        if (None && !InCombat) return false;
 
         if (!StandardStep.CanUse(out act, CanUseOption.MustUse)) return false;
         if (Player.WillStatusEndGCD(2, 0, true, StatusID.StandardFinish)) return true;
