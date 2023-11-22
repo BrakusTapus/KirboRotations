@@ -12,7 +12,9 @@ public sealed class WHM_Default : WHM_Base
     protected override IRotationConfigSet CreateConfiguration()
         => base.CreateConfiguration()
             .SetBool(CombatType.PvE, "UseLilyWhenFull", true, "Use Lily at max stacks.")
-            .SetBool(CombatType.PvE, "UsePreRegen", false, "Regen on Tank at 5 seconds remaining on Countdown.");
+            .SetBool(CombatType.PvE, "UsePreRegen", false, "Regen on Tank at 5 seconds remaining on Countdown.")
+            .SetInt(CombatType.PvE, "AssizeThreshold", 1, "At how many targets should Assize be used", 1, 20);
+
     public static IBaseAction RegenDefense { get; } = new BaseAction(ActionID.Regen, ActionOption.Hot)
     {
         ChoiceTarget = TargetFilter.FindAttackedTarget,
@@ -50,7 +52,8 @@ public sealed class WHM_Default : WHM_Base
     {
         if (PresenceOfMind.CanUse(out act)) return true;
 
-        if (Assize.CanUse(out act, CanUseOption.MustUse)) return true;
+        int AssizeTargets = Configs.GetInt("AssizeThreshold");
+        if (Assize.CanUse(out act, CanUseOption.MustUse) && NumberOfAllHostilesInRange >= AssizeTargets) return true;
 
         return base.AttackAbility(out act);
     }
