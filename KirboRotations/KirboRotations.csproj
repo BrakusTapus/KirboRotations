@@ -5,7 +5,7 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Authors>Kirbo</Authors>
-		<Version>1.0.0.7</Version>
+		<Version>1.0.0.8</Version>
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>AnyCPU</Platforms>
 		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
@@ -28,6 +28,8 @@
 	  <Compile Remove="Magical\BLU_Extra.cs" />
 	  <Compile Remove="Melee\DRG_Kirbo.cs" />
 	  <Compile Remove="Melee\NIN_Default.cs" />
+	  <Compile Remove="Ranged\MCH_Default.cs" />
+	  <Compile Remove="Ranged\MCH_KirboComplete.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -90,11 +92,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="RotationSolver.Basic" Version="3.5.41" />
+	  <None Include="Magical\BLU_Default.cs" />
+	  <None Include="Ranged\MCH_Default.cs" />
+	  <None Include="Ranged\MCH_KirboComplete.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include="Magical\BLU_Default.cs" />
+	  <PackageReference Include="RotationSolver.Basic" Version="3.5.41" />
 	</ItemGroup>
 
 </Project>

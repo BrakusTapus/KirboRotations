@@ -12,7 +12,8 @@ public sealed class SAM_Default : SAM_Base
     protected override IRotationConfigSet CreateConfiguration()
     {
         return base.CreateConfiguration()
-            .SetInt(CombatType.PvE, "addKenki", 50, "Use Kenki above.", min: 0, max: 85, speed: 5);
+            .SetInt(CombatType.PvE, "addKenki", 50, "Use Kenki above.", min: 0, max: 85, speed: 5)
+            .SetInt(CombatType.PvE, "Shoha2Threshold", 3, "Use 'Shoha2' if there are x targets or more", 1, 20);
     }
 
     /// <summary>
@@ -99,7 +100,7 @@ public sealed class SAM_Default : SAM_Base
         }
 
         //照破、无明照破
-        if (Shoha2.CanUse(out act)) return true;
+        if (Shoha2.CanUse(out act) && NumberOfHostilesInRange >=  Configs.GetInt("Shoha2Threshold")) return true;
         if (Shoha.CanUse(out act)) return true;
 
         //震天、九天
