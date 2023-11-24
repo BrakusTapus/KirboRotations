@@ -4,6 +4,8 @@
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
 public class MCH_KirboPvE : MCH_Base
 {
+    //TO-DO:
+    // Attach Wildfire to overheated + more then 4 OR Lastability was Hypercharge
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";

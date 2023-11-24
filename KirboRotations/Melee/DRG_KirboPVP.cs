@@ -4,7 +4,7 @@ namespace KirboRotations.Melee;
 
 [BetaRotation]
 [RotationDesc(ActionID.DragonSight)]
-public sealed class DRG_Kirbo : DRG_Base
+public sealed class DRG_KirboPVP : DRG_Base
 {
     #region Rotation Info
     public override string GameVersion => "6.51";
@@ -20,32 +20,32 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_WheelingThrustCombo { get; } = new BaseAction(ActionID.PvP_WheelingThrustCombo);
+    private static IBaseAction PvP_WheelingThrustCombo { get; } = new BaseAction(ActionID.PvP_WheelingThrustCombo);
 
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_RaidenThrust { get; } = new BaseAction(ActionID.PvP_RaidenThrust);
+    private static IBaseAction PvP_RaidenThrust { get; } = new BaseAction(ActionID.PvP_RaidenThrust);
 
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_FangAndClaw { get; } = new BaseAction(ActionID.PvP_FangAndClaw);
+    private static IBaseAction PvP_FangAndClaw { get; } = new BaseAction(ActionID.PvP_FangAndClaw);
 
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_WheelingThrust { get; } = new BaseAction(ActionID.PvP_WheelingThrust);
+    private static IBaseAction PvP_WheelingThrust { get; } = new BaseAction(ActionID.PvP_WheelingThrust);
 
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_ChaoticSpring { get; } = new BaseAction(ActionID.PvP_ChaoticSpring);
+    private static IBaseAction PvP_ChaoticSpring { get; } = new BaseAction(ActionID.PvP_ChaoticSpring);
 
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_Geirskogul { get; } = new BaseAction(ActionID.PvP_Geirskogul)
+    private static IBaseAction PvP_Geirskogul { get; } = new BaseAction(ActionID.PvP_Geirskogul)
     {
         StatusProvide = [StatusID.PvP_LifeOfTheDragon]
     };
@@ -53,7 +53,7 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_HighJump { get; } = new BaseAction(ActionID.PvP_HighJump)
+    private static IBaseAction PvP_HighJump { get; } = new BaseAction(ActionID.PvP_HighJump)
     {
         StatusProvide = [StatusID.PvP_Heavensent]
     };
@@ -61,17 +61,17 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_ElusiveJump { get; } = new BaseAction(ActionID.PvP_ElusiveJump);
+    private static IBaseAction PvP_ElusiveJump { get; } = new BaseAction(ActionID.PvP_ElusiveJump);
 
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_WyrmwindThrust { get; } = new BaseAction(ActionID.PvP_WyrmwindThrust);
+    private static IBaseAction PvP_WyrmwindThrust { get; } = new BaseAction(ActionID.PvP_WyrmwindThrust);
 
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_HorridRoar { get; } = new BaseAction(ActionID.PvP_HorridRoar, ActionOption.Friendly)
+    private static IBaseAction PvP_HorridRoar { get; } = new BaseAction(ActionID.PvP_HorridRoar, ActionOption.Friendly)
     {
         FilterForHostiles = tars => tars.Where(t => t is PlayerCharacter),
     };
@@ -79,7 +79,7 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_HeavensThrust { get; } = new BaseAction(ActionID.PvP_HeavensThrust)
+    private static IBaseAction PvP_HeavensThrust { get; } = new BaseAction(ActionID.PvP_HeavensThrust)
     {
         StatusNeed = new StatusID[] { StatusID.PvP_Heavensent },
     };
@@ -87,7 +87,7 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_Nastrond { get; } = new BaseAction(ActionID.PvP_Nastrond)
+    private static IBaseAction PvP_Nastrond { get; } = new BaseAction(ActionID.PvP_Nastrond)
     {
         StatusNeed = new StatusID[] { StatusID.PvP_LifeOfTheDragon },
     };
@@ -95,7 +95,7 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_SkyHigh { get; } = new BaseAction(ActionID.PvP_SkyHigh)
+    private static IBaseAction PvP_SkyHigh { get; } = new BaseAction(ActionID.PvP_SkyHigh)
     {
         ActionCheck = (BattleChara t, bool m) => CustomRotation.LimitBreakLevel >= 1
     };
@@ -103,7 +103,7 @@ public sealed class DRG_Kirbo : DRG_Base
     /// <summary>
     /// 
     /// </summary>
-    public static IBaseAction PvP_SkyShatter { get; } = new BaseAction(ActionID.PvP_SkyShatter)
+    private static IBaseAction PvP_SkyShatter { get; } = new BaseAction(ActionID.PvP_SkyShatter)
     {
 
     };
