@@ -164,9 +164,11 @@ public class PLD_KirboPvP : PLD_Base
         try
         {
             ImGui.Separator();
+            ImGui.Text("GCD Speed: " + WeaponTotal);
             ImGui.Text("GCD remain: " + WeaponRemain);
             ImGui.Separator();
             ImGui.Spacing();
+
             ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
             ImGui.Text($"Player.CurrentHp: {Player.CurrentHp}");
             ImGui.Separator();
@@ -175,8 +177,6 @@ public class PLD_KirboPvP : PLD_Base
             ImGui.Text("HasInvulnv: " + HasInvulnv);
             ImGui.Text("PvP_SwordOathStacks: " + PvP_SwordOathStacks);
             ImGui.Text("PvP_Intervene CurrentCharges: " + PvP_Intervene.CurrentCharges);
-
-            ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();
 

@@ -5,12 +5,13 @@
 		<TargetFramework>net7.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Authors>Kirbo</Authors>
-		<Version>1.0.0.9</Version>
+		<Version>1.0.0.10</Version>
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>AnyCPU</Platforms>
 		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
+        <UseWindowsForms>true</UseWindowsForms>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -30,12 +31,18 @@
 	  <Compile Remove="Melee\NIN_Default.cs" />
 	  <Compile Remove="Ranged\MCH_Default.cs" />
 	  <Compile Remove="Ranged\MCH_KirboComplete.cs" />
+	  <Compile Remove="Ranged\MCH_KirboPvPCopy.cs" />
+	  <Compile Remove="Utility\ExcelRow.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="Dalamud">
 			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
 			<Private>False</Private>
+		</Reference>
+		<Reference Include="Dalamud.Common">
+		  <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
+            <Private>False</Private>
 		</Reference>
 		<Reference Include="ImGui.NET">
 			<HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
@@ -60,6 +67,14 @@
 		<Reference Include="Newtonsoft.Json">
 			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
 			<Private>False</Private>
+		</Reference>
+		<Reference Include="PInvoke.User32">
+		  <HintPath>$(DalamudLibPath)PInvoke.User32.dll</HintPath>
+            <Private>False</Private>
+		</Reference>
+		<Reference Include="PInvoke.Windows.Core">
+		  <HintPath>$(DalamudLibPath)PInvoke.Windows.Core.dll</HintPath>
+            <Private>False</Private>
 		</Reference>
 		<Reference Include="Serilog">
 			<HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
@@ -95,10 +110,11 @@
 	  <None Include="Magical\BLU_Default.cs" />
 	  <None Include="Ranged\MCH_Default.cs" />
 	  <None Include="Ranged\MCH_KirboComplete.cs" />
+	  <None Include="Ranged\MCH_KirboPvPCopy.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="RotationSolver.Basic" Version="3.5.41" />
+	  <PackageReference Include="RotationSolver.Basic" Version="3.5.6" />
 	</ItemGroup>
 
 </Project>
