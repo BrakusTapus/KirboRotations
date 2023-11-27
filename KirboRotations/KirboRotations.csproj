@@ -32,7 +32,6 @@
 	  <Compile Remove="Ranged\MCH_Default.cs" />
 	  <Compile Remove="Ranged\MCH_KirboComplete.cs" />
 	  <Compile Remove="Ranged\MCH_KirboPvPCopy.cs" />
-	  <Compile Remove="Utility\ExcelRow.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
