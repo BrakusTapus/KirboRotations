@@ -4,14 +4,11 @@
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
 public class MCH_KirboPvE : MCH_Base
 {
-    //TO-DO:
-    // Attach Wildfire to overheated + more then 4 OR Lastability was Hypercharge
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
     public override string RotationName => "Kirbo's Machinist (PvE)";
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
-#pragma warning disable CS0618 // Type or member is obsolete
     #endregion
 
     #region New PvE IBaseActions
@@ -49,6 +46,7 @@ public class MCH_KirboPvE : MCH_Base
     #endregion
 
     #region Debug window stuff
+    // Displays our 'Debug' in the status tab
     public override bool ShowStatus => true;
     public override void DisplayStatus()
     {
@@ -113,17 +111,26 @@ public class MCH_KirboPvE : MCH_Base
     #endregion
 
     #region Opener Related Properties
+    // Displays the current opener step during the Opener
     private int Openerstep { get; set; }
+    // Indicates wether or not the opener was finished succesfully
     private bool OpenerHasFinished { get; set; }
+    // Indicates wether or not the opener has failed
     private bool OpenerHasFailed { get; set; }
+    // Indicates wether or not the actions needed for the opener are available
     private bool OpenerActionsAvailable { get; set; }
+    // Indicates wether or not the opener is currently in progress
     private bool OpenerInProgress { get; set; }
+    // I have no clue what this did
     private bool Flag { get; set; }
     #endregion
 
     #region Action Related Properties
+    // Check at every frame if 1 of our major tools will come off cooldown soon
     private bool WillhaveTool { get; set; }
+    // Sets InBurst to true if player has the wildfire Buff
     private bool InBurst { get; set; }
+    // Holds the remaining amount of Heat stacks
     private static byte HeatStacks
     {
         get
@@ -132,7 +139,6 @@ public class MCH_KirboPvE : MCH_Base
             return stacks == byte.MaxValue ? (byte)5 : stacks;
         }
     }
-
     #endregion
 
     #region Rotation Config
@@ -619,10 +625,18 @@ public class MCH_KirboPvE : MCH_Base
         // LvL 90+
         if (/*(*/!OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90*/)
         {
-            if (Wildfire.CanUse(out act, (CanUseOption)16) && nextGCD == ChainSaw && Heat >= 50)
+            if (Wildfire.CanUse(out act, (CanUseOption)16))
             {
-                return true;
+                if ((nextGCD == ChainSaw && Heat >= 50) ||
+                    (IsLastAbility(ActionID.Hypercharge) && HeatStacks > 4) ||
+                    (Heat >= 45 && !Drill.WillHaveOneCharge(5) &&
+                     !AirAnchor.WillHaveOneCharge(7.5f) &&
+                     !ChainSaw.WillHaveOneCharge(7.5f)))
+                {
+                    return true;
+                }
             }
+
             if (BarrelStabilizer.CanUse(out act, CanUseOption.MustUseEmpty))
             {
                 if (Wildfire.IsCoolingDown && IsLastGCD((ActionID)16498))
