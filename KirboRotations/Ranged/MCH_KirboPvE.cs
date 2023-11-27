@@ -52,17 +52,15 @@ public class MCH_KirboPvE : MCH_Base
     {
         try
         {
-            ImGui.Separator();
+            ImGuiEx.SeperatorWithSpacing();
             ImGui.Text("GCD remain: " + Drill);
             ImGui.Text("GCD remain: " + WeaponRemain);
             ImGui.Text("HeatStacks: " + HeatStacks);
-            ImGui.Separator();
-            ImGui.Spacing();
+            ImGuiEx.SeperatorWithSpacing();
             //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
             ImGui.Text("Target: " + CurrentTarget.Name);
             ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
-            ImGui.Separator();
-            ImGui.Spacing();
+            ImGuiEx.SeperatorWithSpacing();
 
             int rotationSelection = Configs.GetCombo("RotationSelection");
             string rotationText = "Unknown";
@@ -86,9 +84,7 @@ public class MCH_KirboPvE : MCH_Base
             ImGui.Text("OpenerHasFailed: " + OpenerHasFailed);
             ImGui.Text("OpenerHasFinished: " + OpenerHasFinished);
             ImGui.Text("Flag: " + Flag);
-            ImGui.Spacing();
-            ImGui.Separator();
-            ImGui.Spacing();
+            ImGuiEx.SeperatorWithSpacing();
 
             // Calculate the remaining vertical space in the window
             float remainingSpace = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing(); // Subtracting button height with spacing
@@ -102,6 +98,7 @@ public class MCH_KirboPvE : MCH_Base
             {
                 ResetRotationProperties();
             }
+            ImGuiEx.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
         }
         catch
         {
