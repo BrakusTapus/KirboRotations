@@ -1,5 +1,7 @@
 ﻿namespace KirboRotations.Ranged;
 
+using static KirboRotations.Utility.ImGuiEx;
+
 [RotationDesc(ActionID.Wildfire)]
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
 public class MCH_KirboPvE : MCH_Base
@@ -9,6 +11,7 @@ public class MCH_KirboPvE : MCH_Base
     public override string GameVersion => "6.51";
     public override string RotationName => "Kirbo's Machinist (PvE)";
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
+    public string RotationVersion => "1.0.0.12";
     #endregion
 
     #region New PvE IBaseActions
@@ -52,39 +55,59 @@ public class MCH_KirboPvE : MCH_Base
     {
         try
         {
-            ImGuiEx.SeperatorWithSpacing();
-            ImGui.Text("GCD remain: " + Drill);
-            ImGui.Text("GCD remain: " + WeaponRemain);
-            ImGui.Text("HeatStacks: " + HeatStacks);
-            ImGuiEx.SeperatorWithSpacing();
-            //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-            ImGui.Text("Target: " + CurrentTarget.Name);
-            ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
-            ImGuiEx.SeperatorWithSpacing();
-
-            int rotationSelection = Configs.GetCombo("RotationSelection");
-            string rotationText = "Unknown";
-            switch (rotationSelection)
+            ImGuiEx.CollapsingHeaderWithContent("General Info", () =>
             {
-                case 0:
-                    rotationText = "Early AA";
-                    break;
-                case 1:
-                    rotationText = "Delayed Tools";
-                    break;
-                case 2:
-                    rotationText = "Early All";
-                    break;
-            }
+                ImGui.Text($"Rotation: {RotationName} - v{RotationVersion}");
+                ImGuiColoredText("Rotation  Job: ", ClassJob.Abbreviation, KirboColor.LightBlue);
+                ImGuiEx.SeperatorWithSpacing();
+                ImGui.Text($"Player Name: {Player.Name}");
+                ImGui.Text($"Player Health: {Player.GetHealthRatio() * 100:F2}%%");
+                ImGui.Text($"Player Health: {Player.CurrentMp}");
+                ImGuiEx.SeperatorWithSpacing();
+                ImGui.Text("In Combat: " + InCombat);
+                // ... other general info ...
+            });
+            ImGuiEx.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
 
-            ImGui.Text($"Rotation Selection: {rotationText}");
-            ImGui.Text("Openerstep: " + Openerstep);
-            ImGui.Text("OpenerActionsAvailable: " + OpenerActionsAvailable);
-            ImGui.Text("OpenerInProgress: " + OpenerInProgress);
-            ImGui.Text("OpenerHasFailed: " + OpenerHasFailed);
-            ImGui.Text("OpenerHasFinished: " + OpenerHasFinished);
-            ImGui.Text("Flag: " + Flag);
-            ImGuiEx.SeperatorWithSpacing();
+            ImGuiEx.CollapsingHeaderWithContent("Rotation Status", () =>
+            {
+                string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
+                ImGui.Text($"Rotation Selection: {rotationText}");
+                ImGui.Text("Openerstep: " + Methods.Openerstep);
+                ImGui.Text("OpenerActionsAvailable: " + OpenerActionsAvailable);
+                ImGui.Text("OpenerInProgress: " + Methods.OpenerInProgress);
+                ImGui.Text("OpenerHasFailed: " + Methods.OpenerHasFailed);
+                ImGui.Text("OpenerHasFinished: " + Methods.OpenerHasFinished);
+                // ... other rotation status ...
+            });
+            ImGuiEx.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
+
+            try
+            {
+                ImGuiEx.CollapsingHeaderWithContent("GCD Details", () =>
+                {
+                    if (ImGui.BeginTable("gcdTable", 2))
+                    {
+                        ImGui.TableSetupColumn("Description");
+                        ImGui.TableSetupColumn("Value");
+                        ImGui.TableHeadersRow();
+
+                        ImGui.TableNextRow();
+                        ImGui.TableNextColumn();
+                        ImGui.Text("GCD Remain:");
+                        ImGui.TableNextColumn();
+                        ImGui.Text(WeaponRemain.ToString());
+
+                        // Add more rows as needed...
+
+                        ImGui.EndTable();
+                    }
+                });
+            }
+            catch
+            {
+                Serilog.Log.Warning("Error: Collapsing Header - GCD Details");
+            }
 
             // Calculate the remaining vertical space in the window
             float remainingSpace = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing(); // Subtracting button height with spacing
@@ -93,18 +116,35 @@ public class MCH_KirboPvE : MCH_Base
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace);
             }
 
-            // Add a button for resetting rotation properties
-            if (ImGui.Button("Reset Rotation"))
-            {
-                ResetRotationProperties();
-            }
-            ImGuiEx.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
+            // Reset Button at the bottom
+            DisplayResetButton();
         }
         catch
         {
             Serilog.Log.Warning("Something wrong with DisplayStatus");
         }
     }
+
+    private void DisplayResetButton()
+    {
+        if (ImGui.Button("Reset Rotation"))
+        {
+            Methods.ResetOpenerProperties();
+        }
+        ImGuiEx.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
+    }
+
+    private string GetRotationText(int rotationSelection)
+    {
+        return rotationSelection switch
+        {
+            0 => "Early AA",
+            1 => "Delayed Tools",
+            2 => "Early All",
+            _ => "Unknown",
+        };
+    }
+
     #endregion
 
     #region Opener Related Properties
@@ -165,7 +205,7 @@ public class MCH_KirboPvE : MCH_Base
                     // Use AirAnchor when the remaining countdown time is less or equal to AirAnchor's AnimationLock AND player has the Reassemble Status, also sets OpenerInProgress to 'True'
                     if (remainTime <= AirAnchor.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && AirAnchor.CanUse(out _))
                     {
-                        OpenerInProgress = true;
+                        Methods.OpenerInProgress = true;
                         return AirAnchor;
                     }
                     // Use Tincture if Tincture use is enabled and the countdown time is less or equal to AirAnchor+Tincture animationlock (1.8s)
@@ -185,7 +225,7 @@ public class MCH_KirboPvE : MCH_Base
                     // Use SplitShot when the remaining countdown time is less or equal to SplitShot's AnimationLock, also sets OpenerInProgress to 'True'
                     if (remainTime <= SplitShot.AnimationLockTime && SplitShot.CanUse(out _))
                     {
-                        OpenerInProgress = true;
+                        Methods.OpenerInProgress = true;
                         return SplitShot;
                     }
                     // Use Tincture if Tincture use is enabled and the countdown time is less or equal to SplitShot+Tincture animationlock (1.8s)
@@ -266,201 +306,212 @@ public class MCH_KirboPvE : MCH_Base
     #endregion
 
     #region Opener Logic
+    // To-Do: 
+    // Change logic to be less confusing
+
+    /// <summary>
+    /// <br>The first step should allign with the last action that was used during the countdown</br>
+    /// <br>Case0 returns true and then OpenerStep increases the step number</br>
+    /// <br>Case1 first checks the last action which is going to return false, which then triggers 'nextaction' to be true</br>
+    /// <br>'nextaction' will then use the action that 'lastaction' is checking for</br>
+    /// </summary>
+    /// <param name="act"></param>
+    /// <returns></returns>
     private bool Opener(out IAction act)
     {
         act = default(IAction);
-        while (OpenerInProgress /* && (!OpenerHasFinished || !OpenerHasFailed)*/)
+        while (Methods.OpenerInProgress /* && (!OpenerHasFinished || !OpenerHasFailed)*/)
         {
-            if (TimeSinceLastAction.TotalSeconds > 3.0 && !Flag)
+            if (TimeSinceLastAction.TotalSeconds > 3.0 && !Methods.Flag)
             {
-                OpenerHasFailed = true;
-                OpenerInProgress = false;
-                Openerstep = 0;
-                Flag = true;
+                Methods.OpenerHasFailed = true;
+                Methods.OpenerInProgress = false;
+                Methods.Openerstep = 0;
+                Methods.Flag = true;
             }
-            if (Player.IsDead && !Flag)
+            if (Player.IsDead && !Methods.Flag)
             {
-                OpenerHasFailed = true;
-                OpenerInProgress = false;
-                Openerstep = 0;
-                Flag = true;
+                Methods.OpenerHasFailed = true;
+                Methods.OpenerInProgress = false;
+                Methods.Openerstep = 0;
+                Methods.Flag = true;
             }
             switch (Configs.GetCombo("RotationSelection"))
             {
                 case 0: // Early AA
-                    switch (Openerstep)
+                    switch (Methods.Openerstep)
                     {
                         case 0:
-                            return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 1:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 2:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 3:
-                            return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
-                            return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
                         case 5:
-                            return OpenerStep(IsLastGCD(true, SplitShot), SplitShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, SplitShot), SplitShot.CanUse(out act, CanUseOption.MustUse));
                         case 6:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 7:
-                            return OpenerStep(IsLastGCD(true, SlugShot), SlugShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, SlugShot), SlugShot.CanUse(out act, CanUseOption.MustUse));
                         case 8:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 9:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 10:
-                            return OpenerStep(IsLastGCD(true, CleanShot), CleanShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, CleanShot), CleanShot.CanUse(out act, CanUseOption.MustUse));
                         case 11:
-                            return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 12:
-                            return OpenerStep(IsLastAbility(false, Wildfire), Wildfire.CanUse(out act, (CanUseOption)17));
+                            return Methods.OpenerStep(IsLastAbility(false, Wildfire), Wildfire.CanUse(out act, (CanUseOption)17));
                         case 13:
-                            return OpenerStep(IsLastGCD(false, ChainSaw), ChainSaw.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, ChainSaw), ChainSaw.CanUse(out act, CanUseOption.MustUse));
                         case 14:
-                            return OpenerStep(IsLastAbility(true, RookAutoturret), RookAutoturret.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastAbility(true, RookAutoturret), RookAutoturret.CanUse(out act, CanUseOption.MustUse));
                         case 15:
-                            return OpenerStep(IsLastAbility(false, Hypercharge), Hypercharge.CanUse(out act, (CanUseOption)51));
+                            return Methods.OpenerStep(IsLastAbility(false, Hypercharge), Hypercharge.CanUse(out act, (CanUseOption)51));
                         case 16:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 4, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 4, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 17:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 18:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 3, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 3, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 19:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 20:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 2, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 2, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 21:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 22:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 1, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 1, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 23:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 24:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 0, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 0, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 25:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 26:
-                            return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 27:
-                            OpenerHasFinished = true;
-                            OpenerInProgress = false;
+                            Methods.OpenerHasFinished = true;
+                            Methods.OpenerInProgress = false;
                             // Finished Early AA
                             break;
                     }
                     break;
                 case 1: // Delayed Tools
-                    switch (Openerstep)
+                    switch (Methods.Openerstep)
                     {
                         case 0:
-                            return OpenerStep(IsLastGCD(true, SplitShot), SplitShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, SplitShot), SplitShot.CanUse(out act, CanUseOption.MustUse));
                         case 1:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 2:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 3:
                             //if (Drill.IsCoolingDown)
                             //{
                             //OpenerHasFailed = true;
                             //}
-                            return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
-                            return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUse));
                         case 5:
-                            return OpenerStep(IsLastGCD(true, SlugShot), SlugShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, SlugShot), SlugShot.CanUse(out act, CanUseOption.MustUse));
                         case 6:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 7:
-                            return OpenerStep(IsLastGCD(true, CleanShot), CleanShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, CleanShot), CleanShot.CanUse(out act, CanUseOption.MustUse));
                         case 8:
-                            return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 9:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 10:
-                            return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 11:
-                            return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 12:
-                            return OpenerStep(IsLastAbility(false, Wildfire), Wildfire.CanUse(out act, (CanUseOption)17));
+                            return Methods.OpenerStep(IsLastAbility(false, Wildfire), Wildfire.CanUse(out act, (CanUseOption)17));
                         case 13:
-                            return OpenerStep(IsLastGCD(false, ChainSaw), ChainSaw.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, ChainSaw), ChainSaw.CanUse(out act, CanUseOption.MustUse));
                         case 14:
-                            return OpenerStep(IsLastAbility(true, RookAutoturret), RookAutoturret.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastAbility(true, RookAutoturret), RookAutoturret.CanUse(out act, CanUseOption.MustUse));
                         case 15:
-                            return OpenerStep(IsLastAbility(false, Hypercharge), Hypercharge.CanUse(out act, (CanUseOption)51));
+                            return Methods.OpenerStep(IsLastAbility(false, Hypercharge), Hypercharge.CanUse(out act, (CanUseOption)51));
                         case 16:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 4, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 4, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 17:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 18:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 3, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 3, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 19:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 20:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 2, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 2, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 21:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 22:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 1, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 1, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 23:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 24:
-                            return OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 0, HeatBlast.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, HeatBlast) && HeatStacks == 0, HeatBlast.CanUse(out act, CanUseOption.MustUse));
                         case 25:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 26:
-                            return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 27:
-                            OpenerHasFinished = true;
-                            OpenerInProgress = false;
+                            Methods.OpenerHasFinished = true;
+                            Methods.OpenerInProgress = false;
                             // Finished Delayed Tools
                             break;
                     }
                     break;
                 case 2: // Early All
-                    switch (Openerstep)
+                    switch (Methods.Openerstep)
                     {
                         case 0:
-                            return OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, AirAnchor), AirAnchor.CanUse(out act, CanUseOption.MustUse));
                         case 1:
-                            return OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, BarrelStabilizer), BarrelStabilizer.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 2:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
                         case 3:
-                            return OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 4:
-                            return OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Reassemble), Reassemble.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 5:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
                         case 6:
-                            return OpenerStep(IsLastGCD(false, ChainSaw), ChainSaw.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(false, ChainSaw), ChainSaw.CanUse(out act, CanUseOption.MustUse));
                         case 7:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 8:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
                         case 9:
-                            return OpenerStep(IsLastGCD(true, SplitShot), SplitShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, SplitShot), SplitShot.CanUse(out act, CanUseOption.MustUse));
                         case 10:
-                            return OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, GaussRound), GaussRound.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 11:
-                            return OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
+                            return Methods.OpenerStep(IsLastAbility(false, Ricochet), Ricochet.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
                         case 12:
-                            return OpenerStep(IsLastGCD(true, SlugShot), SlugShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, SlugShot), SlugShot.CanUse(out act, CanUseOption.MustUse));
                         case 13:
-                            return OpenerStep(IsLastAbility(false, Tactician), Tactician.CanUse(out act, CanUseOption.MustUseEmpty));
+                            return Methods.OpenerStep(IsLastAbility(false, Tactician), Tactician.CanUse(out act, CanUseOption.MustUseEmpty));
                         case 14:
-                            return OpenerStep(IsLastAbility(false, Wildfire), Wildfire.CanUse(out act, CanUseOption.OnLastAbility));
+                            return Methods.OpenerStep(IsLastAbility(false, Wildfire), Wildfire.CanUse(out act, CanUseOption.OnLastAbility));
                         case 15:
-                            return OpenerStep(IsLastGCD(true, CleanShot), CleanShot.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastGCD(true, CleanShot), CleanShot.CanUse(out act, CanUseOption.MustUse));
                         case 16:
-                            return OpenerStep(IsLastAbility(true, RookAutoturret), RookAutoturret.CanUse(out act, CanUseOption.MustUse));
+                            return Methods.OpenerStep(IsLastAbility(true, RookAutoturret), RookAutoturret.CanUse(out act, CanUseOption.MustUse));
                         case 17:
-                            return OpenerStep(IsLastAbility(false, Hypercharge), Hypercharge.CanUse(out act, CanUseOption.OnLastAbility));
+                            return Methods.OpenerStep(IsLastAbility(false, Hypercharge), Hypercharge.CanUse(out act, CanUseOption.OnLastAbility));
                         case 18:
-                            OpenerHasFinished = true;
-                            OpenerInProgress = false;
+                            Methods.OpenerHasFinished = true;
+                            Methods.OpenerInProgress = false;
                             // Finished Early All
                             break;
                     }
@@ -471,15 +522,15 @@ public class MCH_KirboPvE : MCH_Base
         act = null;
         return false;
     }
-    private bool OpenerStep(bool condition, bool result)
+    /*private bool OpenerStep(bool condition, bool result)
     {
         if (condition)
         {
-            Openerstep++;
+            Methods.Openerstep++;
             return false;
         }
         return result;
-    }
+    }*/
     #endregion
 
     #region GCD Logic
@@ -488,11 +539,11 @@ public class MCH_KirboPvE : MCH_Base
         act = null;
 
         #region PVE
-        if (OpenerInProgress)
+        if (Methods.OpenerInProgress)
         {
             return Opener(out act);
         }
-        if (!OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished*/)
+        if (!Methods.OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished*/)
         {
             if (AutoCrossbow.CanUse(out act, (CanUseOption)1, 2) && ObjectHelper.DistanceToPlayer(HostileTarget) <= 12f)
             {
@@ -575,7 +626,7 @@ public class MCH_KirboPvE : MCH_Base
         {
             return true;
         }
-        if (OpenerInProgress /*&& !OpenerHasFailed && !OpenerHasFinished*/)
+        if (Methods.OpenerInProgress /*&& !OpenerHasFailed && !OpenerHasFinished*/)
         {
             return Opener(out act);
         }
@@ -632,7 +683,7 @@ public class MCH_KirboPvE : MCH_Base
         }
 
         // LvL 90+
-        if (/*(*/!OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90*/)
+        if (/*(*/!Methods.OpenerInProgress /*|| OpenerHasFailed || OpenerHasFinished) && Player.Level >= 90*/)
         {
             if (Wildfire.CanUse(out act, (CanUseOption)16))
             {
@@ -1058,11 +1109,22 @@ public class MCH_KirboPvE : MCH_Base
 
     #region Extra Helper Methods
     // Updates Status of other extra helper methods on every frame
+    // Reminder:
+    // 'UpdateInfo' seemingly also works for methods maybe also properties in other classes
+
+    // Note: 'StateOfOpener' seems to visually interact with the 'displaystatus' window not sure if important
     protected override void UpdateInfo()
     {
         HandleOpenerAvailability();
         ToolKitCheck();
-        StateOfOpener();
+        try
+        {
+            Methods.StateOfOpener();
+        }
+        catch
+        {
+            Serilog.Log.Error("Error with: Methods.StateOfOpener");
+        }
     }
 
     // Checks if any major tool skill will almost come off CD (only at lvl 90), and sets "InBurst" to true if Player has Wildfire active
@@ -1084,39 +1146,24 @@ public class MCH_KirboPvE : MCH_Base
     {
         if (Player.IsDead)
         {
-            OpenerHasFailed = false;
-            OpenerHasFinished = false;
-            Openerstep = 0;
+            Methods.OpenerHasFailed = false;
+            Methods.OpenerHasFinished = false;
+            Methods.Openerstep = 0;
         }
         if (!InCombat)
         {
-            OpenerHasFailed = false;
-            OpenerHasFinished = false;
-            Openerstep = 0;
+            Methods.OpenerHasFailed = false;
+            Methods.OpenerHasFinished = false;
+            Methods.Openerstep = 0;
         }
-        if (OpenerHasFailed)
+        if (Methods.OpenerHasFailed)
         {
-            OpenerInProgress = false;
+            Methods.OpenerInProgress = false;
         }
-        if (OpenerHasFinished)
+        if (Methods.OpenerHasFinished)
         {
-            OpenerInProgress = false;
+            Methods.OpenerInProgress = false;
         }
-    }
-
-    // Used by Reset button to in Displaystatus
-    private void ResetRotationProperties()
-    {
-        Openerstep = 0;
-        OpenerHasFinished = false;
-        OpenerHasFailed = false;
-        OpenerActionsAvailable = false;
-        OpenerInProgress = false;
-        Serilog.Log.Debug($"Openerstep = {Openerstep}");
-        Serilog.Log.Debug($"OpenerHasFinished = {OpenerHasFinished}");
-        Serilog.Log.Debug($"OpenerHasFailed = {OpenerHasFailed}");
-        Serilog.Log.Debug($"OpenerActionsAvailable = {OpenerActionsAvailable}");
-        Serilog.Log.Debug($"OpenerInProgress = {OpenerInProgress}");
     }
 
     // Used to check OpenerAvailability
@@ -1133,7 +1180,7 @@ public class MCH_KirboPvE : MCH_Base
         bool ReassembleOneCharge = Reassemble.CurrentCharges >= 1;
         bool NoHeat = Heat == 0;
         bool NoBattery = Battery == 0;
-        bool Openerstep0 = Openerstep == 0;
+        bool Openerstep0 = Methods.Openerstep == 0;
         OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
 
         // Future Opener conditions for ULTS

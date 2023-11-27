@@ -44,6 +44,9 @@
 		  <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
             <Private>False</Private>
 		</Reference>
+		<Reference Include="ECommons">
+		  <HintPath>..\..\RotationSolver-fork\ECommons\ECommons\bin\Release\ECommons.dll</HintPath>
+		</Reference>
 		<Reference Include="ImGui.NET">
 			<HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
 			<Private>False</Private>
