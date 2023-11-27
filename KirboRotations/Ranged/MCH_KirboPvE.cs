@@ -152,8 +152,10 @@ public class MCH_KirboPvE : MCH_Base
     #region Countdown Logic
     protected override IAction CountDownAction(float remainTime)
     {
-        TerritoryContentType Content = TerritoryContentType; // Not implemented yet
-        bool UltimateRaids = (int)Content == 28;             // Not implemented yet
+        TerritoryContentType Content = TerritoryContentType;    // Not implemented yet
+        bool UltimateRaids = (int)Content == 28;                // Not implemented yet
+        bool UwUorUCoB = UltimateRaids && Player.Level == 70;   // Not implemented yet
+        bool TEA = UltimateRaids && Player.Level == 80;         // Not implemented yet
 
         // If 'OpenerActionsAvailable' is true (see method 'HandleOpenerAvailability' for conditions) proceed to using Action logic during countdown
         if (OpenerActionsAvailable)
@@ -236,20 +238,31 @@ public class MCH_KirboPvE : MCH_Base
 
         if (UltimateRaids)
         {
-            if (Player.Level != 70)
+            if (UwUorUCoB)
             {
+                if (remainTime <= Drill.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && Drill.CanUse(out _))
+                {
+                    return Drill;
+                }
+                if (remainTime < 5f && Reassemble.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.Reassemble))
+                {
+                    return Reassemble;
+                }
                 return base.CountDownAction(remainTime);
             }
-            if (remainTime <= Drill.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && Drill.CanUse(out _))
+            if (TEA)
             {
-                return Drill;
-            }
-            if (remainTime < 5f && Reassemble.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.Reassemble))
-            {
-                return Reassemble;
+                if (remainTime <= AirAnchor.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && AirAnchor.CanUse(out _))
+                {
+                    return AirAnchor;
+                }
+                if (remainTime < 5f && Reassemble.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.Reassemble))
+                {
+                    return Reassemble;
+                }
+                return base.CountDownAction(remainTime);
             }
             return base.CountDownAction(remainTime);
-
         }
         return base.CountDownAction(remainTime);
     }
@@ -552,7 +565,6 @@ public class MCH_KirboPvE : MCH_Base
     {
         act = null;
 
-        #region PVE
         //TerritoryContentType Content = TerritoryContentType;
         //bool Dungeon = (int)Content == 2;
         //bool Roulette = (int)Content == 1;
@@ -750,17 +762,16 @@ public class MCH_KirboPvE : MCH_Base
                 return true;
             }
         }
-        #endregion
         return base.EmergencyAbility(nextGCD, out act);
 
     }
     #endregion
 
-    #region PvE Helper Methods
+    #region Helper Methods
     // Tincture Conditions
     private bool ShouldUseBurstMedicine(out IAction act)
     {
-        act = null; // Default to null if Burst Medicine cannot be used.
+        act = null; // Default to null if Tincture cannot be used.
 
         // Don't use Tincture if player has the 'Weakness' status 
         if (Player.HasStatus(true, StatusID.Weakness))
@@ -1072,7 +1083,7 @@ public class MCH_KirboPvE : MCH_Base
     }
 
     // Controls various Opener properties depending on various conditions
-    public void StateOfOpener()
+    private void StateOfOpener()
     {
         if (Player.IsDead)
         {
@@ -1112,7 +1123,7 @@ public class MCH_KirboPvE : MCH_Base
     }
 
     // Used to check OpenerAvailability
-    public void HandleOpenerAvailability()
+    private void HandleOpenerAvailability()
     {
         bool Lvl90 = Player.Level >= 90;
         bool HasChainSaw = !ChainSaw.IsCoolingDown;
