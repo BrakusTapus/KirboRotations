@@ -100,7 +100,11 @@ public class MCH_KirboPvPCopy : MCH_Base
             ImGui.Separator();
             ImGui.Spacing();
             //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-            ImGui.Text("Target: " + CurrentTarget.Name);
+            if (Target != Player)
+            {
+                ImGui.Text("Target: " + Target.Name);
+            }
+
             ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
             ImGui.Separator();
             ImGui.Spacing();
@@ -169,12 +173,12 @@ public class MCH_KirboPvPCopy : MCH_Base
         act = null;
 
         // Status checks
-        bool targetIsNotNull = CurrentTarget != null;
+        bool targetIsNotPlayer = Target != Player;
         bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard);
-        bool targetHasGuard = CurrentTarget.HasStatus(false, StatusID.PvP_Guard) && targetIsNotNull;
-        bool hasChiten = CurrentTarget.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotNull;
-        bool hasHallowedGround = CurrentTarget.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotNull;
-        bool hasUndeadRedemption = CurrentTarget.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotNull;
+        bool targetHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && targetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotPlayer;
 
         // Config checks
         int marksmanRifleThreshold = Configs.GetInt("MarksmanRifleThreshold");
@@ -245,7 +249,7 @@ public class MCH_KirboPvPCopy : MCH_Base
             //    return true;
             //}
 
-            if (PvP_Drill.CanUse(out act, CanUseOption.MustUseEmpty) && CurrentTarget.GetHealthRatio() <= 0.99)
+            if (PvP_Drill.CanUse(out act, CanUseOption.MustUseEmpty) && Target != Player && Target.GetHealthRatio() <= 0.99)
             {
                 if (PvP_Analysis.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.PvP_Analysis))
                 {
@@ -297,12 +301,12 @@ public class MCH_KirboPvPCopy : MCH_Base
 
         #region PvP
         // Status checks
-        //bool TargetIsNotPlayer = Target != Player;
-        bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard);
-        bool targetHasGuard = CurrentTarget.HasStatus(false, StatusID.PvP_Guard);
-        bool hasChiten = CurrentTarget.HasStatus(false, StatusID.PvP_Chiten);
-        bool hasHallowedGround = CurrentTarget.HasStatus(false, StatusID.PvP_HallowedGround);
-        bool hasUndeadRedemption = CurrentTarget.HasStatus(false, StatusID.PvP_UndeadRedemption);
+        bool TargetIsNotPlayer = Target != Player;
+        bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool targetHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && TargetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && TargetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && TargetIsNotPlayer;
 
         // Config checks
         bool analysisOnDrill = Configs.GetBool("AnalysisOnDrill");
@@ -357,7 +361,7 @@ public class MCH_KirboPvPCopy : MCH_Base
                 return false;
             }
 
-            if (preventActionWaste && CurrentTarget != null && (targetHasGuard || hasHallowedGround || hasUndeadRedemption))
+            if (preventActionWaste && Target != Player && Target != null && (targetHasGuard || hasHallowedGround || hasUndeadRedemption))
             {
                 return false;
             }
@@ -367,7 +371,7 @@ public class MCH_KirboPvPCopy : MCH_Base
                 return true;
             }
 
-            if (PvP_BishopAutoTurret.CanUse(out act, CanUseOption.MustUse) && CurrentTarget != null)
+            if (PvP_BishopAutoTurret.CanUse(out act, CanUseOption.MustUse) && Target != Player)
             {
                 return true;
             }
@@ -382,7 +386,7 @@ public class MCH_KirboPvPCopy : MCH_Base
                 {
                     return true;
                 }
-                else if (analysisOnChainsaw && nextGCD == PvP_ChainSaw && CurrentTarget.GetHealthRatio() <= 0.5)
+                else if (analysisOnChainsaw && nextGCD == PvP_ChainSaw && Target != Player && Target.GetHealthRatio() <= 0.5)
                 {
                     return true;
                 }
@@ -424,7 +428,7 @@ public class MCH_KirboPvPCopy : MCH_Base
     {
         act = null;
 
-        bool hasEnemiesInRange = HasHostilesInRange && CurrentTarget.CanSee();
+        bool hasEnemiesInRange = HasHostilesInRange && Target != Player && Target.CanSee();
         bool drillPrimeAndHasAnalysis = Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges > 0;
 
         if (Player.HasStatus(true, StatusID.PvP_Analysis))

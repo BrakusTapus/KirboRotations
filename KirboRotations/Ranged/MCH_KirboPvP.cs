@@ -1,8 +1,8 @@
-﻿using ExCSS;
-using Lumina.Excel.GeneratedSheets;
-using RotationSolver.Basic.Helpers;
+﻿//using ExCSS;
+//using Lumina.Excel.GeneratedSheets;
 using static ImGuiNET.ImGui;
 using static KirboRotations.Utility.KirboImGuiHelpers;
+using static KirboRotations.Utility.Methods;
 
 namespace KirboRotations.Ranged;
 
@@ -15,6 +15,7 @@ public class MCH_KirboPvP : MCH_Base
     public override string GameVersion => "6.51";
     public override string RotationName => "Kirbo's Machinist (PvP)";
     public override string Description => "Kirbo's Machinist for PvP";
+    public static string ApiVersionRS => "3.5.7";
     #endregion
 
     #region IBaseActions
@@ -135,14 +136,14 @@ public class MCH_KirboPvP : MCH_Base
         ActionCheck = (BattleChara b, bool m) => LimitBreakLevel >= 1
     };
 
-    // Will pick a Target with around 60% hp or less left
+    // Will pick a Target with around 85% hp or less left
     private static new IBaseAction PvP_Wildfire { get; } = new BaseAction(ActionID.PvP_Wildfire, ActionOption.Attack)
     {
         ChoiceTarget = (Targets, mustUse) =>
         {
-            // target the closest enemy with HP below a certain threshold (e.g., 60%)
+            // target the closest enemy with HP below a certain threshold (e.g., 85%)
             var fallbackTarget = Targets
-            .Where(b => b.YalmDistanceX < 20 && b.GetHealthRatio() < 0.60)
+            .Where(b => b.YalmDistanceX < 20 && b.GetHealthRatio() < 0.85)
             .OrderBy(b => b.YalmDistanceX)
             .FirstOrDefault();
 
@@ -194,6 +195,10 @@ public class MCH_KirboPvP : MCH_Base
     {
         try
         {
+            Text("RS API Version: " + ApiVersionRS);
+            Separator();
+            Spacing();
+
             Text("GCD Speed: " + WeaponTotal);
             Text("GCD remain: " + WeaponRemain);
             Separator();
@@ -207,7 +212,7 @@ public class MCH_KirboPvP : MCH_Base
                 Separator();
                 Spacing();
             }
-            if (Methods.InPvP())
+            if (InPvP())
             {
                 Text("IsPvPOverheated: " + IsPvPOverheated);
                 Text("PvP_HeatStacks: " + PvP_HeatStacks);
@@ -275,12 +280,12 @@ public class MCH_KirboPvP : MCH_Base
         act = null;
 
         // Status checks
-        bool targetIsNotNull = CurrentTarget != null;
+        bool targetIsNotPlayer = Target != Player;
         bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard);
-        bool targetHasGuard = CurrentTarget.HasStatus(false, StatusID.PvP_Guard) && targetIsNotNull;
-        bool hasChiten = CurrentTarget.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotNull;
-        bool hasHallowedGround = CurrentTarget.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotNull;
-        bool hasUndeadRedemption = CurrentTarget.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotNull;
+        bool targetHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && targetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotPlayer;
 
         // Config checks
         int guardthreshold = Configs.GetInt("Guard");
@@ -332,7 +337,7 @@ public class MCH_KirboPvP : MCH_Base
 
         // When Drill can be used we first check if we can buff it with analysis
         // Note: Drill should always be buffed tbh
-        if (PvP_Drill.CanUse(out act, CanUseOption.MustUseEmpty) && CurrentTarget.GetHealthRatio() < 0.75)
+        if (PvP_Drill.CanUse(out act, CanUseOption.MustUseEmpty) && Target != Player && Target.GetHealthRatio() < 0.75)
         {
             if (PvP_Analysis.CurrentCharges > 0 && !Player.HasStatus(true, StatusID.PvP_Analysis))
             {
@@ -403,12 +408,12 @@ public class MCH_KirboPvP : MCH_Base
         //}
 
         // Status checks
-        bool targetIsNotNull = CurrentTarget != null;
+        bool targetIsNotPlayer = Target != Player;
         bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard);
-        bool targetHasGuard = CurrentTarget.HasStatus(false, StatusID.PvP_Guard) && targetIsNotNull;
-        bool hasChiten = CurrentTarget.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotNull;
-        bool hasHallowedGround = CurrentTarget.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotNull;
-        bool hasUndeadRedemption = CurrentTarget.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotNull;
+        bool targetHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && targetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotPlayer;
 
         // Config checks
         bool analysisOnDrill = Configs.GetBool("AnalysisOnDrill");
@@ -479,8 +484,7 @@ public class MCH_KirboPvP : MCH_Base
         }
 
         // Wildfire Should be used only right after getting the 5th Heat Stacks
-        // Distance is set to 20y to ensure Wildfire isn't used on a far away player
-        if (IsPvPOverheated && !Player.WillStatusEnd(3.5f, true, StatusID.PvP_Overheated) && HostileTarget.DistanceToPlayer() < 20 && PvP_Wildfire.CanUse(out act, CanUseOption.MustUse))
+        if (IsPvPOverheated && !Player.WillStatusEnd(3.5f, true, StatusID.PvP_Overheated) && PvP_Wildfire.CanUse(out act, CanUseOption.MustUse))
         {
             return true;
         }
@@ -503,7 +507,7 @@ public class MCH_KirboPvP : MCH_Base
             {
                 return true;
             }
-            else if (analysisOnChainsaw && nextGCD == PvP_ChainSaw && CurrentTarget.GetHealthRatio() <= 0.55)
+            else if (analysisOnChainsaw && nextGCD == PvP_ChainSaw && Target != Player && Target.GetHealthRatio() <= 0.55)
             {
                 return true;
             }
@@ -526,7 +530,7 @@ public class MCH_KirboPvP : MCH_Base
     {
         act = null;
 
-        bool hasEnemiesInRange = HasHostilesInRange && CurrentTarget.CanSee();
+        bool hasEnemiesInRange = HasHostilesInRange && Target.CanSee();
         bool drillPrimeAndHasAnalysis = Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges > 0;
 
         if (Player.HasStatus(true, StatusID.PvP_Analysis))

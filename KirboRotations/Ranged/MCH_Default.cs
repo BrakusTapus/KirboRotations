@@ -82,7 +82,7 @@ public sealed class MCH_Default : MCH_Base
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
-      //if (Dismantle.CanUse(out act, CanUseOption.MustUse)/*&& CurrentTarget.IsCasting*/)
+      //if (Dismantle.CanUse(out act, CanUseOption.MustUse)/*&& Target.IsCasting*/)
       //{
       //    return true;
       //}

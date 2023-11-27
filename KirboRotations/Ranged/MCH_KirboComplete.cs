@@ -118,7 +118,7 @@ public class MCH_KirboComplete : MCH_Base
             ImGui.Separator();
             ImGui.Spacing();
             //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-            ImGui.Text("Target: " + CurrentTarget.Name);
+            ImGui.Text("Target: " + Target.Name);
             ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
             ImGui.Separator();
             ImGui.Spacing();
@@ -723,7 +723,7 @@ public class MCH_KirboComplete : MCH_Base
 
         #region PvP
         // Status checks
-        bool TargetIsNotPlayer = CurrentTarget != Player;
+        bool TargetIsNotPlayer = Target != Player;
         bool hasGuard = HostileTarget.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
         bool tarHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && TargetIsNotPlayer;
         bool hasChiten = HostileTarget.HasStatus(false, StatusID.PvP_Chiten) && TargetIsNotPlayer;
@@ -1305,7 +1305,7 @@ public class MCH_KirboComplete : MCH_Base
     {
         act = null;
 
-        bool hasEnemiesInRange = HasHostilesInRange && CurrentTarget.CanSee();
+        bool hasEnemiesInRange = HasHostilesInRange && Target.CanSee();
         bool drillPrimeAndHasAnalysis = Player.HasStatus(true, StatusID.PvP_DrillPrimed) && PvP_Analysis.CurrentCharges > 0;
 
         if (Player.HasStatus(true, StatusID.PvP_Analysis))

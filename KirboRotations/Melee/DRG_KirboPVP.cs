@@ -16,7 +16,7 @@ public sealed class DRG_KirboPVP : DRG_Base
     public override CombatType Type => CombatType.PvP;
     #endregion
 
-    #region PvPDeclaration
+    #region PvP
     /// <summary>
     /// 
     /// </summary>

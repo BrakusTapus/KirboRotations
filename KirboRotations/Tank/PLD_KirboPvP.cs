@@ -1,10 +1,11 @@
-﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+﻿using static ImGuiNET.ImGui;
+using static KirboRotations.Utility.KirboImGuiHelpers;
+using static KirboRotations.Utility.Methods;
 
 namespace KirboRotations.Ranged;
 
 [BetaRotation]
-//[RotationDesc(ActionID.Wildfire)]
-//[LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
+[RotationDesc(ActionID.PvP_Phalanx)]
 public class PLD_KirboPvP : PLD_Base
 {
     #region Rotation Info
@@ -87,7 +88,7 @@ public class PLD_KirboPvP : PLD_Base
     /// </summary>
     private static IBaseAction PvP_Guardian { get; } = new BaseAction(ActionID.PvP_Guardian, ActionOption.Friendly)
     {
-        ActionCheck = (BattleChara b, bool m) => CurrentTarget.DistanceToPlayer() <= 10,
+        ActionCheck = (BattleChara b, bool m) => PvP_Guardian.Target.DistanceToPlayer() <= 10,
     };
 
     /// <summary>
@@ -153,7 +154,7 @@ public class PLD_KirboPvP : PLD_Base
         // HallowedGround ID = 1302
         // Blade Of Faith Ready ID = 3205
         StatusProvide = new StatusID[2] { (StatusID)1302, (StatusID)3250 },
-        ActionCheck = (BattleChara t, bool m) => CustomRotation.LimitBreakLevel >= 1
+        ActionCheck = (BattleChara t, bool m) => CustomRotation.LimitBreakLevel >= 1 && InCombat
     };
     #endregion
 
@@ -163,32 +164,36 @@ public class PLD_KirboPvP : PLD_Base
     {
         try
         {
-            ImGui.Separator();
-            ImGui.Text("GCD Speed: " + WeaponTotal);
-            ImGui.Text("GCD remain: " + WeaponRemain);
-            ImGui.Separator();
-            ImGui.Spacing();
+            Text("GCD Speed: " + WeaponTotal);
+            Text("GCD remain: " + WeaponRemain);
+            Separator();
+            Spacing();
 
-            ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-            ImGui.Text($"Player.CurrentHp: {Player.CurrentHp}");
-            ImGui.Separator();
-            ImGui.Spacing();
-
-            ImGui.Text("HasInvulnv: " + HasInvulnv);
-            ImGui.Text("PvP_SwordOathStacks: " + PvP_SwordOathStacks);
-            ImGui.Text("PvP_Intervene CurrentCharges: " + PvP_Intervene.CurrentCharges);
-            ImGui.Separator();
-            ImGui.Spacing();
-
+            if (Player != null)
+            {
+                ImGuiColoredText("Job: ", ClassJob.Abbreviation, new Vector4(0.68f, 0.85f, 1.0f, 1.0f)); // Light blue for the abbreviation
+                Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
+                Text($"Player.CurrentHp: {Player.CurrentHp}");
+                Separator();
+                Spacing();
+            }
+            if (InPvP())
+            {
+                Text("HasInvulnv: " + HasInvulnv);
+                Text("PvP_SwordOathStacks: " + PvP_SwordOathStacks);
+                Text("PvP_Intervene CurrentCharges: " + PvP_Intervene.CurrentCharges);
+                Separator();
+                Spacing();
+            }
             // Calculate the remaining vertical space in the window
-            float remainingSpace = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing(); // Subtracting button height with spacing
+            float remainingSpace = GetContentRegionAvail().Y - GetFrameHeightWithSpacing(); // Subtracting button height with spacing
             if (remainingSpace > 0)
             {
-                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace);
+                SetCursorPosY(GetCursorPosY() + remainingSpace);
             }
 
             // Add a button for resetting rotation properties
-            if (ImGui.Button("Reset Rotation"))
+            if (Button("Reset Rotation"))
             {
                 //ResetRotationProperties();
             }
@@ -230,12 +235,12 @@ public class PLD_KirboPvP : PLD_Base
         act = null;
 
         // Status checks
-        bool targetIsNotNull = CurrentTarget != null;
+        bool targetIsNotPlayer = Target != Player;
         bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard);
-        bool targetHasGuard = CurrentTarget.HasStatus(false, StatusID.PvP_Guard) && targetIsNotNull;
-        bool hasChiten = CurrentTarget.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotNull;
-        bool hasHallowedGround = CurrentTarget.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotNull;
-        bool hasUndeadRedemption = CurrentTarget.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotNull;
+        bool targetHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && targetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotPlayer;
 
         // Config checks
         bool guardCancel = Configs.GetBool("GuardCancel");
@@ -251,12 +256,12 @@ public class PLD_KirboPvP : PLD_Base
                 return false;
             }
 
-            if (safetyCheck && targetIsNotNull && hasChiten)
+            if (safetyCheck && targetIsNotPlayer && hasChiten)
             {
                 return false;
             }
 
-            if (preventActionWaste && targetIsNotNull && (targetHasGuard || hasHallowedGround || hasUndeadRedemption))
+            if (preventActionWaste && targetIsNotPlayer && (targetHasGuard || hasHallowedGround || hasUndeadRedemption))
             {
                 return false;
             }
@@ -317,12 +322,12 @@ public class PLD_KirboPvP : PLD_Base
         act = null;
 
         // Status checks
-        bool targetIsNotNull = CurrentTarget != null;
+        bool targetIsNotPlayer = Target != Player;
         bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard);
-        bool targetHasGuard = CurrentTarget.HasStatus(false, StatusID.PvP_Guard) && targetIsNotNull;
-        bool hasChiten = CurrentTarget.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotNull;
-        bool hasHallowedGround = CurrentTarget.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotNull;
-        bool hasUndeadRedemption = CurrentTarget.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotNull;
+        bool targetHasGuard = Target.HasStatus(false, StatusID.PvP_Guard) && targetIsNotPlayer;
+        bool hasChiten = Target.HasStatus(false, StatusID.PvP_Chiten) && targetIsNotPlayer;
+        bool hasHallowedGround = Target.HasStatus(false, StatusID.PvP_HallowedGround) && targetIsNotPlayer;
+        bool hasUndeadRedemption = Target.HasStatus(false, StatusID.PvP_UndeadRedemption) && targetIsNotPlayer;
 
         // Config checks
         int RecuperateThreshold = Configs.GetInt("Recuperate");
@@ -347,12 +352,12 @@ public class PLD_KirboPvP : PLD_Base
             return true;
         }
 
-        if (safetyCheck && targetIsNotNull && hasChiten)
+        if (safetyCheck && targetIsNotPlayer && hasChiten)
         {
             return false;
         }
 
-        if (preventActionWaste && targetIsNotNull && (targetHasGuard || hasHallowedGround || hasUndeadRedemption))
+        if (preventActionWaste && targetIsNotPlayer && (targetHasGuard || hasHallowedGround || hasUndeadRedemption))
         {
             return false;
         }
@@ -362,13 +367,13 @@ public class PLD_KirboPvP : PLD_Base
             return true;
         }
 
-        if (PvP_Shieldbash.CanUse(out act, CanUseOption.MustUse) && CurrentTarget.DistanceToPlayer() <= 5)
+        if (PvP_Shieldbash.CanUse(out act, CanUseOption.MustUse) && targetIsNotPlayer && Target.DistanceToPlayer() <= 5)
         {
             return true;
         }
 
         // Maybe After Use follow Intervene up with a Shield Bash
-        if (PvP_Intervene.CanUse(out act, CanUseOption.MustUseEmpty) && CurrentTarget.DistanceToPlayer() <= 20)
+        if (PvP_Intervene.CanUse(out act, CanUseOption.MustUseEmpty) && targetIsNotPlayer && Target.DistanceToPlayer() <= 20)
         {
             if (!useIntervene)
             {
@@ -385,7 +390,7 @@ public class PLD_KirboPvP : PLD_Base
         }
 
         // Auto use idea for Guardian. Use on partymember with low hp + guard OR + low hp AND check if Partymember is not using Standard Elixer
-        //if (PvP_Guardian.CanUse(out act, CanUseOption.MustUse) && CurrentTarget.DistanceToPlayer() <= 20)
+        //if (PvP_Guardian.CanUse(out act, CanUseOption.MustUse) && Target != Player && Target.DistanceToPlayer() <= 20)
         //{
         //    return true;
         //}
@@ -394,17 +399,17 @@ public class PLD_KirboPvP : PLD_Base
     }
     #endregion
 
-    /*#region Extra Helper Methods
+    #region Extra Helper Methods
     // Updates Status of other extra helper methods on every frame
-    protected override void UpdateInfo()
+    /*protected override void UpdateInfo()
     {
         HandleOpenerAvailability();
         ToolKitCheck();
         StateOfOpener();
-    }
-    
+    }*/
+
     // Checks if any major tool skill will almost come off CD (only at lvl 90), and sets "InBurst" to true if Player has Wildfire active
-    private void ToolKitCheck()
+    /*private void ToolKitCheck()
     {
         bool WillHaveDrill = Drill.WillHaveOneCharge(5f);
         bool WillHaveAirAnchor = AirAnchor.WillHaveOneCharge(5f);
@@ -415,10 +420,10 @@ public class PLD_KirboPvP : PLD_Base
         }
 
         InBurst = Player.HasStatus(true, StatusID.Wildfire);
-    }
+    }*/
 
     // Controls various Opener properties depending on various conditions
-    public void StateOfOpener()
+    /*public void StateOfOpener()
     {
         if (Player.IsDead)
         {
@@ -440,10 +445,10 @@ public class PLD_KirboPvP : PLD_Base
         {
             OpenerInProgress = false;
         }
-    }
+    }*/
 
     // Used by Reset button to in Displaystatus
-    private void ResetRotationProperties()
+    /*private void ResetRotationProperties()
     {
         Openerstep = 0;
         OpenerHasFinished = false;
@@ -455,10 +460,10 @@ public class PLD_KirboPvP : PLD_Base
         Serilog.Log.Debug($"OpenerHasFailed = {OpenerHasFailed}");
         Serilog.Log.Debug($"OpenerActionsAvailable = {OpenerActionsAvailable}");
         Serilog.Log.Debug($"OpenerInProgress = {OpenerInProgress}");
-    }
+    }*/
 
     // Used to check OpenerAvailability
-    public void HandleOpenerAvailability()
+    /*public void HandleOpenerAvailability()
     {
         bool Lvl90 = Player.Level >= 90;
         bool HasChainSaw = !ChainSaw.IsCoolingDown;
@@ -475,7 +480,7 @@ public class PLD_KirboPvP : PLD_Base
         OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
 
         // Future Opener conditions for ULTS
-    }
-    #endregion*/
+    }*/
+    #endregion
 
 }
