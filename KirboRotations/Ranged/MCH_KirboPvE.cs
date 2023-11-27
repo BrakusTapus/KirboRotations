@@ -689,7 +689,7 @@ public class MCH_KirboPvE : MCH_Base
             }
             if (Hypercharge.CanUse(out act) && !WillhaveTool)
             {
-                if (InBurst && IsLastGCD((ActionID)25788))
+                if (InBurst && IsLastGCD(ActionID.ChainSaw, ActionID.AirAnchor, ActionID.Drill, ActionID.SplitShot, ActionID.SlugShot, ActionID.CleanShot, ActionID.HeatedSplitShot, ActionID.HeatedSlugShot))
                 {
                     return true;
                 }
