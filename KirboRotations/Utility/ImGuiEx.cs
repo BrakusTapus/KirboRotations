@@ -1,6 +1,6 @@
 ﻿namespace KirboRotations.Utility;
 
-public static class KirboImGuiHelpers
+public static class ImGuiEx
 {
     /// <summary>
     /// Displays two parts of text using ImGui, with the second part in a specified color.

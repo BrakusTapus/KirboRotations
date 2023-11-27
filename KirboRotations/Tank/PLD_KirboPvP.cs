@@ -1,5 +1,5 @@
 ﻿using static ImGuiNET.ImGui;
-using static KirboRotations.Utility.KirboImGuiHelpers;
+using static KirboRotations.Utility.ImGuiEx;
 using static KirboRotations.Utility.Methods;
 
 namespace KirboRotations.Ranged;
