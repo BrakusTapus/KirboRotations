@@ -1,4 +1,6 @@
-﻿namespace KirboRotations.Ranged;
+﻿using static KirboRotations.Utility.ImGuiEx;
+
+namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.Wildfire)]
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
@@ -9,6 +11,7 @@ public class MCH_KirboPvE : MCH_Base
     public override string GameVersion => "6.51";
     public override string RotationName => "Kirbo's Machinist (PvE)";
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
+    public string RotationVersion => "1.0.0.12";
     #endregion
 
     #region New PvE IBaseActions
