@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+    <!-- General Project Settings -->
 	<PropertyGroup>
 		<AssemblyName>KirboRotations</AssemblyName>
 		<TargetFramework>net7.0-windows</TargetFramework>
@@ -9,32 +10,52 @@
 		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>AnyCPU</Platforms>
 		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <RSversion>3.5.6</RSversion>
+        <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\$(RSversion)</RSInstallPath>
+        <ECommonsHintPath>$(RSInstallPath)\ECommons.dll</ECommonsHintPath>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<LangVersion>latest</LangVersion>
         <UseWindowsForms>true</UseWindowsForms>
+        <Nullable>enable</Nullable>
 	</PropertyGroup>
 
+    <!-- Debug Configuration Settings -->
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
 		<WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
 	</PropertyGroup>
 
+    <!-- Release Configuration Settings -->
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
 		<WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <Compile Remove="Magical\BLU_Default.cs" />
-	  <Compile Remove="Magical\BLU_Extra.cs" />
-	  <Compile Remove="Melee\DRG_KirboPVP.cs" />
-	  <Compile Remove="Melee\NIN_Default.cs" />
-	  <Compile Remove="Ranged\MCH_Default.cs" />
-	  <Compile Remove="Ranged\MCH_KirboComplete.cs" />
-	  <Compile Remove="Ranged\MCH_KirboPvPCopy.cs" />
-	</ItemGroup>
+    <!-- Files Management -->
+    <!-- Exclude from Compilation -->
+    <ItemGroup>
+        <Compile Remove="Magical\BLU_Default.cs" />
+        <Compile Remove="Magical\BLU_Extra.cs" />
+        <Compile Remove="Melee\DRG_KirboPVP.cs" />
+        <Compile Remove="Melee\NIN_Default.cs" />
+        <Compile Remove="Ranged\MCH_Default.cs" />
+        <Compile Remove="Ranged\MCH_KirboComplete.cs" />
+        <Compile Remove="Ranged\MCH_KirboPvPCopy.cs" />
+    </ItemGroup>
 
-	<ItemGroup>
+    <!-- Include for easy access/reference -->
+    <ItemGroup>        
+        <None Include="Magical\BLU_Extra.cs" />
+        <None Include="Magical\BLU_Default.cs" />
+        <None Include="Melee\DRG_KirboPVP.cs" />
+        <None Include="Melee\NIN_Default.cs" />
+        <None Include="Ranged\MCH_Default.cs" />
+        <None Include="Ranged\MCH_KirboComplete.cs" />
+        <None Include="Ranged\MCH_KirboPvPCopy.cs" />
+    </ItemGroup>
+
+    <!-- Reference Libraries -->
+    <ItemGroup>
 		<Reference Include="Dalamud">
 			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
 			<Private>False</Private>
@@ -43,6 +64,10 @@
 		  <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
             <Private>False</Private>
 		</Reference>
+        <Reference Include="ECommons">
+            <HintPath>$(ECommonsHintPath)</HintPath>
+            <Private>False</Private>
+        </Reference>
 		<Reference Include="ImGui.NET">
 			<HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
 			<Private>False</Private>
@@ -99,19 +124,7 @@
 		<Using Include="System.Reflection" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Include="Magical\BLU_Extra.cs" />
-	  <None Include="Melee\DRG_KirboPVP.cs" />
-	  <None Include="Melee\NIN_Default.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="Magical\BLU_Default.cs" />
-	  <None Include="Ranged\MCH_Default.cs" />
-	  <None Include="Ranged\MCH_KirboComplete.cs" />
-	  <None Include="Ranged\MCH_KirboPvPCopy.cs" />
-	</ItemGroup>
-
+    <!-- Package References -->
 	<ItemGroup>
 	  <PackageReference Include="RotationSolver.Basic" Version="3.5.6" />
 	</ItemGroup>
