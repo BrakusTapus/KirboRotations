@@ -53,13 +53,12 @@ public class MCH_KirboPvE : MCH_Base
         try
         {
             ImGui.Separator();
-            ImGui.Text("GCD remain: " + Drill);
-            ImGui.Text("GCD remain: " + WeaponRemain);
-            ImGui.Text("HeatStacks: " + HeatStacks);
+            ImGui.Text($"WeaponRemain: {WeaponRemain}");
+            ImGui.Text($"HeatStacks: {HeatStacks}");
             ImGui.Separator();
             ImGui.Spacing();
             //ImGui.Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-            ImGui.Text("Target: " + CurrentTarget.Name);
+            ImGui.Text($"Player: " + Player.Name);
             ImGui.Text($"Player.HealthRatio: {Player.CurrentHp}");
             ImGui.Separator();
             ImGui.Spacing();
@@ -80,12 +79,12 @@ public class MCH_KirboPvE : MCH_Base
             }
 
             ImGui.Text($"Rotation Selection: {rotationText}");
-            ImGui.Text("Openerstep: " + Openerstep);
-            ImGui.Text("OpenerActionsAvailable: " + OpenerActionsAvailable);
-            ImGui.Text("OpenerInProgress: " + OpenerInProgress);
-            ImGui.Text("OpenerHasFailed: " + OpenerHasFailed);
-            ImGui.Text("OpenerHasFinished: " + OpenerHasFinished);
-            ImGui.Text("Flag: " + Flag);
+            ImGui.Text($"Openerstep: {Openerstep}");
+            ImGui.Text($"OpenerActionsAvailable: {OpenerActionsAvailable}");
+            ImGui.Text($"OpenerInProgress: {OpenerInProgress}");
+            ImGui.Text($"OpenerHasFailed: {OpenerHasFailed}");
+            ImGui.Text($"OpenerHasFinished: {OpenerHasFinished}");
+            ImGui.Text( $"Flag: {Flag}");
             ImGui.Spacing();
             ImGui.Separator();
             ImGui.Spacing();
