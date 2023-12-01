@@ -1,13 +1,14 @@
 ﻿//using ExCSS;
 //using Lumina.Excel.GeneratedSheets;
 using static ImGuiNET.ImGui;
+using static KirboRotations.Utility.ImGuiEx;
 using static KirboRotations.Utility.Methods;
 
 namespace KirboRotations.Ranged;
 
 [BetaRotation]
 [RotationDesc(ActionID.Wildfire)]
-public class MCH_KirboPvP : MCH_Base
+public class MCH_KirboPvP_Copy : MCH_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;
@@ -205,7 +206,7 @@ public class MCH_KirboPvP : MCH_Base
 
             if (Player != null)
             {
-                Utility.ImGuiEx.ImGuiEx.ImGuiColoredText("Job: ", ClassJob.Abbreviation, Utility.ImGuiEx.EColor.LightBlue); // Light blue for the abbreviation
+                ImGuiColoredText("Job: ", ClassJob.Abbreviation, KirboColor.LightBlue); // Light blue for the abbreviation
                 Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
                 Text($"Player.CurrentHp: {Player.CurrentHp}");
                 Separator();
