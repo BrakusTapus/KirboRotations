@@ -29,6 +29,17 @@
 		<NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
 		<WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
 	</PropertyGroup>
+	<ItemGroup>
+	  <Compile Remove="Utility\Data\Object\**" />
+	  <Compile Remove="Utility\Data\Status\**" />
+	  <Compile Remove="Utility\Rotations\Basic\**" />
+	  <EmbeddedResource Remove="Utility\Data\Object\**" />
+	  <EmbeddedResource Remove="Utility\Data\Status\**" />
+	  <EmbeddedResource Remove="Utility\Rotations\Basic\**" />
+	  <None Remove="Utility\Data\Object\**" />
+	  <None Remove="Utility\Data\Status\**" />
+	  <None Remove="Utility\Rotations\Basic\**" />
+	</ItemGroup>
 
     <!-- Files Management -->
     <!-- Exclude from Compilation -->
@@ -134,13 +145,6 @@
     <!-- Package References -->
 	<ItemGroup>
 	  <PackageReference Include="RotationSolver.Basic" Version="3.5.6" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Utility\Data\Object\" />
-	  <Folder Include="Utility\Data\Status\" />
-	  <Folder Include="Utility\Rotations\Basic\" />
-	  <Folder Include="Utility\KirboConfiguration\KirboConditions\" />
-	  <Folder Include="Utility\KirboConfiguration\KirboRotationConfig\" />
 	</ItemGroup>
 	<ItemGroup>
 	  <EditorConfigFiles Remove="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />

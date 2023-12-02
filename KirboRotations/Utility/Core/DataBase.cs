@@ -34,13 +34,11 @@ internal static class DataBase
 
     #endregion
 
-
     #region Combat
 
     public static bool InCombat { get; set; }
 
     #endregion
-
 
     #region Time
 
@@ -109,7 +107,6 @@ internal static class DataBase
 
     #endregion
 
-
     #region System
 
     public static float Ping => Math.Min(RTT, FetchTime);
@@ -117,8 +114,6 @@ internal static class DataBase
     public static float FetchTime { get; private set; } = 0.1f;
 
     #endregion
-
-
 
     #region Target
     private static uint _hostileTargetId = GameObject.InvalidGameObjectId;
@@ -137,8 +132,5 @@ internal static class DataBase
     public static ObjectListDelay<BattleChara> HostileTargets { get; } = new ObjectListDelay<BattleChara>(() => (0,0));
 
     #endregion
-
-
-
 
 }

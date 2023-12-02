@@ -3,7 +3,6 @@ using Dalamud.Plugin.Services;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.Attributes;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using KirboRotations.Utility.KirboConfiguration;
 using Lumina.Excel;
 
 namespace KirboRotations.Utility.Core;
@@ -40,7 +39,6 @@ internal class KirboService : IDisposable
     }
 
     public static float CountDownTime => Countdown.TimeRemaining;
-    public static KirboConfigs Config { get; set; } = new KirboConfigs();
 
     public KirboService()
     {

@@ -7,7 +7,4 @@ namespace KirboRotations.Utility.Logging;
 public class KirboInternalLog
 {
     public static readonly CircularBuffer<KirboInternalLogMessage> Messages = new(1000);
-
-
-
 }

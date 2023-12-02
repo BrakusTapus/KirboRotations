@@ -239,8 +239,6 @@ public class UserRotations : IKirboTexture
 
     #endregion
 
-
-
     #region Target
     /// <summary>
     /// The last attacked hostile target.
