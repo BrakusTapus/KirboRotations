@@ -71,9 +71,10 @@ public class MCH_KirboPvE : MCH_Base
         {
             try
             {
-
                 if (actionMethods != null)
                 {
+                    ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
+                    ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
                     ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
                 }
 
