@@ -1,119 +1,155 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<AssemblyName>KirboRotations</AssemblyName>
-		<TargetFramework>net7.0-windows</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Authors>Kirbo</Authors>
-		<Version>1.0.0.12</Version>
-		<PlatformTarget>x64</PlatformTarget>
-		<Platforms>AnyCPU</Platforms>
-		<DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-		<LangVersion>latest</LangVersion>
+    <!-- General Project Settings -->
+    <PropertyGroup>
+        <AssemblyName>KirboRotations</AssemblyName>
+        <TargetFramework>net7.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Authors>Kirbo</Authors>
+        <Version>1.0.0.13</Version>
+        <PlatformTarget>x64</PlatformTarget>
+        <Platforms>AnyCPU</Platforms>
+        <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
+        <RSversion>3.5.6.6</RSversion>
+        <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\$(RSversion)</RSInstallPath>
+        <ECommonsHintPath>$(RSInstallPath)\ECommons.dll</ECommonsHintPath>
+        <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
         <UseWindowsForms>true</UseWindowsForms>
-	</PropertyGroup>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
-		<WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
-	</PropertyGroup>
+    <!-- Debug Configuration Settings -->
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
+        <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
+    </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
-		<WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
-	</PropertyGroup>
+    <!-- Release Configuration Settings -->
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
+        <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
+    </PropertyGroup>
+    <ItemGroup>
+        <Compile Remove="Utility\Data\Object\**" />
+        <Compile Remove="Utility\Data\Status\**" />
+        <Compile Remove="Utility\Rotations\Basic\**" />
+        <EmbeddedResource Remove="Utility\Data\Object\**" />
+        <EmbeddedResource Remove="Utility\Data\Status\**" />
+        <EmbeddedResource Remove="Utility\Rotations\Basic\**" />
+        <None Remove="Utility\Data\Object\**" />
+        <None Remove="Utility\Data\Status\**" />
+        <None Remove="Utility\Rotations\Basic\**" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <Compile Remove="Magical\BLU_Default.cs" />
-	  <Compile Remove="Magical\BLU_Extra.cs" />
-	  <Compile Remove="Melee\DRG_KirboPVP.cs" />
-	  <Compile Remove="Melee\NIN_Default.cs" />
-	  <Compile Remove="Ranged\MCH_Default.cs" />
-	  <Compile Remove="Ranged\MCH_KirboComplete.cs" />
-	  <Compile Remove="Ranged\MCH_KirboPvPCopy.cs" />
-	</ItemGroup>
+    <!-- Files Management -->
+    <!-- Exclude from Compilation -->
+    <ItemGroup>
+        <Compile Remove="Magical\BLU_Default.cs" />
+        <Compile Remove="Magical\BLU_Extra.cs" />
+        <Compile Remove="Melee\DRG_KirboPVP.cs" />
+        <Compile Remove="Melee\NIN_Default.cs" />
+        <Compile Remove="Ranged\MCH_Default.cs" />
+        <Compile Remove="Ranged\MCH_KirboComplete.cs" />
+        <Compile Remove="Ranged\MCH_KirboPvE_Copy.cs" />
+        <Compile Remove="Ranged\MCH_KirboPvP_Copy.cs" />
+        <Compile Remove="Ranged\MCH_Template.cs" />
+        <Compile Remove="Utility\Data\Actions\ActionUpdater.cs" />
+        <Compile Remove="Utility\ImGuiEx\ImGuiEx2.cs" />
+        <Compile Remove="Utility\Rotations\Templates\MCH_KirboPvE_EXP.cs" />
+        <Compile Remove="Utility\Rotations\Templates\MCH_Template.cs" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<Reference Include="Dalamud">
-			<HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Dalamud.Common">
-		  <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
+    <!-- Include for easy access/reference -->
+    <ItemGroup>
+        <None Include="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+        <None Include="Magical\BLU_Extra.cs" />
+        <None Include="Magical\BLU_Default.cs" />
+        <None Include="Melee\DRG_KirboPVP.cs" />
+        <None Include="Melee\NIN_Default.cs" />
+        <None Include="Ranged\MCH_Default.cs" />
+        <None Include="Ranged\MCH_KirboPvE_Copy.cs" />
+        <None Include="Ranged\MCH_KirboPvP_Copy.cs" />
+        <None Include="Utility\Data\Actions\ActionUpdater.cs" />
+        <None Include="Utility\Rotations\Templates\MCH_KirboPvE_EXP.cs" />
+        <None Include="Utility\Rotations\Templates\MCH_Template.cs" />
+    </ItemGroup>
+
+    <!-- Reference Libraries -->
+    <ItemGroup>
+        <Reference Include="Dalamud">
+            <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
             <Private>False</Private>
-		</Reference>
-		<Reference Include="ImGui.NET">
-			<HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="ImGuiScene">
-			<HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Lumina">
-			<HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
-			<Private>False</Private>
-		</Reference> 
-		<Reference Include="Lumina.Excel">
-			<HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="FFXIVClientStructs">
-			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="Newtonsoft.Json">
-			<HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-		<Reference Include="PInvoke.User32">
-		  <HintPath>$(DalamudLibPath)PInvoke.User32.dll</HintPath>
+        </Reference>
+        <Reference Include="Dalamud.Common">
+            <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
             <Private>False</Private>
-		</Reference>
-		<Reference Include="PInvoke.Windows.Core">
-		  <HintPath>$(DalamudLibPath)PInvoke.Windows.Core.dll</HintPath>
+        </Reference>
+        <Reference Include="ECommons">
+            <HintPath>..\..\RotationSolver\RotationSolver\bin\Release\net7.0-windows\ECommons.dll</HintPath>
             <Private>False</Private>
-		</Reference>
-		<Reference Include="Serilog">
-			<HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
+        </Reference>
+        <Reference Include="ImGui.NET">
+            <HintPath>$(DalamudLibPath)ImGui.NET.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="ImGuiScene">
+            <HintPath>$(DalamudLibPath)ImGuiScene.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Lumina">
+            <HintPath>$(DalamudLibPath)Lumina.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Lumina.Excel">
+            <HintPath>$(DalamudLibPath)Lumina.Excel.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="FFXIVClientStructs">
+            <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(DalamudLibPath)Newtonsoft.Json.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="PInvoke.User32">
+            <HintPath>$(DalamudLibPath)PInvoke.User32.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="PInvoke.Windows.Core">
+            <HintPath>$(DalamudLibPath)PInvoke.Windows.Core.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Serilog">
+            <HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
 
-		<Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
-		<Using Include="Dalamud.Game.ClientState.Objects.Types" />
-		<Using Include="Dalamud.Interface" />
-		<Using Include="ImGuiNET" />
-		<Using Include="KirboRotations.Utility" />
-		<Using Include="Newtonsoft.Json" />
-		<Using Include="RotationSolver.Basic" />
-		<Using Include="RotationSolver.Basic.Actions" />
-		<Using Include="RotationSolver.Basic.Attributes" />
-		<Using Include="RotationSolver.Basic.Configuration.RotationConfig" />
-		<Using Include="RotationSolver.Basic.Data" />
-		<Using Include="RotationSolver.Basic.Helpers" />
-		<Using Include="RotationSolver.Basic.Rotations" />
-		<Using Include="RotationSolver.Basic.Rotations.Basic" />
-		<Using Include="System.ComponentModel" />
-		<Using Include="System.Numerics" />
-		<Using Include="System.Reflection" />
-	</ItemGroup>
+        <Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
+        <Using Include="Dalamud.Game.ClientState.Objects.Types" />
+        <Using Include="Dalamud.Interface" />
+        <Using Include="ImGuiNET" />
+        <Using Include="KirboRotations.Utility" />
+        <Using Include="Newtonsoft.Json" />
+        <Using Include="RotationSolver.Basic" />
+        <Using Include="RotationSolver.Basic.Actions" />
+        <Using Include="RotationSolver.Basic.Attributes" />
+        <Using Include="RotationSolver.Basic.Configuration.RotationConfig" />
+        <Using Include="RotationSolver.Basic.Data" />
+        <Using Include="RotationSolver.Basic.Helpers" />
+        <Using Include="RotationSolver.Basic.Rotations" />
+        <Using Include="RotationSolver.Basic.Rotations.Basic" />
+        <Using Include="System.ComponentModel" />
+        <Using Include="System.Numerics" />
+        <Using Include="System.Reflection" />
+    </ItemGroup>
 
-	<ItemGroup>
-	  <None Include="Magical\BLU_Extra.cs" />
-	  <None Include="Melee\DRG_KirboPVP.cs" />
-	  <None Include="Melee\NIN_Default.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Include="Magical\BLU_Default.cs" />
-	  <None Include="Ranged\MCH_Default.cs" />
-	  <None Include="Ranged\MCH_KirboComplete.cs" />
-	  <None Include="Ranged\MCH_KirboPvPCopy.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <PackageReference Include="RotationSolver.Basic" Version="3.5.6" />
-	</ItemGroup>
+    <!-- Package References -->
+    <ItemGroup>
+        <EditorConfigFiles Remove="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="RotationSolver.Basic" Version="3.5.6" />
+    </ItemGroup>
 
 </Project>

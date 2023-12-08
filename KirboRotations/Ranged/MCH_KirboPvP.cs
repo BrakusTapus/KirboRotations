@@ -1,7 +1,6 @@
 ﻿//using ExCSS;
 //using Lumina.Excel.GeneratedSheets;
 using static ImGuiNET.ImGui;
-using static KirboRotations.Utility.KirboImGuiHelpers;
 using static KirboRotations.Utility.Methods;
 
 namespace KirboRotations.Ranged;
@@ -206,7 +205,7 @@ public class MCH_KirboPvP : MCH_Base
 
             if (Player != null)
             {
-                ImGuiColoredText("Job: ", ClassJob.Abbreviation, new Vector4(0.68f, 0.85f, 1.0f, 1.0f)); // Light blue for the abbreviation
+                Utility.ImGuiEx.ImGuiEx.ImGuiColoredText("Job: ", ClassJob.Abbreviation, Utility.ImGuiEx.EColor.LightBlue); // Light blue for the abbreviation
                 Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
                 Text($"Player.CurrentHp: {Player.CurrentHp}");
                 Separator();
