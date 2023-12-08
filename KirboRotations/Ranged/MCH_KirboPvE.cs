@@ -21,8 +21,6 @@ public class MCH_KirboPvE : MCH_Base
     public string RotationVersion => "1.0.0.12";
     #endregion
 
-    ActionMethods actionMethods = new ActionMethods();
-
     #region New PvE IBaseActions
     private static new IBaseAction Dismantle { get; } = new BaseAction(ActionID.Dismantle, ActionOption.None | ActionOption.Defense);
     private static new IBaseAction Drill { get; } = new BaseAction(ActionID.Drill)
@@ -71,12 +69,12 @@ public class MCH_KirboPvE : MCH_Base
         {
             try
             {
-                if (actionMethods != null)
+                /*if (actionMethods != null)
                 {
                     ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
                     ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
                     ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
-                }
+                }*/
 
                 ImGuiEx.TripleSpacing();
                 ImGuiEx.CollapsingHeaderWithContent("General Info", () =>
@@ -229,10 +227,10 @@ public class MCH_KirboPvE : MCH_Base
     #region Countdown Logic
     protected override IAction CountDownAction(float remainTime)
     {
-        TerritoryContentType Content = TerritoryContentType;    // Not implemented yet
-        bool UltimateRaids = (int)Content == 28;                // Not implemented yet
-        bool UwUorUCoB = UltimateRaids && Player.Level == 70;   // Not implemented yet
-        bool TEA = UltimateRaids && Player.Level == 80;         // Not implemented yet
+        TerritoryContentType Content = TerritoryContentType;
+        bool UltimateRaids = (int)Content == 28;
+        bool UwUorUCoB = UltimateRaids && Player.Level == 70;
+        bool TEA = UltimateRaids && Player.Level == 80; 
 
         // If 'OpenerActionsAvailable' is true (see method 'HandleOpenerAvailability' for conditions) proceed to using Action logic during countdown
         if (Methods.OpenerActionsAvailable)
@@ -240,22 +238,22 @@ public class MCH_KirboPvE : MCH_Base
             // Selects action logic depending on which rotation has been selected (Default: Delayed Tool)
             switch (Configs.GetCombo("RotationSelection"))
             {
-
                 case 0: // Early AA
-                    // Use AirAnchor when the remaining countdown time is less or equal to AirAnchor's AnimationLock AND player has the Reassemble Status, also sets OpenerInProgress to 'True'
-                    if (remainTime <= AirAnchor.AnimationLockTime && Player.HasStatus(true, StatusID.Reassemble) && AirAnchor.CanUse(out _))
+                    // Use Drill when the remaining countdown time is less or equal to Drill's AnimationLock, also sets OpenerInProgress to 'True'
+                    if (remainTime <= Drill.AnimationLockTime && Drill.CanUse(out _))
                     {
                         Methods.OpenerInProgress = true;
-                        return AirAnchor;
+                        return Drill;
                     }
-                    // Use Tincture if Tincture use is enabled and the countdown time is less or equal to AirAnchor+Tincture animationlock (1.8s)
+                    // Use Tincture if Tincture use is enabled and the countdown time is less or equal to SplitShot+Tincture animationlock (1.8s)
                     IAction act0;
-                    if (remainTime <= TinctureOfDexterity8.AnimationLockTime + AirAnchor.AnimationLockTime && UseBurstMedicine(out act0, false))
+                    if (remainTime <= Drill.AnimationLockTime + TinctureOfDexterity8.AnimationLockTime && UseBurstMedicine(out act0, false))
                     {
                         return act0;
                     }
-                    // Use Reassemble if countdown timer is 5s or less and Player has more then 1 Reassemble Charges AND does not already have the Reassemble Status
-                    if (remainTime <= 5f && Reassemble.CurrentCharges > 1 && !Player.HasStatus(true, StatusID.Reassemble) && Reassemble.CanUse(out _))
+                    // Use Reassemble 
+                    IAction act2;
+                    if (remainTime <= 5f && !Player.HasStatus(true, StatusID.Reassemble) && Reassemble.CanUse(out act2, CanUseOption.MustUseEmpty))
                     {
                         return Reassemble;
                     }
