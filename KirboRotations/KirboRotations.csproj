@@ -29,17 +29,6 @@
         <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
         <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
     </PropertyGroup>
-    <ItemGroup>
-        <Compile Remove="Utility\Data\Object\**" />
-        <Compile Remove="Utility\Data\Status\**" />
-        <Compile Remove="Utility\Rotations\Basic\**" />
-        <EmbeddedResource Remove="Utility\Data\Object\**" />
-        <EmbeddedResource Remove="Utility\Data\Status\**" />
-        <EmbeddedResource Remove="Utility\Rotations\Basic\**" />
-        <None Remove="Utility\Data\Object\**" />
-        <None Remove="Utility\Data\Status\**" />
-        <None Remove="Utility\Rotations\Basic\**" />
-    </ItemGroup>
 
     <!-- Files Management -->
     <!-- Exclude from Compilation -->
@@ -55,8 +44,6 @@
         <Compile Remove="Ranged\MCH_Template.cs" />
         <Compile Remove="Utility\Data\Actions\ActionUpdater.cs" />
         <Compile Remove="Utility\ImGuiEx\ImGuiEx2.cs" />
-        <Compile Remove="Utility\Rotations\Templates\MCH_KirboPvE_EXP.cs" />
-        <Compile Remove="Utility\Rotations\Templates\MCH_Template.cs" />
     </ItemGroup>
 
     <!-- Include for easy access/reference -->
@@ -70,8 +57,6 @@
         <None Include="Ranged\MCH_KirboPvE_Copy.cs" />
         <None Include="Ranged\MCH_KirboPvP_Copy.cs" />
         <None Include="Utility\Data\Actions\ActionUpdater.cs" />
-        <None Include="Utility\Rotations\Templates\MCH_KirboPvE_EXP.cs" />
-        <None Include="Utility\Rotations\Templates\MCH_Template.cs" />
     </ItemGroup>
 
     <!-- Reference Libraries -->
@@ -85,7 +70,7 @@
             <Private>False</Private>
         </Reference>
         <Reference Include="ECommons">
-            <HintPath>..\..\RotationSolver\RotationSolver\bin\Release\net7.0-windows\ECommons.dll</HintPath>
+            <HintPath>$(ECommonsHintPath)</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="ImGui.NET">
@@ -149,7 +134,7 @@
         <EditorConfigFiles Remove="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="RotationSolver.Basic" Version="3.5.6" />
+        <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
     </ItemGroup>
 
 </Project>

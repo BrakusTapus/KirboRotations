@@ -6,6 +6,8 @@ using KirboRotations.Utility.GameAssists;
 using KirboRotations.Utility.Rotations;
 using KirboRotations.Utility.ImGuiEx;
 using KirboRotations.Utility.Data.Actions;
+using static KirboRotations.Utility.StatusID_Buffs;
+using static KirboRotations.Utility.StatusID_DeBuffs;
 
 namespace KirboRotations.Ranged;
 
@@ -18,7 +20,7 @@ public class MCH_KirboPvE : MCH_Base
     public override string GameVersion => "6.51";
     public override string RotationName => "Kirbo's Machinist (PvE)";
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
-    public string RotationVersion => "1.0.0.12";
+    public string RotationVersion => "1.0.0.13";
     #endregion
 
     #region New PvE IBaseActions
@@ -42,7 +44,7 @@ public class MCH_KirboPvE : MCH_Base
     private static new IBaseAction Reassemble { get; } = new BaseAction(ActionID.Reassemble)
     {
         StatusProvide = new StatusID[1] { StatusID.Reassemble },
-        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.Reassemble) && CustomRotation.HasHostilesInRange
+        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.Reassemble),
     };
     private static new IBaseAction Hypercharge { get; } = new BaseAction(ActionID.Hypercharge, ActionOption.UseResources)
     {
@@ -62,6 +64,9 @@ public class MCH_KirboPvE : MCH_Base
     //ImGui.Text($"PlayerData Character: {PlayerData.Character->Name}");
 
     public override bool ShowStatus => true;
+
+    private string ErrorDebug => "Error Caught";
+    private string OpenerComplete => "Completed Opener";
 
     public override void DisplayStatus()
     {
@@ -91,7 +96,7 @@ public class MCH_KirboPvE : MCH_Base
                 });
                 ImGuiEx.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
             }
-            catch { Serilog.Log.Error($"Error Caught at: {RotationName} between line   65 - 80"); }
+            catch { Serilog.Log.Error($"{ErrorDebug} - General Info"); }
 
             ImGuiEx.TripleSpacing();
 
@@ -110,7 +115,7 @@ public class MCH_KirboPvE : MCH_Base
                 });
                 ImGuiEx.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
             }
-            catch { Serilog.Log.Error($"Error Caught at: {RotationName} between line   89 - 100"); }
+            catch { Serilog.Log.Error($"{ErrorDebug} - Rotation Status"); }
 
             ImGuiEx.TripleSpacing();
 
@@ -129,7 +134,7 @@ public class MCH_KirboPvE : MCH_Base
                 });
                 ImGuiEx.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
             }
-            catch { Serilog.Log.Error($"Error Caught at: {RotationName} between line   89 - 100"); }
+            catch { Serilog.Log.Error($"{ErrorDebug} - Burst Status"); }
 
             ImGuiEx.TripleSpacing();
 
@@ -157,20 +162,26 @@ public class MCH_KirboPvE : MCH_Base
                 });
                 ImGuiEx.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
             }
-            catch { Serilog.Log.Error($"Error Caught at: {RotationName} between line   109 - 128"); }
+            catch { Serilog.Log.Error($"{ErrorDebug} - Action Details"); }
 
-            float remainingSpace = ImGuiEx.CalculateRemainingVerticalSpace();
-            ImGui.Text($"Remaining Vertical Space: {remainingSpace} pixels");
+            ImGuiEx.TripleSpacing();
 
-            // Calculate the remaining vertical space in the window
-            // Subtracting button height with spacing
-            float remainingSpace2 = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing();
-            if (remainingSpace2 > 0)
-            { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
-            ImGuiEx.DisplayResetButton("Reset Properties");
+            try
+            {
+                float remainingSpace = ImGuiEx.CalculateRemainingVerticalSpace();
+                ImGui.Text($"Remaining Vertical Space: {remainingSpace} pixels");
+
+                // Calculate the remaining vertical space in the window
+                // Subtracting button height with spacing
+                float remainingSpace2 = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing();
+                if (remainingSpace2 > 0)
+                { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
+                ImGuiEx.DisplayResetButton("Reset Properties");
+            }
+            catch { Serilog.Log.Error($"{ErrorDebug} - Extra + Reset Button"); }
 
         }
-        catch { Serilog.Log.Warning("Something wrong with DisplayStatus"); }
+        catch { Serilog.Log.Warning($"{ErrorDebug} - DisplayStatus"); }
     }
 
     private string GetRotationText(int rotationSelection)
@@ -230,7 +241,7 @@ public class MCH_KirboPvE : MCH_Base
         TerritoryContentType Content = TerritoryContentType;
         bool UltimateRaids = (int)Content == 28;
         bool UwUorUCoB = UltimateRaids && Player.Level == 70;
-        bool TEA = UltimateRaids && Player.Level == 80; 
+        bool TEA = UltimateRaids && Player.Level == 80;
 
         // If 'OpenerActionsAvailable' is true (see method 'HandleOpenerAvailability' for conditions) proceed to using Action logic during countdown
         if (Methods.OpenerActionsAvailable)
@@ -240,20 +251,19 @@ public class MCH_KirboPvE : MCH_Base
             {
                 case 0: // Early AA
                     // Use Drill when the remaining countdown time is less or equal to Drill's AnimationLock, also sets OpenerInProgress to 'True'
-                    if (remainTime <= Drill.AnimationLockTime && Drill.CanUse(out _))
+                    if (remainTime <= AirAnchor.AnimationLockTime && AirAnchor.CanUse(out _))
                     {
                         Methods.OpenerInProgress = true;
-                        return Drill;
+                        return AirAnchor;
                     }
                     // Use Tincture if Tincture use is enabled and the countdown time is less or equal to SplitShot+Tincture animationlock (1.8s)
                     IAction act0;
-                    if (remainTime <= Drill.AnimationLockTime + TinctureOfDexterity8.AnimationLockTime && UseBurstMedicine(out act0, false))
+                    if (remainTime <= AirAnchor.AnimationLockTime + TinctureOfDexterity8.AnimationLockTime && UseBurstMedicine(out act0, false))
                     {
                         return act0;
                     }
                     // Use Reassemble 
-                    IAction act2;
-                    if (remainTime <= 5f && !Player.HasStatus(true, StatusID.Reassemble) && Reassemble.CanUse(out act2, CanUseOption.MustUseEmpty))
+                    if (remainTime <= 5f && Reassemble.CurrentCharges == 2)
                     {
                         return Reassemble;
                     }
@@ -425,6 +435,7 @@ public class MCH_KirboPvE : MCH_Base
                         case 27:
                             Methods.OpenerHasFinished = true;
                             Methods.OpenerInProgress = false;
+                            Serilog.Log.Information($"{OpenerComplete} - Early AA");
                             // Finished Early AA
                             break;
                     }
@@ -489,6 +500,7 @@ public class MCH_KirboPvE : MCH_Base
                         case 27:
                             Methods.OpenerHasFinished = true;
                             Methods.OpenerInProgress = false;
+                            Serilog.Log.Information($"{OpenerComplete} - Delayed Tools");
                             // Finished Delayed Tools
                             break;
                     }
@@ -552,7 +564,12 @@ public class MCH_KirboPvE : MCH_Base
     {
         act = null;
 
-        #region PVE
+        if (Player.HasStatus(true, (StatusID)Transcendent))
+        {
+            // Logic when the player is recently revived
+            return false;
+        }
+
         if (Methods.OpenerInProgress)
         {
             return Opener(out act);
@@ -616,7 +633,7 @@ public class MCH_KirboPvE : MCH_Base
                 return true;
             }
         }
-        #endregion
+
         return base.GeneralGCD(out act);
 
     }
@@ -741,34 +758,32 @@ public class MCH_KirboPvE : MCH_Base
                     return true;
                 }
             }
-            if (Hypercharge.CanUse(out act) && !WillhaveTool)
+
+            // when using delayed tools, hypercharge should be used 3 GCD's before dril comes up at the 2min mark. Currently drifts barrel stabilizer and overcaps 20 heat because of it
+            // link 'https://xivanalysis.com/fflogs/a:K6Jnpwbv4z3WRyGL/1/1' 12.230dps 10min test
+            // when using Early AA, misses crowned colider during 2nd tincture, loses 30 battery due to overcap
+            // at 2min mark loses 10 battery as queen is not used at 90 battery which then gets followed by AA
+            // at 4min 15s loses another 20 battery when gauge is at 100 shouldve used queen after the clean shot at 4min 7s, 8s before wildfire came off cooldown
+            // link 'https://xivanalysis.com/fflogs/a:K6Jnpwbv4z3WRyGL/3/1' 12.100dps 10min test
+            // in both tests there's a weaving issue at 8min 46 (either gauss or rico's problem, maybe implement oGCD counter or something)
+            if (Hypercharge.CanUse(out act) && (IsLastAbility(ActionID.Wildfire) || (!WillhaveTool && (
+                Methods.InBurst && IsLastGCD(ActionID.ChainSaw, ActionID.AirAnchor, ActionID.Drill, ActionID.SplitShot, ActionID.SlugShot, ActionID.CleanShot, ActionID.HeatedSplitShot, ActionID.HeatedSlugShot) ||
+                (Heat >= 100 && Wildfire.WillHaveOneCharge(10f)) ||
+                (Heat >= 100 && Wildfire.WillHaveOneCharge(40f)) || // was 90 (causes issues with 2min early aa burst) 
+                (Heat >= 50 && !Wildfire.WillHaveOneCharge(40f))
+            ))))
             {
-                if (Methods.InBurst && IsLastGCD(ActionID.ChainSaw, ActionID.AirAnchor, ActionID.Drill, ActionID.SplitShot, ActionID.SlugShot, ActionID.CleanShot, ActionID.HeatedSplitShot, ActionID.HeatedSlugShot))
-                {
-                    return true;
-                }
-                if (Heat >= 100 && Wildfire.WillHaveOneCharge(10f))
-                {
-                    return true;
-                }
-                if (Heat >= 90 && Wildfire.WillHaveOneCharge(40f))
-                {
-                    return true;
-                }
-                if (Heat >= 50 && !Wildfire.WillHaveOneCharge(40f))
-                {
-                    return true;
-                }
+                return true;
             }
 
-            if (ShouldUseGaussroundOrRicochet(out act) && NextAbilityToNextGCD > GaussRound.AnimationLockTime + Ping)
+            if (ShouldUseGaussroundOrRicochet(out act) && WeaponRemain > GaussRound.AnimationLockTime + Ping)
             {
                 return true;
             }
         }
 
         // LvL 30-89 and Casual Content
-        if (/*Deepdungeon || Eureka || Roulette || Dungeon || VCDungeonFinder || FATEs || */Player.Level < 90)
+        if (Player.Level < 90)
         {
             if ((IsLastAbility(false, Hypercharge) || Heat >= 50) && HostileTarget.IsBossFromIcon()
                 && Wildfire.CanUse(out act, CanUseOption.OnLastAbility)) return true;
@@ -790,6 +805,10 @@ public class MCH_KirboPvE : MCH_Base
             }
             if (Hypercharge.CanUse(out act) && InCombat && HostileTarget && HostileTarget.IsTargetable)
             {
+                if (HostileTarget.GetTimeToKill() > 10 && Heat >= 100)
+                {
+                    return true;
+                }
                 if (HostileTarget.GetHealthRatio() > 0.25)
                 {
                     return true;
@@ -816,6 +835,7 @@ public class MCH_KirboPvE : MCH_Base
                 return true;
             }
         }
+
         return base.EmergencyAbility(nextGCD, out act);
 
     }
@@ -827,8 +847,8 @@ public class MCH_KirboPvE : MCH_Base
     {
         act = null; // Default to null if Tincture cannot be used.
 
-        // Don't use Tincture if player has the 'Weakness' status 
-        if (Player.HasStatus(true, StatusID.Weakness) || Player.HasStatus(true, StatusID.Transcendent))
+        // Don't use Tincture if player has the 'Weakness' status
+        if (Player.HasStatus(true, StatusID.Weakness) || Player.HasStatus(true, (StatusID)Transcendent))
         {
             return false;
         }
@@ -936,13 +956,10 @@ public class MCH_KirboPvE : MCH_Base
         Methods.OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && RCcharges == 3 && HasWildfire && GRcharges == 3 && Lvl90 && NoBattery && NoHeat && Openerstep0;
 
         // Future Opener conditions for ULTS
-
-        TerritoryContentType Content = TerritoryContentType;    // Not implemented yet
-        bool UltimateRaids = (int)Content == 28;                // Not implemented yet
-        bool UwUorUCoB = UltimateRaids && Player.Level == 70;   // Not implemented yet
-        bool TEA = UltimateRaids && Player.Level == 80;         // Not implemented yet
-
-
+        TerritoryContentType Content = TerritoryContentType;
+        bool UltimateRaids = (int)Content == 28;
+        bool UwUorUCoB = UltimateRaids && Player.Level == 70;
+        bool TEA = UltimateRaids && Player.Level == 80;
 
         Methods.LvL70_Ultimate_OpenerActionsAvailable = UwUorUCoB && NoResources && ReassembleOneCharge && HasDrill && HasWildfire && HasBarrelStabilizer;
 

@@ -42,7 +42,7 @@ public class UserRotations : IKirboTexture
 
     private unsafe delegate bool OnUseAction(ActionManager* manager, ActionType actionType, uint actionID, ulong targetID, uint a4, uint a5, uint a6, void* a7);
 
-    private static Hook<OnUseAction> _useActionHook;
+    //private static Hook<OnUseAction> _useActionHook;
 
     private Queue<ActionInfo> _actions = new Queue<ActionInfo>();
     private const int MaxQueueSize = 512;
