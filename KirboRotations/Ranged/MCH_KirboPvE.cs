@@ -759,10 +759,17 @@ public class MCH_KirboPvE : MCH_Base
                 }
             }
 
+            // when using delayed tools, hypercharge should be used 3 GCD's before dril comes up at the 2min mark. Currently drifts barrel stabilizer and overcaps 20 heat because of it
+            // link 'https://xivanalysis.com/fflogs/a:K6Jnpwbv4z3WRyGL/1/1' 12.230dps 10min test
+            // when using Early AA, misses crowned colider during 2nd tincture, loses 30 battery due to overcap
+            // at 2min mark loses 10 battery as queen is not used at 90 battery which then gets followed by AA
+            // at 4min 15s loses another 20 battery when gauge is at 100 shouldve used queen after the clean shot at 4min 7s, 8s before wildfire came off cooldown
+            // link 'https://xivanalysis.com/fflogs/a:K6Jnpwbv4z3WRyGL/3/1' 12.100dps 10min test
+            // in both tests there's a weaving issue at 8min 46 (either gauss or rico's problem, maybe implement oGCD counter or something)
             if (Hypercharge.CanUse(out act) && (IsLastAbility(ActionID.Wildfire) || (!WillhaveTool && (
                 Methods.InBurst && IsLastGCD(ActionID.ChainSaw, ActionID.AirAnchor, ActionID.Drill, ActionID.SplitShot, ActionID.SlugShot, ActionID.CleanShot, ActionID.HeatedSplitShot, ActionID.HeatedSlugShot) ||
                 (Heat >= 100 && Wildfire.WillHaveOneCharge(10f)) ||
-                (Heat >= 90 && Wildfire.WillHaveOneCharge(40f)) ||
+                (Heat >= 100 && Wildfire.WillHaveOneCharge(40f)) || // was 90 (causes issues with 2min early aa burst) 
                 (Heat >= 50 && !Wildfire.WillHaveOneCharge(40f))
             ))))
             {
@@ -798,6 +805,10 @@ public class MCH_KirboPvE : MCH_Base
             }
             if (Hypercharge.CanUse(out act) && InCombat && HostileTarget && HostileTarget.IsTargetable)
             {
+                if (HostileTarget.GetTimeToKill() > 10 && Heat >= 100)
+                {
+                    return true;
+                }
                 if (HostileTarget.GetHealthRatio() > 0.25)
                 {
                     return true;

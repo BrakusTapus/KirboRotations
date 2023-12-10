@@ -10,7 +10,7 @@
         <PlatformTarget>x64</PlatformTarget>
         <Platforms>AnyCPU</Platforms>
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-        <RSversion>3.5.4</RSversion>
+        <RSversion>3.5.6.6</RSversion>
         <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\$(RSversion)</RSInstallPath>
         <ECommonsHintPath>$(RSInstallPath)\ECommons.dll</ECommonsHintPath>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -70,7 +70,7 @@
             <Private>False</Private>
         </Reference>
         <Reference Include="ECommons">
-            <HintPath>..\..\RotationSolver\RotationSolver\bin\Release\net7.0-windows\ECommons.dll</HintPath>
+            <HintPath>$(ECommonsHintPath)</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="ImGui.NET">
