@@ -44,7 +44,7 @@ public class MCH_KirboPvE : MCH_Base
     private static new IBaseAction Reassemble { get; } = new BaseAction(ActionID.Reassemble)
     {
         StatusProvide = new StatusID[1] { StatusID.Reassemble },
-        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.Reassemble) && CustomRotation.HasHostilesInRange
+        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.Reassemble),
     };
     private static new IBaseAction Hypercharge { get; } = new BaseAction(ActionID.Hypercharge, ActionOption.UseResources)
     {
@@ -66,6 +66,7 @@ public class MCH_KirboPvE : MCH_Base
     public override bool ShowStatus => true;
 
     private string ErrorDebug => "Error Caught";
+    private string OpenerComplete => "Completed Opener";
 
     public override void DisplayStatus()
     {
@@ -250,20 +251,19 @@ public class MCH_KirboPvE : MCH_Base
             {
                 case 0: // Early AA
                     // Use Drill when the remaining countdown time is less or equal to Drill's AnimationLock, also sets OpenerInProgress to 'True'
-                    if (remainTime <= Drill.AnimationLockTime && Drill.CanUse(out _))
+                    if (remainTime <= AirAnchor.AnimationLockTime && AirAnchor.CanUse(out _))
                     {
                         Methods.OpenerInProgress = true;
-                        return Drill;
+                        return AirAnchor;
                     }
                     // Use Tincture if Tincture use is enabled and the countdown time is less or equal to SplitShot+Tincture animationlock (1.8s)
                     IAction act0;
-                    if (remainTime <= Drill.AnimationLockTime + TinctureOfDexterity8.AnimationLockTime && UseBurstMedicine(out act0, false))
+                    if (remainTime <= AirAnchor.AnimationLockTime + TinctureOfDexterity8.AnimationLockTime && UseBurstMedicine(out act0, false))
                     {
                         return act0;
                     }
                     // Use Reassemble 
-                    IAction act2;
-                    if (remainTime <= 5f && !Player.HasStatus(true, StatusID.Reassemble) && Reassemble.CanUse(out act2, CanUseOption.MustUseEmpty))
+                    if (remainTime <= 5f && Reassemble.CurrentCharges == 2)
                     {
                         return Reassemble;
                     }
@@ -435,6 +435,7 @@ public class MCH_KirboPvE : MCH_Base
                         case 27:
                             Methods.OpenerHasFinished = true;
                             Methods.OpenerInProgress = false;
+                            Serilog.Log.Information($"{OpenerComplete} - Early AA");
                             // Finished Early AA
                             break;
                     }
@@ -499,6 +500,7 @@ public class MCH_KirboPvE : MCH_Base
                         case 27:
                             Methods.OpenerHasFinished = true;
                             Methods.OpenerInProgress = false;
+                            Serilog.Log.Information($"{OpenerComplete} - Delayed Tools");
                             // Finished Delayed Tools
                             break;
                     }
@@ -943,10 +945,10 @@ public class MCH_KirboPvE : MCH_Base
         Methods.OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && RCcharges == 3 && HasWildfire && GRcharges == 3 && Lvl90 && NoBattery && NoHeat && Openerstep0;
 
         // Future Opener conditions for ULTS
-        TerritoryContentType Content = TerritoryContentType;    
-        bool UltimateRaids = (int)Content == 28;                
-        bool UwUorUCoB = UltimateRaids && Player.Level == 70;   
-        bool TEA = UltimateRaids && Player.Level == 80;         
+        TerritoryContentType Content = TerritoryContentType;
+        bool UltimateRaids = (int)Content == 28;
+        bool UwUorUCoB = UltimateRaids && Player.Level == 70;
+        bool TEA = UltimateRaids && Player.Level == 80;
 
         Methods.LvL70_Ultimate_OpenerActionsAvailable = UwUorUCoB && NoResources && ReassembleOneCharge && HasDrill && HasWildfire && HasBarrelStabilizer;
 
