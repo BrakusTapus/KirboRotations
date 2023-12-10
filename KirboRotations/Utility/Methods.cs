@@ -4,11 +4,36 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using static FFXIVClientStructs.FFXIV.Client.Game.Conditions;
 using static FFXIVClientStructs.FFXIV.Client.Game.ActionManager;
 using KirboRotations.Utility.Core;
+using KirboRotations.Utility.GameAssists;
+using static KirboRotations.Utility.StatusID_Buffs;
+using static KirboRotations.Utility.StatusID_DeBuffs;
 
 namespace KirboRotations.Utility;
 
 public static class Methods
 {
+
+    /// <summary>
+    /// Calls the 'ResetBoolAfterDelay' if 'Flag' is true.
+    /// </summary>
+    internal static void FlagControl()
+    {
+        if (_openerFlag)
+        {
+            Serilog.Log.Debug($"Opener Event");
+            _openerFlag = false;
+        }
+        if (_burstFlag)
+        {
+            Serilog.Log.Debug($"Burst Event");
+            _burstFlag = false;
+        }
+    }
+
+    /// <summary> Checks if the player is in a PVP enabled zone. </summary>
+    /// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
+    internal static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
+
     #region Opener
 
     /// <summary>
@@ -220,29 +245,7 @@ public static class Methods
 
     #endregion
 
-    /// <summary>
-    /// Calls the 'ResetBoolAfterDelay' if 'Flag' is true.
-    /// </summary>
-    internal static void FlagControl()
-    {
-        if (_openerFlag)
-        {
-            Serilog.Log.Debug($"Opener Event");
-            _openerFlag = false;
-        }
-        if (_burstFlag)
-        {
-            Serilog.Log.Debug($"Burst Event");
-            _burstFlag = false;
-        }
-    }
-
-    /// <summary> Checks if the player is in a PVP enabled zone. </summary>
-    /// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
-    internal static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
-
     #region Conditions
-
     /// <summary>
     /// 
     /// </summary>
