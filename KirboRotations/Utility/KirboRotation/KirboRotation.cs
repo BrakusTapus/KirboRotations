@@ -1,10 +1,8 @@
-﻿using Dalamud.Plugin.Services;
-using ECommons.DalamudServices;
-using ECommons.ExcelServices;
+﻿using ECommons.ExcelServices;
+using KirboRotations.Utility.Service;
 using Lumina.Excel.GeneratedSheets;
-using RotationSolver.Basic.Traits;
 
-namespace KirboRotations.Utility;
+namespace KirboRotations.Utility.KirboRotation;
 
 public class KirboRotation : IKirboRotation
 {

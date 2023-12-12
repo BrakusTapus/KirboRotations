@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ECommons.ExcelServices;
 using Lumina.Excel.GeneratedSheets;
 
-namespace KirboRotations.Utility;
+namespace KirboRotations.Utility.KirboRotation;
 
 internal interface IKirboRotation
 {

@@ -1,6 +1,5 @@
-﻿using KirboRotations.Ranged;
-using KirboRotations.Utility.Core;
-using KirboRotations.Utility.GameAssists;
+﻿using ECommons.GameHelpers;
+using KirboRotations.Ranged;
 using RotationSolver.Basic.Helpers;
 
 namespace KirboRotations.Utility.Rotations.ActionHandling
@@ -11,7 +10,7 @@ namespace KirboRotations.Utility.Rotations.ActionHandling
         {
             get
             {
-                byte stacks = PlayerData.Object.StatusStack(true, StatusID.Overheated);
+                byte stacks = Player.Object.StatusStack(true, StatusID.Overheated);
                 return stacks == byte.MaxValue ? (byte)5 : stacks;
             }
         }
@@ -22,7 +21,7 @@ namespace KirboRotations.Utility.Rotations.ActionHandling
             act = null; // Default to null if Reassemble cannot be used.
 
             // Common checks before considering rotation variants
-            bool hasReassemble = PlayerData.Object.HasStatus(true, StatusID.Reassemble);
+            bool hasReassemble = Player.Object.HasStatus(true, StatusID.Reassemble);
             bool isPlayerLevelTooLowForDrill = !MCH_Base.Drill.EnoughLevel;
             bool isNextGCDEligibleForDefault =
             nextGCD == MCH_Base.Drill ||
@@ -157,7 +156,7 @@ namespace KirboRotations.Utility.Rotations.ActionHandling
             act = null; // Default to null if Barrel Stabilizer cannot be used.
 
             // Check if the target is not a boss or a dummy.
-            if (!UserRotations.HostileTarget.IsBossFromTTK() || !UserRotations.HostileTarget.IsDummy())
+            if (!Target.IsBossFromTTK() || !UserRotations.HostileTarget.IsDummy())
             {
                 return MCH_Base.BarrelStabilizer.CanUse(out act, CanUseOption.MustUse);
             }

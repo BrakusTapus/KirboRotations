@@ -1,9 +1,9 @@
 ﻿using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
+using ECommons;
 using ECommons.DalamudServices;
 using ImGuiNET;
-using KirboRotations.Utility.GameAssists;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,7 +36,7 @@ namespace KirboRotations.Utility.ImGuiEx
             ImGui.PushStyleColor(ImGuiCol.Text, ColorText);
             if (ImGui.Button(Text))
             {
-                GenericAssists.ShellStart(DonateLink);
+                GenericHelpers.ShellStart(DonateLink);
             }
             if (ImGui.IsItemHovered())
             {

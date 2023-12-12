@@ -1,6 +1,7 @@
-﻿using KirboRotations.Utility.ImGuiEx;
+﻿using KirboRotations.Utility.ExtraHelpers;
+using KirboRotations.Utility.ImGuiEx;
 using static ImGuiNET.ImGui;
-using static KirboRotations.Utility.Methods;
+using static KirboRotations.Utility.ExtraHelpers.Methods;
 
 namespace KirboRotations.Ranged;
 

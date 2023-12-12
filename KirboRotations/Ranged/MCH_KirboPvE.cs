@@ -1,7 +1,8 @@
 ﻿using KirboRotations.Utility.ImGuiEx;
-using static KirboRotations.Utility.RotationStrings;
-using static KirboRotations.Utility.StatusID_Buffs;
-using static KirboRotations.Utility.StatusID_DeBuffs;
+using static KirboRotations.Utility.Strings.RotationStrings;
+using static KirboRotations.Utility.Data.StatusID_Buffs;
+using static KirboRotations.Utility.Data.StatusID_DeBuffs;
+using KirboRotations.Utility.ExtraHelpers;
 
 namespace KirboRotations.Ranged;
 

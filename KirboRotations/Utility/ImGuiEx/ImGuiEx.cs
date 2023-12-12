@@ -4,11 +4,12 @@ using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Interface.Style;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using ECommons;
+using ECommons.DalamudServices;
 using ECommons.GameHelpers;
+using ECommons.Reflection;
 using ImGuiNET;
-using KirboRotations.Utility.Core;
-using KirboRotations.Utility.GameAssists;
-using KirboRotations.Utility.Reflection;
+using KirboRotations.Utility.ExtraHelpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -332,7 +333,7 @@ public static unsafe partial class ImGuiEx
     {
         if (values.Length == 1)
         {
-            GenericAssists.Safe(values[0]);
+            GenericHelpers.Safe(values[0]);
         }
         else
         {
@@ -341,7 +342,7 @@ public static unsafe partial class ImGuiEx
                 foreach (Action action in values)
                 {
                     ImGui.TableNextColumn();
-                    GenericAssists.Safe(action);
+                    GenericHelpers.Safe(action);
                 }
                 ImGui.EndTable();
             }
@@ -459,10 +460,10 @@ public static unsafe partial class ImGuiEx
 
         var scale = ImGuiHelpers.GlobalScale;
         var currentID = ImGui.GetID(0);
-        if (currentID != headerLastWindowID || headerLastFrame != KirboSvc.PluginInterface.UiBuilder.FrameCount)
+        if (currentID != headerLastWindowID || headerLastFrame != Svc.PluginInterface.UiBuilder.FrameCount)
         {
             headerLastWindowID = currentID;
-            headerLastFrame = KirboSvc.PluginInterface.UiBuilder.FrameCount;
+            headerLastFrame = Svc.PluginInterface.UiBuilder.FrameCount;
             headerCurrentPos = 0.25f * ImGui.GetStyle().FramePadding.Length();
             if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoTitleBar))
                 headerCurrentPos = 1;
@@ -495,7 +496,7 @@ public static unsafe partial class ImGuiEx
             if (ImGui.IsMouseReleased(options.MouseButton))
                 pressed = true;
             if (options.ToastTooltipOnClick && ImGui.IsMouseReleased(options.ToastTooltipOnClickButton))
-                KirboSvc.PluginInterface.UiBuilder.AddNotification(options.Tooltip!, null, NotificationType.Info);
+                Svc.PluginInterface.UiBuilder.AddNotification(options.Tooltip!, null, NotificationType.Info);
         }
 
         ImGui.SetCursorPos(buttonPos);
@@ -862,7 +863,7 @@ public static unsafe partial class ImGuiEx
     public static void WithTextColor(Vector4 col, Action func)
     {
         ImGui.PushStyleColor(ImGuiCol.Text, col);
-        GenericAssists.Safe(func);
+        GenericHelpers.Safe(func);
         ImGui.PopStyleColor();
     }
 
@@ -1226,7 +1227,7 @@ public static unsafe partial class ImGuiEx
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
         {
             ImGui.SetClipboardText(text);
-            KirboSvc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
+            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
         }
     }
 
@@ -1240,7 +1241,7 @@ public static unsafe partial class ImGuiEx
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
         {
             ImGui.SetClipboardText(text);
-            KirboSvc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
+            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
         }
     }
 
@@ -1254,7 +1255,7 @@ public static unsafe partial class ImGuiEx
         if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
         {
             ImGui.SetClipboardText(text);
-            KirboSvc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
+            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
         }
     }
 
@@ -1300,7 +1301,7 @@ public static unsafe partial class ImGuiEx
         if (ImGui.Button(buttonText.Replace("$COPY", copy)))
         {
             ImGui.SetClipboardText(copy);
-            KirboSvc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
+            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
         }
     }
 
@@ -1456,23 +1457,23 @@ public static unsafe partial class ImGuiEx
 
         ImGui.Text($"{title}"); // Should be 'StatusProvide'
         ImGui.Indent();
-        foreach (var status in PlayerData.Object.StatusList)
+        foreach (var status in Player.Object.StatusList)
         {
             // Skip the 'Well Fed' buff with ID 48
             if (status.StatusId == 48) continue;
 
-            var source = status.SourceId == Player.Object.ObjectId ? "You" : KirboSvc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-            ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
+            var source = status.SourceId == Player.Object.ObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
+            //ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
             ImGui.SameLine();
 
             ImGui.PushID((int)status.StatusId);
-            var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
+            //var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
             var statusinfo = $"{status.GameData.Name} = {status.StatusId}";
             var sourceinfo = $"Source: '{source}'";
             var providestatus = $"StatusProvide = new StatusID[] { status.GameData.Name },";
             if (ImGui.Button("Copy"))
             {
-                ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{providestatus}");
+                //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{providestatus}");
                 Notify.Success("copied to clipboard.");
             }
             ImGui.PopID();
@@ -1483,23 +1484,23 @@ public static unsafe partial class ImGuiEx
 
         ImGui.Text($"{title}"); // Should be 'TargetStatus'
         ImGui.Indent();
-        if (KirboSvc.Targets.Target is BattleChara b)
+        if (Svc.Targets.Target is BattleChara b)
         {
             foreach (var status in b.StatusList)
             {
-                var source = status.SourceId == PlayerData.Object.ObjectId ? "You" : KirboSvc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-                ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
+                var source = status.SourceId == Player.Object.ObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
+                //ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
                 ImGui.SameLine();
 
                 // Copy Button Uses a unique ID for each button
                 ImGui.PushID((int)status.StatusId); // Ensure status.StatusId is unique for each status
-                var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
+                //var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
                 var statusinfo = $"{status.GameData.Name} = {status.StatusId}";
                 var sourceinfo = $"Source: '{source}'";
                 var targetstatus = $"TargetStatus = new StatusID[] { status.GameData.Name },";
                 if (ImGui.Button("Copy"))
                 {
-                    ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{targetstatus}");
+                    //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{targetstatus}");
                     ECommons.ImGuiMethods.Notify.Success("copied to clipboard.");
                 }
                 ImGui.PopID(); // End of unique ID scope

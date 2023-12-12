@@ -1,6 +1,5 @@
 ﻿using ECommons;
 using ImGuiNET;
-using KirboRotations.Utility.GameAssists;
 using System;
 using System.Numerics;
 
@@ -32,7 +31,7 @@ public class ImGuiTrans
     public static void WithTextColor(Vector4 col, Action func)
     {
         PushStyleColor(ImGuiCol.Text, col);
-        GenericAssists.Safe(func);
+        GenericHelpers.Safe(func);
         ImGui.PopStyleColor();
     }
 

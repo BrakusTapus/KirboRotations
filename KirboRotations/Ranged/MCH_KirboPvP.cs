@@ -1,7 +1,7 @@
 ﻿//using ExCSS;
 //using Lumina.Excel.GeneratedSheets;
 using static ImGuiNET.ImGui;
-using static KirboRotations.Utility.Methods;
+using static KirboRotations.Utility.ExtraHelpers.Methods;
 
 namespace KirboRotations.Ranged;
 

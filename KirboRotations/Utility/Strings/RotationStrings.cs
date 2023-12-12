@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.Utility;
+﻿namespace KirboRotations.Utility.Strings;
 
 public class RotationStrings
 {

@@ -1,10 +1,10 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using ECommons;
 using ECommons.DalamudServices;
 using ECommons.Reflection;
 using ImGuiNET;
-using KirboRotations.Utility.GameAssists;
 using System;
 
 namespace KirboRotations.Utility.ImGuiEx;
@@ -58,7 +58,7 @@ public class ChangelogWindow : Window
 
     public override void OnClose()
     {
-        GenericAssists.Safe(delegate
+        GenericHelpers.Safe(delegate
         {
             config.GetType().GetField("ChangelogWindowVer").SetValue(config, version);
             base.OnClose();

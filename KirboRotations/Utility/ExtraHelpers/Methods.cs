@@ -3,13 +3,11 @@ using Dalamud.Game.ClientState.Statuses;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using static FFXIVClientStructs.FFXIV.Client.Game.Conditions;
 using static FFXIVClientStructs.FFXIV.Client.Game.ActionManager;
-using KirboRotations.Utility.Core;
 using KirboRotations.Utility.ImGuiEx;
-using KirboRotations.Utility.GameAssists;
-using static KirboRotations.Utility.StatusID_Buffs;
-using static KirboRotations.Utility.StatusID_DeBuffs;
+using static KirboRotations.Utility.Data.StatusID_Buffs;
+using static KirboRotations.Utility.Data.StatusID_DeBuffs;
 
-namespace KirboRotations.Utility;
+namespace KirboRotations.Utility.ExtraHelpers;
 
 public static class Methods
 {
@@ -86,7 +84,7 @@ public static class Methods
     {
         if (lastaction)
         {
-            Methods.OpenerStep++;
+            OpenerStep++;
             return false;
         }
         return nextaction;
@@ -97,15 +95,15 @@ public static class Methods
     /// </summary>
     internal static void ResetOpenerProperties()
     {
-        Methods.OpenerActionsAvailable = false;
-        Methods.OpenerInProgress = false;
-        Methods.OpenerStep = 0;
-        Methods.OpenerHasFinished = false;
-        Methods.OpenerHasFailed = false;
-        Serilog.Log.Debug($"OpenerActionsAvailable = {Methods.OpenerActionsAvailable}");
-        Serilog.Log.Debug($"OpenerInProgress = {Methods.OpenerInProgress} - Step: {Methods.OpenerStep}");
-        Serilog.Log.Debug($"OpenerHasFinished = {Methods.OpenerHasFinished}");
-        Serilog.Log.Debug($"OpenerHasFailed = {Methods.OpenerHasFailed}");
+        OpenerActionsAvailable = false;
+        OpenerInProgress = false;
+        OpenerStep = 0;
+        OpenerHasFinished = false;
+        OpenerHasFailed = false;
+        Serilog.Log.Debug($"OpenerActionsAvailable = {OpenerActionsAvailable}");
+        Serilog.Log.Debug($"OpenerInProgress = {OpenerInProgress} - Step: {OpenerStep}");
+        Serilog.Log.Debug($"OpenerHasFinished = {OpenerHasFinished}");
+        Serilog.Log.Debug($"OpenerHasFailed = {OpenerHasFailed}");
     }
 
     /// <summary>
@@ -115,20 +113,20 @@ public static class Methods
     {
         if (!CustomRotation.InCombat)
         {
-            Methods._openerFlag = false;
-            Methods.OpenerStep = 0;
-            Methods.OpenerHasFinished = false;
-            Methods.OpenerHasFailed = false;
+            _openerFlag = false;
+            OpenerStep = 0;
+            OpenerHasFinished = false;
+            OpenerHasFailed = false;
         }
-        if (Methods.OpenerHasFailed)
+        if (OpenerHasFailed)
         {
-            Methods._openerFlag = true;
-            Methods.OpenerInProgress = false;
+            _openerFlag = true;
+            OpenerInProgress = false;
         }
-        if (Methods.OpenerHasFinished)
+        if (OpenerHasFinished)
         {
-            Methods._openerFlag = true;
-            Methods.OpenerInProgress = false;
+            _openerFlag = true;
+            OpenerInProgress = false;
         }
     }
     #endregion
@@ -180,7 +178,7 @@ public static class Methods
     {
         if (lastaction)
         {
-            Methods.BurstStep++;
+            BurstStep++;
             return false;
         }
         return nextaction;
@@ -191,14 +189,14 @@ public static class Methods
     /// </summary>
     internal static void ResetBurstProperties()
     {
-        Methods.BurstActionsAvailable = false;
-        Methods.BurstInProgress = false;
-        Methods.BurstStep = 0;
-        Methods.BurstHasFinished = false;
-        Methods.BurstHasFailed = false;
-        Serilog.Log.Debug($"OpenerHasFailed = {Methods.InBurst}");
-        Serilog.Log.Debug($"OpenerInProgress = {Methods.BurstInProgress} - Step: {Methods.BurstStep}");
-        Serilog.Log.Debug($"OpenerHasFinished = {Methods.BurstHasFinished}");
+        BurstActionsAvailable = false;
+        BurstInProgress = false;
+        BurstStep = 0;
+        BurstHasFinished = false;
+        BurstHasFailed = false;
+        Serilog.Log.Debug($"OpenerHasFailed = {InBurst}");
+        Serilog.Log.Debug($"OpenerInProgress = {BurstInProgress} - Step: {BurstStep}");
+        Serilog.Log.Debug($"OpenerHasFinished = {BurstHasFinished}");
     }
 
     /// <summary>
@@ -208,21 +206,21 @@ public static class Methods
     {
         if (!CustomRotation.InCombat)
         {
-            Methods._burstFlag = true;
-            Methods.BurstStep = 0;
-            Methods.BurstHasFinished = false;
-            Methods.InBurst = false;
-            Methods.BurstInProgress = false;
+            _burstFlag = true;
+            BurstStep = 0;
+            BurstHasFinished = false;
+            InBurst = false;
+            BurstInProgress = false;
         }
-        if (Methods.BurstHasFailed)
+        if (BurstHasFailed)
         {
-            Methods._burstFlag = true;
-            Methods.BurstInProgress = false;
+            _burstFlag = true;
+            BurstInProgress = false;
         }
-        if (Methods.BurstHasFinished)
+        if (BurstHasFinished)
         {
-            Methods._burstFlag = true;
-            Methods.BurstInProgress = false;
+            _burstFlag = true;
+            BurstInProgress = false;
         }
     }
 

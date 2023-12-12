@@ -1,7 +1,7 @@
 ﻿using ECommons.DalamudServices;
 using Lumina.Excel;
 
-namespace KirboRotations.Utility;
+namespace KirboRotations.Utility.Service;
 
 public class kService
 {
