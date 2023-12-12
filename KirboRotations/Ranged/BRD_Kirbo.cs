@@ -6,7 +6,7 @@ namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.BattleVoice)]
 [SourceCode(Path = "main/KirboRotations/Ranged/BRD_Default.cs")]
-public sealed class BRD_Default : BRD_Base
+public sealed class BRD_Kirbo : BRD_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;

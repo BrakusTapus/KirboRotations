@@ -37,7 +37,6 @@
         <Compile Remove="Magical\BLU_Extra.cs" />
         <Compile Remove="Melee\DRG_KirboPVP.cs" />
         <Compile Remove="Melee\NIN_Default.cs" />
-        <Compile Remove="Ranged\BRD_Default.cs" />
         <Compile Remove="Ranged\MCH_Default.cs" />
         <Compile Remove="Ranged\MCH_KirboComplete.cs" />
         <Compile Remove="Ranged\MCH_KirboPvE_Copy.cs" />
@@ -54,7 +53,6 @@
         <None Include="Magical\BLU_Default.cs" />
         <None Include="Melee\DRG_KirboPVP.cs" />
         <None Include="Melee\NIN_Default.cs" />
-        <None Include="Ranged\BRD_Default.cs" />
         <None Include="Ranged\MCH_Default.cs" />
         <None Include="Ranged\MCH_KirboPvE_Copy.cs" />
         <None Include="Ranged\MCH_KirboPvP_Copy.cs" />
