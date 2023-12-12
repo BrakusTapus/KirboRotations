@@ -13,12 +13,6 @@ namespace KirboRotations.Utility;
 
 public static class Methods
 {
-    #region Debug Strings
-    public static string RotationVersion => "1.0.0.15";
-    public static string ErrorDebug => "Error Caught";
-    public static string OpenerComplete => "[RotationSolver] Completed Opener";
-    #endregion
-
     /// <summary>
     /// Calls the 'ResetBoolAfterDelay' if 'Flag' is true.
     /// </summary>

@@ -1,6 +1,5 @@
-﻿using KirboRotations.Utility.Core;
-using KirboRotations.Utility.ImGuiEx;
-using static KirboRotations.Utility.Methods;
+﻿using KirboRotations.Utility.ImGuiEx;
+using static KirboRotations.Utility.RotationStrings;
 using static KirboRotations.Utility.StatusID_Buffs;
 using static KirboRotations.Utility.StatusID_DeBuffs;
 
@@ -134,14 +133,6 @@ public class MCH_KirboPvE : MCH_Base
                         ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn(); ImGui.Text("GCD Remain:"); ImGui.TableNextColumn(); ImGui.Text(WeaponRemain.ToString());
-                        ImGui.TableNextRow();
-
-                        ImGui.TableNextColumn(); ImGui.Text($"LastAction: {DataBase.LastAction}  {(uint)DataBase.LastAction}"); ImGui.TableNextColumn(); ImGui.Text(WeaponRemain.ToString());
-                        //ImGui.TableNextRow();
-                        //ImGui.TableNextColumn(); ImGui.Text($"Remain: "); ImGui.TableNextColumn(); ImGui.Text(WeaponRemain.ToString());
-                        //ImGui.TableNextRow();
-                        //ImGui.TableNextColumn(); ImGui.Text($"Remain: "); ImGui.TableNextColumn(); ImGui.Text(WeaponRemain.ToString());
-
                         // Add more rows as needed...
 
                         ImGui.EndTable();

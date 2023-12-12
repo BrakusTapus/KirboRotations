@@ -12,7 +12,7 @@
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
         <RSversion>3.5.6.9</RSversion>
         <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\$(RSversion)</RSInstallPath>
-        <ECommonsHintPath>$(RSInstallPath)\ECommons.dll</ECommonsHintPath>
+        <ECommonsHintPath>$(RSInstallPath)</ECommonsHintPath>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <UseWindowsForms>true</UseWindowsForms>
@@ -113,9 +113,19 @@
     <!-- Ecommons path (should point to Rotation Solver's ECommons) -->
     <ItemGroup>
         <Reference Include="ECommons">
-            <HintPath>$(ECommonsHintPath)</HintPath>
+            <HintPath>$(ECommonsHintPath)\ECommons.dll</HintPath>
             <Private>False</Private>
         </Reference>
+    </ItemGroup>
+
+    <!-- Package References -->
+    <ItemGroup>
+        <EditorConfigFiles Remove="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+    </ItemGroup>
+
+    <!-- RS API -->
+    <ItemGroup>
+        <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
     </ItemGroup>
 
     <!-- Global Namespace usings -->
@@ -137,16 +147,6 @@
         <Using Include="System.ComponentModel" />
         <Using Include="System.Numerics" />
         <Using Include="System.Reflection" />
-    </ItemGroup>
-
-    <!-- Package References -->
-    <ItemGroup>
-        <EditorConfigFiles Remove="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
-    </ItemGroup>
-
-    <!-- RS API -->
-    <ItemGroup>
-        <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
     </ItemGroup>
 
 </Project>

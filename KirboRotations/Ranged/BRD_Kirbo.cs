@@ -1,18 +1,18 @@
 ﻿using KirboRotations.Utility.ImGuiEx;
-using static KirboRotations.Utility.Methods;
+using static KirboRotations.Utility.RotationStrings;
 using static KirboRotations.Utility.StatusID_Buffs;
 
 namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.BattleVoice)]
 [SourceCode(Path = "main/KirboRotations/Ranged/BRD_Default.cs")]
-public sealed class BRD_Kirbo : BRD_Base
+public class BRD_Kirbo : BRD_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
-    public override string RotationName => "Kirbo's Bard\n(PvE)";
-    public override string Description => "Please make sure that the three song times add up to 120 seconds!";
+    public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string Description => $"{RotationVersion} - Please make sure that the three song times add up to 120 seconds!";
     #endregion
 
     #region New PvE IBaseActions
@@ -33,7 +33,7 @@ public sealed class BRD_Kirbo : BRD_Base
                 ImGuiEx.TripleSpacing();
                 ImGuiEx.CollapsingHeaderWithContent("General Info", () =>
                 {
-                    ImGui.Text($"Rotation: {RotationName} - v{RotationVersion}");
+                    ImGui.Text($"Rotation: {RotationName} {RotationVersion}");
                     ImGuiEx.ImGuiColoredText("Rotation  Job: ", ClassJob.Abbreviation, EColor.GreenBright);
                     ImGuiEx.SeperatorWithSpacing();
                     ImGui.Text($"Player Name: {Player.Name}");
