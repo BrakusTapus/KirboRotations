@@ -4,6 +4,7 @@ using FFXIVClientStructs.FFXIV.Client.Game;
 using static FFXIVClientStructs.FFXIV.Client.Game.Conditions;
 using static FFXIVClientStructs.FFXIV.Client.Game.ActionManager;
 using KirboRotations.Utility.Core;
+using KirboRotations.Utility.ImGuiEx;
 using KirboRotations.Utility.GameAssists;
 using static KirboRotations.Utility.StatusID_Buffs;
 using static KirboRotations.Utility.StatusID_DeBuffs;
@@ -12,6 +13,12 @@ namespace KirboRotations.Utility;
 
 public static class Methods
 {
+    #region Debug Strings
+    public static string RotationVersion => "1.0.0.14";
+    public static string ErrorDebug => "Error Caught";
+    public static string OpenerComplete => "Completed Opener";
+    #endregion
+
 
     /// <summary>
     /// Calls the 'ResetBoolAfterDelay' if 'Flag' is true.
@@ -113,28 +120,12 @@ public static class Methods
     /// </summary>
     internal static void StateOfOpener()
     {
-        // Do NOT uncomment unless we have a way to get localplayer without ECommons
-        //if (Player.Object.IsDead)
-        //{
-        //    Methods.OpenerHasFailed = false;
-        //    Methods.OpenerHasFinished = false;
-        //    Methods.Openerstep = 0;
-        //}
         if (!CustomRotation.InCombat)
         {
-            Methods._openerFlag = true;
+            Methods._openerFlag = false;
             Methods.OpenerStep = 0;
             Methods.OpenerHasFinished = false;
             Methods.OpenerHasFailed = false;
-
-            // To-Do: Find a better way of handling the debugflag instead of resetting it every 60s            
-            //if (!CustomRotation.InCombat && !Methods.Flag)
-            //{
-            //    Serilog.Log.Debug($"InCombat is {CustomRotation.InCombat} resetting properties: OpenerHasFailed: {OpenerHasFailed} | OpenerHasFinished: {OpenerHasFinished} | Openerstep: {Openerstep}");
-            //    Methods.Flag = true;
-            //    Thread.Sleep(5000);
-            //    ResetDebugFlag();
-            //}
         }
         if (Methods.OpenerHasFailed)
         {
@@ -147,7 +138,6 @@ public static class Methods
             Methods.OpenerInProgress = false;
         }
     }
-
     #endregion
 
     #region Burst

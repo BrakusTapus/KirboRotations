@@ -1,11 +1,6 @@
-﻿using System.Collections;
-using Dalamud.Interface.Utility;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using KirboRotations.Utility.Core;
-using KirboRotations.Utility.GameAssists;
-using KirboRotations.Utility.Rotations;
+﻿using KirboRotations.Utility.Core;
 using KirboRotations.Utility.ImGuiEx;
-using KirboRotations.Utility.Data.Actions;
+using static KirboRotations.Utility.Methods;
 using static KirboRotations.Utility.StatusID_Buffs;
 using static KirboRotations.Utility.StatusID_DeBuffs;
 
@@ -20,7 +15,6 @@ public class MCH_KirboPvE : MCH_Base
     public override string GameVersion => "6.51";
     public override string RotationName => "Kirbo's Machinist (PvE)";
     public override string Description => "Kirbo's Machinist, revived and modified by Incognito, Do Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
-    public string RotationVersion => "1.0.0.13";
     #endregion
 
     #region New PvE IBaseActions
@@ -59,15 +53,8 @@ public class MCH_KirboPvE : MCH_Base
 
     #region Debug window stuff
     // Displays our 'Debug' in the status tab
-    //ImGui.Text($"CustomRotation Player: {CustomRotation.Player.Name}");
-    //ImGui.Text($"UserRotations LocalPlayer: {UserRotations.LocalPlayer.Name}");
-    //ImGui.Text($"PlayerData Character: {PlayerData.Character->Name}");
 
     public override bool ShowStatus => true;
-
-    private string ErrorDebug => "Error Caught";
-    private string OpenerComplete => "Completed Opener";
-
     public override void DisplayStatus()
     {
         try
@@ -142,7 +129,7 @@ public class MCH_KirboPvE : MCH_Base
             {
                 ImGuiEx.CollapsingHeaderWithContent("Action Details", () =>
                 {
-                    if (ImGui.BeginTable("gcdTable", 2))
+                    if (ImGui.BeginTable("actionTable", 2))
                     {
                         ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
                         ImGui.TableNextRow();
@@ -183,7 +170,6 @@ public class MCH_KirboPvE : MCH_Base
         }
         catch { Serilog.Log.Warning($"{ErrorDebug} - DisplayStatus"); }
     }
-
     private string GetRotationText(int rotationSelection)
     {
         return rotationSelection switch
@@ -195,21 +181,6 @@ public class MCH_KirboPvE : MCH_Base
         };
     }
     #endregion
-
-    /*#region Opener Related Properties
-    // Displays the current opener step during the Opener
-    private int Openerstep { get; set; }
-    // Indicates wether or not the opener was finished succesfully
-    private bool OpenerHasFinished { get; set; }
-    // Indicates wether or not the opener has failed
-    private bool OpenerHasFailed { get; set; }
-    // Indicates wether or not the actions needed for the opener are available
-    private bool OpenerActionsAvailable { get; set; }
-    // Indicates wether or not the opener is currently in progress
-    private bool OpenerInProgress { get; set; }
-    // I have no clue what this did
-    private bool Flag { get; set; }
-    #endregion*/
 
     #region Action Related Properties
     // Check at every frame if 1 of our major tools will come off cooldown soon
@@ -359,18 +330,9 @@ public class MCH_KirboPvE : MCH_Base
         act = default(IAction);
         while (Methods.OpenerInProgress)
         {
-            if (TimeSinceLastAction.TotalSeconds > 3.0 && !Methods._openerFlag)
+            if (!Methods._openerFlag && (Player.IsDead) || (TimeSinceLastAction.TotalSeconds > 3.0))
             {
                 Methods.OpenerHasFailed = true;
-                Methods.OpenerInProgress = false;
-                Methods.OpenerStep = 0;
-                Methods._openerFlag = true;
-            }
-            if (Player.IsDead && !Methods._openerFlag)
-            {
-                Methods.OpenerHasFailed = true;
-                Methods.OpenerInProgress = false;
-                Methods.OpenerStep = 0;
                 Methods._openerFlag = true;
             }
             switch (Configs.GetCombo("RotationSelection"))
@@ -635,16 +597,12 @@ public class MCH_KirboPvE : MCH_Base
         }
 
         return base.GeneralGCD(out act);
-
     }
     #endregion
 
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
-        //TerritoryContentType Content = TerritoryContentType;
-        //bool Dungeon = (int)Content == 2;
-
         if (ShouldUseBurstMedicine(out act))
         {
             return true;
@@ -918,6 +876,7 @@ public class MCH_KirboPvE : MCH_Base
     protected override void UpdateInfo()
     {
         HandleOpenerAvailability();
+        BurstActionCheck();
         ToolKitCheck();
         Methods.StateOfOpener();
     }
@@ -932,8 +891,6 @@ public class MCH_KirboPvE : MCH_Base
         {
             WillhaveTool = WillHaveDrill || WillHaveAirAnchor || WillHaveChainSaw;
         }
-
-        Methods.InBurst = Player.HasStatus(true, StatusID.Wildfire);
     }
 
     // Used to check OpenerAvailability
@@ -966,6 +923,9 @@ public class MCH_KirboPvE : MCH_Base
         Methods.LvL80_Ultimate_OpenerActionsAvailable = TEA && NoResources && ReassembleOneCharge && HasDrill && HasAirAnchor && HasWildfire && HasBarrelStabilizer;
 
     }
+    private void BurstActionCheck()
+    {
+        Methods.InBurst = Player.HasStatus(true, StatusID.Wildfire);
+    }
     #endregion
-
 }
