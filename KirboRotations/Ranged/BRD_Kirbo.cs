@@ -6,12 +6,12 @@ namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.BattleVoice)]
 [SourceCode(Path = "main/KirboRotations/Ranged/BRD_Default.cs")]
-public sealed class BRD_Default : BRD_Base
+public sealed class BRD_Kirbo : BRD_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
-    public override string RotationName => "Kirbo's Bard (PvE)";
+    public override string RotationName => "Kirbo's Bard\n(PvE)";
     public override string Description => "Please make sure that the three song times add up to 120 seconds!";
     #endregion
 
@@ -25,6 +25,9 @@ public sealed class BRD_Default : BRD_Base
     {
         try
         {
+            //try {}
+            //catch {}
+
             try
             {
                 ImGuiEx.TripleSpacing();
@@ -56,7 +59,6 @@ public sealed class BRD_Default : BRD_Base
                     ImGui.Text("OpenerHasFailed: " + Methods.OpenerHasFailed);
                     ImGui.Text("OpenerHasFinished: " + Methods.OpenerHasFinished);
                     ImGui.Text("_openerFlag: " + Methods._openerFlag);
-                    
                     // ... other rotation status ...
                 });
                 ImGuiEx.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
@@ -86,15 +88,13 @@ public sealed class BRD_Default : BRD_Base
             {
                 ImGuiEx.CollapsingHeaderWithContent("Action Details", () =>
                 {
-                    if (ImGui.BeginTable("actionTable", 2,ImGuiTableFlags.BordersOuter))
+                    if (ImGui.BeginTable("actionTable", 2, ImGuiTableFlags.BordersOuter))
                     {
                         ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
                         ImGui.TableNextRow();
                         ImGui.TableNextColumn(); ImGui.Text("GCD Remain:"); ImGui.TableNextColumn(); ImGui.Text(WeaponRemain.ToString());
                         ImGui.TableNextRow();
-
                         ImGui.TableNextColumn(); ImGui.Text($"TimeSinceLastAction:"); ImGui.TableNextColumn(); ImGui.Text(TimeSinceLastAction.TotalSeconds.ToString());
-
                         // Add more rows as needed...
 
                         ImGui.EndTable();
