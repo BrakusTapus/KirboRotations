@@ -10,7 +10,7 @@
         <PlatformTarget>x64</PlatformTarget>
         <Platforms>AnyCPU</Platforms>
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-        <RSversion>3.5.6.8</RSversion>
+        <RSversion>3.5.6.9</RSversion>
         <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\$(RSversion)</RSInstallPath>
         <ECommonsHintPath>$(RSInstallPath)\ECommons.dll</ECommonsHintPath>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -31,12 +31,13 @@
     </PropertyGroup>
 
     <!-- Files Management -->
-    <!-- Exclude from Compilation -->
+    <!-- Exclude from Compiler -->
     <ItemGroup>
         <Compile Remove="Magical\BLU_Default.cs" />
         <Compile Remove="Magical\BLU_Extra.cs" />
         <Compile Remove="Melee\DRG_KirboPVP.cs" />
         <Compile Remove="Melee\NIN_Default.cs" />
+        <Compile Remove="Ranged\BRD_Default.cs" />
         <Compile Remove="Ranged\MCH_Default.cs" />
         <Compile Remove="Ranged\MCH_KirboComplete.cs" />
         <Compile Remove="Ranged\MCH_KirboPvE_Copy.cs" />
@@ -46,20 +47,22 @@
         <Compile Remove="Utility\ImGuiEx\ImGuiEx2.cs" />
     </ItemGroup>
 
-    <!-- Include for easy access/reference -->
+    <!-- Files Management -->
+    <!-- Include for access/reference -->
     <ItemGroup>
-        <None Include="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+        <None Include="$(AppData)\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
         <None Include="Magical\BLU_Extra.cs" />
         <None Include="Magical\BLU_Default.cs" />
         <None Include="Melee\DRG_KirboPVP.cs" />
         <None Include="Melee\NIN_Default.cs" />
+        <None Include="Ranged\BRD_Default.cs" />
         <None Include="Ranged\MCH_Default.cs" />
         <None Include="Ranged\MCH_KirboPvE_Copy.cs" />
         <None Include="Ranged\MCH_KirboPvP_Copy.cs" />
         <None Include="Utility\Data\Actions\ActionUpdater.cs" />
     </ItemGroup>
 
-    <!-- Reference Libraries -->
+    <!-- Default Dalamud Reference Libraries -->
     <ItemGroup>
         <Reference Include="Dalamud">
             <HintPath>$(DalamudLibPath)Dalamud.dll</HintPath>
@@ -67,10 +70,6 @@
         </Reference>
         <Reference Include="Dalamud.Common">
             <HintPath>$(DalamudLibPath)Dalamud.Common.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="ECommons">
-            <HintPath>$(ECommonsHintPath)</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="ImGui.NET">
@@ -109,7 +108,18 @@
             <HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
             <Private>False</Private>
         </Reference>
+    </ItemGroup>
 
+    <!-- Ecommons path (should point to Rotation Solver's ECommons) -->
+    <ItemGroup>
+        <Reference Include="ECommons">
+            <HintPath>$(ECommonsHintPath)</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+    <!-- Global Namespace usings -->
+    <ItemGroup>
         <Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
         <Using Include="Dalamud.Game.ClientState.Objects.Types" />
         <Using Include="Dalamud.Interface" />
@@ -133,6 +143,8 @@
     <ItemGroup>
         <EditorConfigFiles Remove="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
     </ItemGroup>
+
+    <!-- RS API -->
     <ItemGroup>
         <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
     </ItemGroup>
