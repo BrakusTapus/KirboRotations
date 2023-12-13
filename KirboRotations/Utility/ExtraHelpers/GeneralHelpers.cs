@@ -93,6 +93,5 @@ public static class GeneralHelpers
     /// 
     /// </summary>
     public static unsafe bool IsPerforming => Conditions.Instance()->Flags[16];
-
     #endregion
 }

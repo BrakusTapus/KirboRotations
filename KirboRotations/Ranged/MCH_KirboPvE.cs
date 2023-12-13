@@ -812,6 +812,12 @@ public class MCH_KirboPvE : MCH_Base
     #endregion
 
     #region Job Helper Methods
+    // This should be relevant to the Action shown in the [RotationDesc(ActionID.Action]
+    private void BurstActionCheck()
+    {
+        BurstHelpers.InBurst = Player.HasStatus(true, StatusID.Wildfire);
+    }
+
     // Tincture Conditions
     private bool ShouldUseBurstMedicine(out IAction act)
     {
@@ -935,9 +941,6 @@ public class MCH_KirboPvE : MCH_Base
         OpenerHelpers.LvL80_Ultimate_OpenerActionsAvailable = TEA && NoResources && ReassembleOneCharge && HasDrill && HasAirAnchor && HasWildfire && HasBarrelStabilizer;
 
     }
-    private void BurstActionCheck()
-    {
-        BurstHelpers.InBurst = Player.HasStatus(true, StatusID.Wildfire);
-    }
+
     #endregion
 }
