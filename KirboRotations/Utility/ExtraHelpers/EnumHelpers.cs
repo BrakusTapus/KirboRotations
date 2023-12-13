@@ -21,9 +21,10 @@ public enum Compatibility
 [Flags]
 public enum Features
 {
-    UseTincture = 0,
-    SavageOptimized = 1,
-    HasUserConfig = 2,
+    None = 0,
+    UseTincture = 1,
+    SavageOptimized = 2,
+    HasUserConfig = 3,
 }
 
 /// <summary>
@@ -67,4 +68,5 @@ public enum ContentCompatibility
     Eureka = 12,
     VariantDungeons = 13,
     Criterion = 14,
+    Hunts = 15,
 }

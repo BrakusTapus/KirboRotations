@@ -18,18 +18,23 @@ public sealed class SGE_Kirbo : SGE_Base
     public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override string Description => $"{DefaultDescription}";
     private string DefaultDescription =>
-            $"{kService.USERNAME}'s rotation for the job: {ClassJob.Name}\n" +
-            $"Rotation Version: {DescriptionHelpers.RotationVersion}\n" +
-            $"This is a modified version of the {ClassJob.Abbreviation} rotation from Archi's DefaultRotations\n" +
-            $"\nThis rotation is compatible with the following content:\n" +
-            $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibility)}\n\n" +
-            $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibility)}\n" +
-            $"\nThis rotation features:\n" +
-            $"{DescriptionHelpers.GetFeaturesDescription(RotationFeatures)}";
-    private UltimateCompatibility UltimateCompatibility => UltimateCompatibility.UwU | UltimateCompatibility.UCoB;
-    private ContentCompatibility ContentCompatibility => ContentCompatibility.Dungeons | ContentCompatibility.Trials | ContentCompatibility.DutyRoulette;
-    private Features RotationFeatures => Features.HasUserConfig;
+        $"{kService.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
+        $"This is a modified version of the {ClassJob.Name} rotation from Archi's DefaultRotations\n" +
+        $"Note: For more information check out the 'Status' category\n" +
+        $"\nContent compatibility list:\n" +
+        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n\n" +
+        $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibilities)}\n" +
+        $"\nFeature list:\n" +
+        $"{DescriptionHelpers.GetFeaturesDescription(FeaturesList)}";
 
+    private List<UltimateCompatibility> UltimateCompatibilities { get; } = new List<UltimateCompatibility>
+    { UltimateCompatibility.NotCompatible, };
+
+    private List<ContentCompatibility> ContentCompatibilities { get; } = new List<ContentCompatibility>
+    { ContentCompatibility.DutyRoulette, ContentCompatibility.FATEs, ContentCompatibility.TreasureHunt, ContentCompatibility.DeepDungeons, ContentCompatibility.VariantDungeons, };
+
+    private List<Features> FeaturesList { get; } = new List<Features>
+    { Features.HasUserConfig, };
     #endregion
 
     private static bool InTwoMIsBurst()
