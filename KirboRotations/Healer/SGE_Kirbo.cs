@@ -18,8 +18,18 @@ public sealed class SGE_Kirbo : SGE_Base
     public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override string Description => $"{DefaultDescription}";
     private string DefaultDescription =>
-        $"{kService.USERNAME}'s {ClassJob.Name}\n{DescriptionHelpers.RotationVersion}\nThis is a modified version of the {ClassJob.Abbreviation} rotation from Archi's DefaultRotations\nCompatibility:\n" +
-        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibility.NotCompatible)}";
+            $"{kService.USERNAME}'s rotation for the job: {ClassJob.Name}\n" +
+            $"Rotation Version: {DescriptionHelpers.RotationVersion}\n" +
+            $"This is a modified version of the {ClassJob.Abbreviation} rotation from Archi's DefaultRotations\n" +
+            $"\nThis rotation is compatible with the following content:\n" +
+            $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibility)}\n\n" +
+            $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibility)}\n" +
+            $"\nThis rotation features:\n" +
+            $"{DescriptionHelpers.GetFeaturesDescription(RotationFeatures)}";
+    private UltimateCompatibility UltimateCompatibility => UltimateCompatibility.UwU | UltimateCompatibility.UCoB;
+    private ContentCompatibility ContentCompatibility => ContentCompatibility.Dungeons | ContentCompatibility.Trials | ContentCompatibility.DutyRoulette;
+    private Features RotationFeatures => Features.HasUserConfig;
+
     #endregion
 
     private static bool InTwoMIsBurst()
@@ -184,7 +194,7 @@ public sealed class SGE_Kirbo : SGE_Base
         {
             if (Pneuma.CanUse(out act, CanUseOption.MustUse)) return true;
         }
-        
+
         if (IsMoving && Toxikon.CanUse(out act, CanUseOption.MustUse)) return true;
 
         if (Dyskrasia.CanUse(out act)) return true;
@@ -227,7 +237,7 @@ public sealed class SGE_Kirbo : SGE_Base
 
             if (Physis2.CanUse(out act)) return true;
             if (!Physis2.EnoughLevel && Physis.CanUse(out act)) return true;
-          
+
             if (Holos.CanUse(out act, CanUseOption.OnLastAbility)) return true;
 
             if ((!Haima.EnoughLevel || Haima.ElapsedAfter(20)) && Panhaima.CanUse(out act, CanUseOption.OnLastAbility)) return true;
