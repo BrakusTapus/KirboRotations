@@ -45,23 +45,18 @@
         <Compile Remove="Ranged\MCH_KirboPvP_Copy.cs" />
         <Compile Remove="Ranged\MCH_Template.cs" />
         <Compile Remove="Utility\ImGuiEx\ImGuiEx2.cs" />
-        <Compile Remove="Utility\Rotations\ActionHandling\MCH_ActionLogic.cs" />
+        <Compile Remove="Utility\Rotations\**" />
+        <Compile Remove="Utility\KirboRotation\**" />
     </ItemGroup>
 
     <!-- Files Management -->
     <!-- Include for access/reference -->
     <ItemGroup>
         <None Include="$(AppData)\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
-        <None Include="Healer\SGE_Default.cs" />
         <None Include="Magical\BLU_Extra.cs" />
         <None Include="Magical\BLU_Default.cs" />
         <None Include="Melee\DRG_KirboPVP.cs" />
         <None Include="Melee\NIN_Default.cs" />
-        <None Include="Ranged\BRD_Default.cs" />
-        <None Include="Ranged\MCH_Default.cs" />
-        <None Include="Ranged\MCH_KirboPvE_Copy.cs" />
-        <None Include="Ranged\MCH_KirboPvP_Copy.cs" />
-        <None Include="Utility\Rotations\ActionHandling\MCH_ActionLogic.cs" />
     </ItemGroup>
 
     <!-- Default Dalamud Reference Libraries -->
