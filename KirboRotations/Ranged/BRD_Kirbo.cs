@@ -13,7 +13,25 @@ public class BRD_Kirbo : BRD_Base
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
     public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{DescriptionHelpers.RotationVersion} - Please make sure that the three song times add up to 120 seconds!";
+    public override string Description => $"{DefaultDescription}";
+    private string DefaultDescription =>
+        $"{kService.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
+        $"This is a modified version of the {ClassJob.Name} rotation from Archi's DefaultRotations\n" +
+        $"Note: For more information check out the 'Status' category\n" +
+        $"\nContent compatibility list:\n" +
+        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n" +
+        $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibilities)}\n" +
+        $"\nFeature list:\n" +
+        $"{DescriptionHelpers.GetFeaturesDescription(FeaturesList)}";
+
+    private List<UltimateCompatibility> UltimateCompatibilities { get; } = new List<UltimateCompatibility>
+    { UltimateCompatibility.NotCompatible, };
+
+    private List<ContentCompatibility> ContentCompatibilities { get; } = new List<ContentCompatibility>
+    { ContentCompatibility.DutyRoulette, };
+
+    private List<Features> FeaturesList { get; } = new List<Features>
+    { Features.UseTincture, Features.HasUserConfig };
     #endregion
 
     #region New PvE IBaseActions

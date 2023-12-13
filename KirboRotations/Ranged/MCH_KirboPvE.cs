@@ -16,7 +16,24 @@ public class MCH_KirboPvE : MCH_Base
     public override string GameVersion => "6.51";
     public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override string Description => $"{DefaultDescription}";
-    private string DefaultDescription => $"{kService.USERNAME}'s {ClassJob.Name}\n{DescriptionHelpers.RotationVersion}\nDoes Delayed Tools and Early AA. \n\n Should be optimised for Boss Level 90 content with 2.5 GCD.";
+    private string DefaultDescription =>
+        $"{kService.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
+        $"Does Delayed Tools and Early AA. Should be optimised for Boss Level 90 content with 2.5 GCD\n" +
+        $"Note: For more information check out the 'Status' category\n" +
+        $"\nContent compatibility list:\n" +
+        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n" +
+        $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibilities)}\n" +
+        $"\nFeature list:\n" +
+        $"{DescriptionHelpers.GetFeaturesDescription(FeaturesList)}";
+
+    private List<UltimateCompatibility> UltimateCompatibilities { get; } = new List<UltimateCompatibility>
+    { UltimateCompatibility.UCoB, };
+
+    private List<ContentCompatibility> ContentCompatibilities { get; } = new List<ContentCompatibility>
+    { ContentCompatibility.DutyRoulette, ContentCompatibility.ExtremeTrials, ContentCompatibility.SavageRaids, ContentCompatibility.DeepDungeons, ContentCompatibility.TreasureHunt, ContentCompatibility.Hunts };
+
+    private List<Features> FeaturesList { get; } = new List<Features>
+    { Features.UseTincture, Features.SavageOptimized, Features.HasUserConfig };
     #endregion
 
     #region New PvE IBaseActions

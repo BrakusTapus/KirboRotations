@@ -22,7 +22,7 @@ public sealed class SGE_Kirbo : SGE_Base
         $"This is a modified version of the {ClassJob.Name} rotation from Archi's DefaultRotations\n" +
         $"Note: For more information check out the 'Status' category\n" +
         $"\nContent compatibility list:\n" +
-        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n\n" +
+        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n" +
         $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibilities)}\n" +
         $"\nFeature list:\n" +
         $"{DescriptionHelpers.GetFeaturesDescription(FeaturesList)}";
