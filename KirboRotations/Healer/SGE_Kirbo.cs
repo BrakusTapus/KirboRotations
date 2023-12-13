@@ -3,8 +3,8 @@ using KirboRotations.Utility.Service;
 
 namespace KirboRotations.Healer;
 
-[SourceCode(Path = "main/KirboRotations/Healer/SGE_Default.cs")]
 //[RotationDesc(ActionID.Pneuma)]
+[SourceCode(Path = "main/KirboRotations/Healer/SGE_Default.cs")]
 public sealed class SGE_Kirbo : SGE_Base
 {
     #region Rotation Info
