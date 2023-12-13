@@ -1,8 +1,7 @@
 ﻿using KirboRotations.Utility.ImGuiEx;
-using static KirboRotations.Utility.Strings.RotationStrings;
+using KirboRotations.Utility.ExtraHelpers;
 using static KirboRotations.Utility.Data.StatusID_Buffs;
 using KirboRotations.Utility.Service;
-using KirboRotations.Utility.ExtraHelpers;
 
 namespace KirboRotations.Ranged;
 
@@ -14,7 +13,7 @@ public class BRD_Kirbo : BRD_Base
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
     public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{RotationVersion} - Please make sure that the three song times add up to 120 seconds!";
+    public override string Description => $"{DescriptionHelpers.RotationVersion} - Please make sure that the three song times add up to 120 seconds!";
     #endregion
 
     #region New PvE IBaseActions
@@ -35,7 +34,7 @@ public class BRD_Kirbo : BRD_Base
                 ImGuiEx.TripleSpacing();
                 ImGuiEx.CollapsingHeaderWithContent("General Info", () =>
                 {
-                    ImGui.Text($"Rotation: {RotationName} {RotationVersion}");
+                    ImGui.Text($"Rotation: {RotationName} {DescriptionHelpers.RotationVersion}");
                     ImGuiEx.ImGuiColoredText("Rotation  Job: ", ClassJob.Abbreviation, EColor.GreenBright);
                     ImGuiEx.SeperatorWithSpacing();
                     ImGui.Text($"Player Name: {Player.Name}");
@@ -47,7 +46,7 @@ public class BRD_Kirbo : BRD_Base
                 });
                 ImGuiEx.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
             }
-            catch { Serilog.Log.Error($"{ErrorDebug} - General Info"); }
+            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - General Info"); }
 
             ImGuiEx.TripleSpacing();
 
@@ -55,17 +54,17 @@ public class BRD_Kirbo : BRD_Base
             {
                 ImGuiEx.CollapsingHeaderWithContent("Rotation Status", () =>
                 {
-                    ImGui.Text("Openerstep: " + Methods.OpenerStep);
-                    ImGui.Text("OpenerActionsAvailable: " + Methods.OpenerActionsAvailable);
-                    ImGui.Text("OpenerInProgress: " + Methods.OpenerInProgress);
-                    ImGui.Text("OpenerHasFailed: " + Methods.OpenerHasFailed);
-                    ImGui.Text("OpenerHasFinished: " + Methods.OpenerHasFinished);
-                    ImGui.Text("_openerFlag: " + Methods._openerFlag);
+                    ImGui.Text("Openerstep: " + OpenerHelpers.OpenerStep);
+                    ImGui.Text("OpenerActionsAvailable: " + OpenerHelpers.OpenerActionsAvailable);
+                    ImGui.Text("OpenerInProgress: " + OpenerHelpers.OpenerInProgress);
+                    ImGui.Text("OpenerHasFailed: " + OpenerHelpers.OpenerHasFailed);
+                    ImGui.Text("OpenerHasFinished: " + OpenerHelpers.OpenerHasFinished);
+                    ImGui.Text("_openerFlag: " + OpenerHelpers._openerFlag);
                     // ... other rotation status ...
                 });
                 ImGuiEx.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
             }
-            catch { Serilog.Log.Error($"{ErrorDebug} - Rotation Status"); }
+            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Rotation Status"); }
 
             ImGuiEx.TripleSpacing();
 
@@ -73,16 +72,16 @@ public class BRD_Kirbo : BRD_Base
             {
                 ImGuiEx.CollapsingHeaderWithContent("Burst Status", () =>
                 {
-                    ImGui.Text("BurstStep: " + Methods.BurstStep);
-                    ImGui.Text("BurstActionsAvailable: " + Methods.BurstActionsAvailable);
-                    ImGui.Text("BurstInProgress: " + Methods.BurstInProgress);
-                    ImGui.Text("BurstHasFailed: " + Methods.BurstHasFailed);
-                    ImGui.Text("BurstHasFinished: " + Methods.BurstHasFinished);
+                    ImGui.Text("BurstStep: " + BurstHelpers.BurstStep);
+                    ImGui.Text("BurstActionsAvailable: " + BurstHelpers.BurstActionsAvailable);
+                    ImGui.Text("BurstInProgress: " + BurstHelpers.BurstInProgress);
+                    ImGui.Text("BurstHasFailed: " + BurstHelpers.BurstHasFailed);
+                    ImGui.Text("BurstHasFinished: " + BurstHelpers.BurstHasFinished);
                     // ... other Burst status ...
                 });
                 ImGuiEx.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
             }
-            catch { Serilog.Log.Error($"{ErrorDebug} - Burst Status"); }
+            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Burst Status"); }
 
             ImGuiEx.TripleSpacing();
 
@@ -104,7 +103,7 @@ public class BRD_Kirbo : BRD_Base
                 });
                 ImGuiEx.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
             }
-            catch { Serilog.Log.Error($"{ErrorDebug} - Action Details"); }
+            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Action Details"); }
 
             ImGuiEx.TripleSpacing();
 
@@ -120,10 +119,10 @@ public class BRD_Kirbo : BRD_Base
                 { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
                 ImGuiEx.DisplayResetButton("Reset Properties");
             }
-            catch { Serilog.Log.Error($"{ErrorDebug} - Extra + Reset Button"); }
+            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Extra + Reset Button"); }
 
         }
-        catch { Serilog.Log.Warning($"{ErrorDebug} - DisplayStatus"); }
+        catch { Serilog.Log.Warning($"{DebugWindowHelpers.ErrorDebug} - DisplayStatus"); }
     }
     #endregion
 
@@ -148,7 +147,7 @@ public class BRD_Kirbo : BRD_Base
     {
         if (remainTime <= WindBite.AnimationLockTime && WindBite.CanUse(out _))
         {
-            Methods.OpenerInProgress = true;
+            OpenerHelpers.OpenerInProgress = true;
             return WindBite;
         }
 
@@ -166,47 +165,47 @@ public class BRD_Kirbo : BRD_Base
     private bool Opener(out IAction act)
     {
         act = default(IAction);
-        while (Methods.OpenerInProgress)
+        while (OpenerHelpers.OpenerInProgress)
         {
-            if (!Methods._openerFlag && (Player.IsDead) || (TimeSinceLastAction.TotalSeconds > 3.0))
+            if (!OpenerHelpers._openerFlag && (Player.IsDead) || (TimeSinceLastAction.TotalSeconds > 3.0))
             {
-                Methods.OpenerHasFailed = true;
-                Methods._openerFlag = true;
+                OpenerHelpers.OpenerHasFailed = true;
+                OpenerHelpers._openerFlag = true;
             }
-            switch (Methods.OpenerStep)
+            switch (OpenerHelpers.OpenerStep)
             {
                 case 0:
-                    return Methods.OpenerController(IsLastGCD(true, WindBite), WindBite.CanUse(out act, CanUseOption.MustUse));
+                    return OpenerHelpers.OpenerController(IsLastGCD(true, WindBite), WindBite.CanUse(out act, CanUseOption.MustUse));
                 case 1:
-                    return Methods.OpenerController(IsLastAbility(false, WanderersMinuet), WanderersMinuet.CanUse(out act, CanUseOption.MustUseEmpty));
+                    return OpenerHelpers.OpenerController(IsLastAbility(false, WanderersMinuet), WanderersMinuet.CanUse(out act, CanUseOption.MustUseEmpty));
                 case 2:
-                    return Methods.OpenerController(IsLastAbility(false, RagingStrikes), RagingStrikes.CanUse(out act, CanUseOption.OnLastAbility));
+                    return OpenerHelpers.OpenerController(IsLastAbility(false, RagingStrikes), RagingStrikes.CanUse(out act, CanUseOption.OnLastAbility));
                 case 3:
-                    return Methods.OpenerController(IsLastGCD(true, VenomousBite), VenomousBite.CanUse(out act, CanUseOption.MustUse));
+                    return OpenerHelpers.OpenerController(IsLastGCD(true, VenomousBite), VenomousBite.CanUse(out act, CanUseOption.MustUse));
                 case 4:
-                    return Methods.OpenerController(IsLastAbility(false, EmpyrealArrow), EmpyrealArrow.CanUse(out act, CanUseOption.MustUseEmpty));
+                    return OpenerHelpers.OpenerController(IsLastAbility(false, EmpyrealArrow), EmpyrealArrow.CanUse(out act, CanUseOption.MustUseEmpty));
                 case 5:
-                    return Methods.OpenerController(IsLastAbility(true, Bloodletter), Bloodletter.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
+                    return OpenerHelpers.OpenerController(IsLastAbility(true, Bloodletter), Bloodletter.CanUse(out act, CanUseOption.MustUseEmpty | CanUseOption.OnLastAbility));
                 case 6:
-                    return Methods.OpenerController(IsLastGCD(true, HeavyShoot), HeavyShoot.CanUse(out act, CanUseOption.MustUse));
+                    return OpenerHelpers.OpenerController(IsLastGCD(true, HeavyShoot), HeavyShoot.CanUse(out act, CanUseOption.MustUse));
                 case 7:
-                    return Methods.OpenerController(IsLastAbility(false, RadiantFinale), RadiantFinale.CanUse(out act, CanUseOption.MustUse));
+                    return OpenerHelpers.OpenerController(IsLastAbility(false, RadiantFinale), RadiantFinale.CanUse(out act, CanUseOption.MustUse));
                 case 8:
-                    return Methods.OpenerController(IsLastAbility(false, BattleVoice), BattleVoice.CanUse(out act, CanUseOption.OnLastAbility));
+                    return OpenerHelpers.OpenerController(IsLastAbility(false, BattleVoice), BattleVoice.CanUse(out act, CanUseOption.OnLastAbility));
                 case 9:
-                    return Methods.OpenerController(IsLastGCD(true, HeavyShoot), HeavyShoot.CanUse(out act, CanUseOption.MustUse));
+                    return OpenerHelpers.OpenerController(IsLastGCD(true, HeavyShoot), HeavyShoot.CanUse(out act, CanUseOption.MustUse));
                 case 10:
-                    return Methods.OpenerController(IsLastAbility(false, Barrage), Barrage.CanUse(out act, CanUseOption.MustUseEmpty));
+                    return OpenerHelpers.OpenerController(IsLastAbility(false, Barrage), Barrage.CanUse(out act, CanUseOption.MustUseEmpty));
                 case 11:
-                    return Methods.OpenerController(IsLastGCD(true, StraitShoot), StraitShoot.CanUse(out act, CanUseOption.MustUse));
+                    return OpenerHelpers.OpenerController(IsLastGCD(true, StraitShoot), StraitShoot.CanUse(out act, CanUseOption.MustUse));
                 case 12:
-                    return Methods.OpenerController(IsLastAbility(false, Sidewinder), Sidewinder.CanUse(out act, (CanUseOption)17));
+                    return OpenerHelpers.OpenerController(IsLastAbility(false, Sidewinder), Sidewinder.CanUse(out act, (CanUseOption)17));
                 case 13:
-                    return Methods.OpenerController(IsLastGCD(true, HeavyShoot), HeavyShoot.CanUse(out act, CanUseOption.MustUse));
+                    return OpenerHelpers.OpenerController(IsLastGCD(true, HeavyShoot), HeavyShoot.CanUse(out act, CanUseOption.MustUse));
                 case 14:
-                    Methods.OpenerHasFinished = true;
-                    Methods.OpenerInProgress = false;
-                    Serilog.Log.Information($"{OpenerComplete} - BRD Opener");
+                    OpenerHelpers.OpenerHasFinished = true;
+                    OpenerHelpers.OpenerInProgress = false;
+                    Serilog.Log.Information($"{OpenerHelpers.OpenerComplete} - BRD Opener");
                     // Finished Opener
                     break;
             }
@@ -227,11 +226,11 @@ public class BRD_Kirbo : BRD_Base
             return false;
         }
 
-        if (Methods.OpenerInProgress)
+        if (OpenerHelpers.OpenerInProgress)
         {
             return Opener(out act);
         }
-        if (!Methods.OpenerInProgress)
+        if (!OpenerHelpers.OpenerInProgress)
         {
             if (IronJaws.CanUse(out act))
             {
@@ -307,11 +306,11 @@ public class BRD_Kirbo : BRD_Base
         {
             return true;
         }
-        if (Methods.OpenerInProgress)
+        if (OpenerHelpers.OpenerInProgress)
         {
             return Opener(out act);
         }
-        if (!Methods.OpenerInProgress)
+        if (!OpenerHelpers.OpenerInProgress)
         {
             if (nextGCD.IsTheSameTo(true, StraitShoot, VenomousBite, WindBite, IronJaws))
             {
@@ -334,11 +333,11 @@ public class BRD_Kirbo : BRD_Base
     protected override bool AttackAbility(out IAction act)
     {
         act = null;
-        if (Methods.OpenerInProgress)
+        if (OpenerHelpers.OpenerInProgress)
         {
             return Opener(out act);
         }
-        if (!Methods.OpenerInProgress)
+        if (!OpenerHelpers.OpenerInProgress)
         {
             if (Song == Song.NONE)
             {
@@ -618,13 +617,13 @@ public class BRD_Kirbo : BRD_Base
     protected override void UpdateInfo()
     {
         HandleOpenerAvailability();
-        Methods.StateOfOpener();
+        OpenerHelpers.StateOfOpener();
         BurstActionCheck();
     }
 
     public void BurstActionCheck()
     {
-        Methods.InBurst = Player.HasStatus(true, StatusID.BattleVoice);
+        BurstHelpers.InBurst = Player.HasStatus(true, StatusID.BattleVoice);
     }
 
     // Used to check OpenerAvailability
@@ -639,8 +638,8 @@ public class BRD_Kirbo : BRD_Base
         bool HasBV = !BattleVoice.IsCoolingDown;
         bool HasBar = !Barrage.IsCoolingDown;
         bool HasSideWinder = !Sidewinder.IsCoolingDown;
-        bool Openerstep0 = Methods.OpenerStep == 0;
-        Methods.OpenerActionsAvailable = HasWM && HasRS && HasEA && HasRF && HasBV && BLcharges == 3 && HasBar && Lvl90 && HasSideWinder && Openerstep0;
+        bool Openerstep0 = OpenerHelpers.OpenerStep == 0;
+        OpenerHelpers.OpenerActionsAvailable = HasWM && HasRS && HasEA && HasRF && HasBV && BLcharges == 3 && HasBar && Lvl90 && HasSideWinder && Openerstep0;
     }
     #endregion
 }

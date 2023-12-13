@@ -1611,7 +1611,7 @@ public static unsafe partial class ImGuiEx
     {
         if (ImGui.Button($"{label}"))
         {
-            Methods.ResetOpenerProperties();
+            OpenerHelpers.ResetOpenerProperties();
         }
         ImGuiEx.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
     }

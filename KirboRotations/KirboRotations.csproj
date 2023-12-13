@@ -33,6 +33,7 @@
     <!-- Files Management -->
     <!-- Exclude from Compiler -->
     <ItemGroup>
+        <Compile Remove="Healer\SGE_Default.cs" />
         <Compile Remove="Magical\BLU_Default.cs" />
         <Compile Remove="Magical\BLU_Extra.cs" />
         <Compile Remove="Melee\DRG_KirboPVP.cs" />
@@ -51,6 +52,7 @@
     <!-- Include for access/reference -->
     <ItemGroup>
         <None Include="$(AppData)\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+        <None Include="Healer\SGE_Default.cs" />
         <None Include="Magical\BLU_Extra.cs" />
         <None Include="Magical\BLU_Default.cs" />
         <None Include="Melee\DRG_KirboPVP.cs" />

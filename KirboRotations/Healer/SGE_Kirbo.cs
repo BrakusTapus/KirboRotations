@@ -1,7 +1,10 @@
 namespace KirboRotations.Healer;
 
+using KirboRotations.Utility.ExtraHelpers;
+using KirboRotations.Utility.Service;
+
 [SourceCode(Path = "main/KirboRotations/Healer/SGE_Default.cs")]
-public sealed class SGE_Default : SGE_Base
+public sealed class SGE_Kirbo : SGE_Base
 {
     /*
      * TO-DO
@@ -9,13 +12,15 @@ public sealed class SGE_Default : SGE_Base
      PvE: SGE_default is returning an error. (Soteria line 159)
      */
 
+    #region Rotation Info
     public override CombatType Type => CombatType.PvE;
-
     public override string GameVersion => "6.51";
-
-    public override string RotationName => "Default";
-
-    public override string Description => "Kirbo Revived SGE\nPlease contact Nore#7219 on Discord for questions about this rotation.";
+    public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string Description => $"{DefaultDescription}";
+    private string DefaultDescription =>
+        $"{kService.USERNAME}'s {ClassJob.Name}\n{DescriptionHelpers.RotationVersion}\nThis is a modified version of the {ClassJob.Abbreviation} rotation from Archi's DefaultRotations\nCompatibility:\n" +
+        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibility.NotCompatible)}";
+    #endregion
 
     private static bool InTwoMIsBurst()
     {
@@ -23,7 +28,6 @@ public sealed class SGE_Default : SGE_Base
         if (RatioOfMembersIn2minsBurst == -1) return true;
         else return false;
     }
-
     private static BaseAction MEukrasianDiagnosis { get; } = new(ActionID.EukrasianDiagnosis, ActionOption.Heal)
     {
         ChoiceTarget = (Targets, mustUse) =>
@@ -40,15 +44,12 @@ public sealed class SGE_Default : SGE_Base
             return true;
         }
     };
-
     public override bool CanHealSingleSpell => base.CanHealSingleSpell && (Configs.GetBool("GCDHeal") || PartyHealers.Count() < 2);
     public override bool CanHealAreaSpell => base.CanHealAreaSpell && (Configs.GetBool("GCDHeal") || PartyHealers.Count() < 2);
-
     protected override IRotationConfigSet CreateConfiguration()
     {
         return base.CreateConfiguration().SetBool(CombatType.PvE, "GCDHeal", false, "Use spells with cast times to heal.");
     }
-
     protected override IAction CountDownAction(float remainTime)
     {
         if (remainTime <= 1.5 && Dosis.CanUse(out var act)) return act;
@@ -149,7 +150,6 @@ public sealed class SGE_Default : SGE_Base
 
         return base.DefenseAreaGCD(out act);
     }
-
     protected override bool GeneralAbility(out IAction act)
     {
         if (Kardia.CanUse(out act)) return true;
@@ -162,7 +162,6 @@ public sealed class SGE_Default : SGE_Base
 
         return base.GeneralAbility(out act);
     }
-
     protected override bool GeneralGCD(out IAction act)
     {
         if (HostileTarget?.IsBossFromTTK() ?? false)

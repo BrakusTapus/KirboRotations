@@ -1,7 +1,7 @@
 ﻿using KirboRotations.Utility.ExtraHelpers;
 using KirboRotations.Utility.ImGuiEx;
 using static ImGuiNET.ImGui;
-using static KirboRotations.Utility.ExtraHelpers.Methods;
+using static KirboRotations.Utility.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Ranged;
 
@@ -250,7 +250,7 @@ public class PLD_KirboPvP : PLD_Base
         bool lowHPNoAttacks = Configs.GetBool("LowHPNoAttacks");
         int lowHPThreshold = Configs.GetInt("LowHPThreshold");
 
-        if (Methods.InPvP())
+        if (GeneralHelpers.InPvP())
         {
             if (guardCancel && playerHasGuard)
             {
