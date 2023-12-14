@@ -1,4 +1,5 @@
-# To be used with [RotationSolver](https://github.com/ArchiDog1998/RotationSolver)
+# To be used with [RotationSolver](https://github.com/Jaksuhn/RotationSolver)
+![GitHub all releases](https://img.shields.io/github/downloads/BrakusTapus/KirboRotations/total)
 
 Download the latest version of KirboRotations:
 
