@@ -1,5 +1,4 @@
-using KirboRotations.Utility.ExtraHelpers;
-using KirboRotations.Utility.Service;
+using KirboRotations.Custom.ExtraHelpers;
 
 namespace KirboRotations.Healer;
 
@@ -10,10 +9,10 @@ public sealed class SGE_Kirbo : SGE_Base
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override string Description => $"{DefaultDescription}";
     private string DefaultDescription =>
-        $"{kService.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
+        $"{GeneralHelpers.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
         $"This is a modified version of the {ClassJob.Name} rotation from Archi's DefaultRotations\n" +
         $"Note: For more information check out the 'Status' category\n" +
         $"\nContent compatibility list:\n" +
@@ -61,10 +60,10 @@ public sealed class SGE_Kirbo : SGE_Base
     #endregion
 
     #region Rotation Config
-    protected override IRotationConfigSet CreateConfiguration()
-    {
-        return base.CreateConfiguration().SetBool(CombatType.PvE, "GCDHeal", false, "Use spells with cast times to heal.");
-    }
+    protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
+        .SetBool(CombatType.PvE, "GCDHeal", false, "Use spells with cast times to heal.")
+        .SetBool(CombatType.PvE, "UseAddersgalWhenLowMP", true, "Use addersgall oGCD's if MP is low.")
+        .SetInt(CombatType.PvE, "EmergencyMP", 3000, "MP Threshold for when to use MP restoring oGCD's", 0, 10000);
     #endregion
 
     #region Countdown Logic
@@ -205,8 +204,7 @@ public sealed class SGE_Kirbo : SGE_Base
     {
         if (base.EmergencyAbility(nextGCD, out act)) return true;
 
-        if (nextGCD.IsTheSameTo(false, Pneuma, EukrasianDiagnosis,
-            EukrasianPrognosis, Diagnosis, Prognosis))
+        if (nextGCD.IsTheSameTo(false, Pneuma, EukrasianDiagnosis, EukrasianPrognosis, Diagnosis, Prognosis))
         {
             if (Zoe.CanUse(out act)) return true;
         }
@@ -214,7 +212,20 @@ public sealed class SGE_Kirbo : SGE_Base
         if (nextGCD.IsTheSameTo(false, Pneuma))
         {
             if (Krasis.CanUse(out act)) return true;
+            else if (Zoe.CanUse(out act)) return true;
+            else if (Soteria.CanUse(out act)) return true;
         }
+
+        if (Configs.GetBool("UseAddersgalWhenLowMP") && Player.CurrentMp < Configs.GetInt("EmergencyMP"))
+        {
+            //if (Addersgall == 2 && (!Rhizomata.IsCoolingDown  || Rhizomata.WillHaveOneCharge(20)))
+            //{
+                if (Druochole.CanUse(out act, CanUseOption.MustUse | CanUseOption.IgnoreTarget)) return true;
+            //}
+        }
+
+        int lucidDreamingThreshold = Configs.GetInt("LucidDreaming");
+        if (Player.CurrentMp < lucidDreamingThreshold && LucidDreaming.CanUse(out act)) return true;
 
         return base.EmergencyAbility(nextGCD, out act);
     }

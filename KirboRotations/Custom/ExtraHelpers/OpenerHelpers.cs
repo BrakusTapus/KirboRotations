@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.Utility.ExtraHelpers;
+﻿namespace KirboRotations.Custom.ExtraHelpers;
 
 public static class OpenerHelpers
 {

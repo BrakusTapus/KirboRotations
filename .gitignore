@@ -368,3 +368,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /.editorconfig
+/KirboRotations/Ranged/3.0.6.3_MCH_Kirbo_AIO.cs
+/KirboRotations/Ranged/MCH_Kirbo_AIO.cs

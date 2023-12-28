@@ -3,20 +3,25 @@
     <!-- General Project Settings -->
     <PropertyGroup>
         <AssemblyName>KirboRotations</AssemblyName>
-        <TargetFramework>net7.0-windows</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
         <Authors>Kirbo</Authors>
         <Version>1.0.0.16</Version>
+        <TargetFramework>net7.0-windows</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
         <Platforms>AnyCPU</Platforms>
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
-        <RSversion>3.5.6.9</RSversion>
-        <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\$(RSversion)</RSInstallPath>
-        <ECommonsHintPath>$(RSInstallPath)</ECommonsHintPath>
+        <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <UseWindowsForms>true</UseWindowsForms>
     </PropertyGroup>
+
+    <!-- Rotation Solver's ECommons Path -->
+    <PropertyGroup>
+        <RSversion>3.5.6.9</RSversion>
+        <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\$(RSversion)</RSInstallPath>
+        <ECommonsHintPath>$(RSInstallPath)</ECommonsHintPath>
+    </PropertyGroup>
+
 
     <!-- Debug Configuration Settings -->
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -33,30 +38,44 @@
     <!-- Files Management -->
     <!-- Exclude from Compiler -->
     <ItemGroup>
+        <Compile Remove="Custom\Actions\BaseActionEx.cs" />
+        <Compile Remove="Custom\Utility\ImGuiEx\ChangelogWindow.cs" />
         <Compile Remove="Healer\SGE_Default.cs" />
         <Compile Remove="Magical\BLU_Default.cs" />
         <Compile Remove="Magical\BLU_Extra.cs" />
         <Compile Remove="Melee\DRG_KirboPVP.cs" />
         <Compile Remove="Melee\NIN_Default.cs" />
+        <Compile Remove="Ranged\3.0.6.3_MCH_Kirbo_AIO.cs" />
         <Compile Remove="Ranged\BRD_Default.cs" />
         <Compile Remove="Ranged\MCH_Default.cs" />
         <Compile Remove="Ranged\MCH_KirboComplete.cs" />
         <Compile Remove="Ranged\MCH_KirboPvE_Copy.cs" />
         <Compile Remove="Ranged\MCH_KirboPvP_Copy.cs" />
+        <Compile Remove="Ranged\MCH_Kirbo_AIO.cs" />
         <Compile Remove="Ranged\MCH_Template.cs" />
-        <Compile Remove="Utility\ImGuiEx\ImGuiEx2.cs" />
-        <Compile Remove="Utility\Rotations\**" />
-        <Compile Remove="Utility\KirboRotation\**" />
+        <Compile Remove="Custom\Utility\ImGuiEx\ImGuiEx2.cs" />
+        <Compile Remove="Custom\Utility\Rotations\**" />
+        <Compile Remove="Custom\Utility\KirboRotation\**" />
+        <Compile Remove="Custom\Utility\Service\**" />
+        <EmbeddedResource Remove="Custom\Utility\Service\**" />
+        <None Remove="Custom\Utility\Service\**" />
     </ItemGroup>
 
     <!-- Files Management -->
     <!-- Include for access/reference -->
     <ItemGroup>
         <None Include="$(AppData)\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+        <None Include="Custom\Actions\BaseActionEx.cs" />
+        <None Include="Custom\Utility\ImGuiEx\ChangelogWindow.cs" />
         <None Include="Magical\BLU_Extra.cs" />
         <None Include="Magical\BLU_Default.cs" />
         <None Include="Melee\DRG_KirboPVP.cs" />
         <None Include="Melee\NIN_Default.cs" />
+        <None Include="Ranged\3.0.6.3_MCH_Kirbo_AIO.cs" />
+        <None Include="Ranged\MCH_Kirbo_AIO.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
     </ItemGroup>
 
     <!-- Default Dalamud Reference Libraries -->
@@ -108,22 +127,17 @@
     </ItemGroup>
 
     <!-- Ecommons path (should point to Rotation Solver's ECommons) -->
+    <!--
     <ItemGroup>
         <Reference Include="ECommons">
             <HintPath>$(ECommonsHintPath)\ECommons.dll</HintPath>
             <Private>False</Private>
         </Reference>
-    </ItemGroup>
-
-    <!-- Package References -->
-    <ItemGroup>
-        <EditorConfigFiles Remove="C:\Users\AJvdM\AppData\Roaming\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
-    </ItemGroup>
+    </ItemGroup> 
+    -->
+    
 
     <!-- RS API -->
-    <ItemGroup>
-        <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
-    </ItemGroup>
 
     <!-- Global Namespace usings -->
     <ItemGroup>
@@ -144,6 +158,7 @@
         <Using Include="System.ComponentModel" />
         <Using Include="System.Numerics" />
         <Using Include="System.Reflection" />
+
     </ItemGroup>
 
 </Project>

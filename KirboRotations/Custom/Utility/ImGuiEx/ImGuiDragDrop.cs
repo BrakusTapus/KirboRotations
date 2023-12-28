@@ -3,7 +3,7 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace KirboRotations.Utility.ImGuiEx;
+namespace KirboRotations.Custom.Utility.ImGuiEx;
 
 // ImGui extra functionality related with Drag and Drop
 public static class ImGuiDragDrop

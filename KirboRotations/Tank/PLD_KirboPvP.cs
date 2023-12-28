@@ -1,7 +1,8 @@
-﻿using KirboRotations.Utility.ExtraHelpers;
+﻿using KirboRotations.Custom.ExtraHelpers;
+using KirboRotations.Custom.Utility.ImGuiEx;
 using KirboRotations.Utility.ImGuiEx;
 using static ImGuiNET.ImGui;
-using static KirboRotations.Utility.ExtraHelpers.GeneralHelpers;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Ranged;
 
@@ -172,7 +173,7 @@ public class PLD_KirboPvP : PLD_Base
 
             if (Player != null)
             {
-                ImGuiEx.ImGuiColoredText("Job: ", ClassJob.Abbreviation, EColor.LightBlue); // Light blue for the abbreviation
+                ImGuiExtra.ImGuiColoredText("Job: ", ClassJob.Abbreviation, EColor.LightBlue); // Light blue for the abbreviation
                 Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
                 Text($"Player.CurrentHp: {Player.CurrentHp}");
                 Separator();

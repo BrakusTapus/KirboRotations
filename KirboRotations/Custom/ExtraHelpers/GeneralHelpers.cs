@@ -1,9 +1,11 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game;
 
-namespace KirboRotations.Utility.ExtraHelpers;
+namespace KirboRotations.Custom.ExtraHelpers;
 
 public static class GeneralHelpers
 {
+    public const string USERNAME = "Kirbo";
+
     /// <summary> Checks if the player is in a PVP enabled zone. </summary>
     /// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
     internal static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();

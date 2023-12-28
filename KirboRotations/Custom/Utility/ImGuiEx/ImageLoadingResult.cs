@@ -1,7 +1,7 @@
 ﻿using Dalamud.Interface.Internal;
 using ImGuiScene;
 
-namespace KirboRotations.Utility.ImGuiEx;
+namespace KirboRotations.Custom.Utility.ImGuiEx;
 
 internal class ImageLoadingResult
 {

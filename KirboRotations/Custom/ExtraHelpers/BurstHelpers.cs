@@ -1,8 +1,4 @@
-﻿
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using KirboRotations.Utility.Data;
-
-namespace KirboRotations.Utility.ExtraHelpers;
+﻿namespace KirboRotations.Custom.ExtraHelpers;
 
 public static class BurstHelpers
 {

@@ -1,13 +1,13 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
-using ECommons;
-using ECommons.DalamudServices;
-using ECommons.Reflection;
+//using ECommons;
+//using ECommons.DalamudServices;
+//using ECommons.Reflection;
 using ImGuiNET;
 using System;
 
-namespace KirboRotations.Utility.ImGuiEx;
+namespace KirboRotations.Custom.Utility.ImGuiEx;
 
 public class ChangelogWindow : Window
 {

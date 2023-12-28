@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.Utility.Data;
+﻿namespace KirboRotations.Custom.Data;
 
 internal static class StatusID_Buffs
 {

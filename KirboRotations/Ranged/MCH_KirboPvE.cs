@@ -1,9 +1,10 @@
 ﻿using KirboRotations.Utility.ImGuiEx;
-using KirboRotations.Utility.ExtraHelpers;
-using static KirboRotations.Utility.Data.StatusID_Buffs;
-using static KirboRotations.Utility.Data.StatusID_DeBuffs;
-using KirboRotations.Utility.Service;
+using static KirboRotations.Custom.Data.StatusID_Buffs;
+using static KirboRotations.Custom.Data.StatusID_DeBuffs;
 using Lumina.Excel.GeneratedSheets;
+using KirboRotations.Custom.Actions;
+using KirboRotations.Custom.ExtraHelpers;
+using KirboRotations.Custom.Utility.ImGuiEx;
 
 namespace KirboRotations.Ranged;
 
@@ -14,10 +15,10 @@ public class MCH_KirboPvE : MCH_Base
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{kService.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override string Description => $"{DefaultDescription}";
     private string DefaultDescription =>
-        $"{kService.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
+        $"{GeneralHelpers.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
         $"Does Delayed Tools and Early AA. Should be optimised for Boss Level 90 content with 2.5 GCD\n" +
         $"Note: For more information check out the 'Status' category\n" +
         $"\nContent compatibility list:\n" +
@@ -81,35 +82,33 @@ public class MCH_KirboPvE : MCH_Base
         {
             try
             {
-                /*if (actionMethods != null)
-                {
-                    ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
-                    ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
-                    ImGui.Text("GetSpecificActionRecastTime: " + actionMethods.GetSpecificActionRecastTime(ActionID.Peloton));
-                }*/
+                try
+                { }
+                catch
+                { }
 
-                ImGuiEx.TripleSpacing();
-                ImGuiEx.CollapsingHeaderWithContent("General Info", () =>
+                ImGuiExtra.TripleSpacing();
+                ImGuiExtra.CollapsingHeaderWithContent("General Info", () =>
                 {
                     ImGui.Text($"Rotation: {RotationName} - {DescriptionHelpers.RotationVersion}");
-                    ImGuiEx.ImGuiColoredText("Rotation  Job: ", ClassJob.Abbreviation, EColor.LightBlue);
-                    ImGuiEx.SeperatorWithSpacing();
+                    ImGuiExtra.ImGuiColoredText("Rotation  Job: ", ClassJob.Abbreviation, EColor.LightBlue);
+                    ImGuiExtra.SeperatorWithSpacing();
                     ImGui.Text($"Player Name: {Player.Name}");
                     ImGui.Text($"Player HP: {Player.GetHealthRatio() * 100:F2}%%");
-                    ImGuiEx.ImGuiColoredText("Player MP: ", (int)Player.CurrentMp, EColor.Blue);
-                    ImGuiEx.SeperatorWithSpacing();
+                    ImGuiExtra.ImGuiColoredText("Player MP: ", (int)Player.CurrentMp, EColor.Blue);
+                    ImGuiExtra.SeperatorWithSpacing();
                     ImGui.Text("In Combat: " + InCombat);
                     // ... other general info ...
                 });
-                ImGuiEx.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
+                ImGuiExtra.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
             }
             catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - General Info"); }
 
-            ImGuiEx.TripleSpacing();
+            ImGuiExtra.TripleSpacing();
 
             try
             {
-                ImGuiEx.CollapsingHeaderWithContent("Rotation Status", () =>
+                ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
                 {
                     string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
                     ImGui.Text($"Rotation Selection: {rotationText}");
@@ -120,15 +119,15 @@ public class MCH_KirboPvE : MCH_Base
                     ImGui.Text("OpenerHasFinished: " + OpenerHelpers.OpenerHasFinished);
                     // ... other rotation status ...
                 });
-                ImGuiEx.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
+                ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
             }
             catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Rotation Status"); }
 
-            ImGuiEx.TripleSpacing();
+            ImGuiExtra.TripleSpacing();
 
             try
             {
-                ImGuiEx.CollapsingHeaderWithContent("Burst Status", () =>
+                ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
                 {
                     string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
                     ImGui.Text($"Rotation Selection: {rotationText}");
@@ -139,15 +138,15 @@ public class MCH_KirboPvE : MCH_Base
                     ImGui.Text("BurstHasFinished: " + BurstHelpers.BurstHasFinished);
                     // ... other Burst status ...
                 });
-                ImGuiEx.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
+                ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
             }
             catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Burst Status"); }
 
-            ImGuiEx.TripleSpacing();
+            ImGuiExtra.TripleSpacing();
 
             try
             {
-                ImGuiEx.CollapsingHeaderWithContent("Action Details", () =>
+                ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
                 {
                     if (ImGui.BeginTable("actionTable", 2))
                     {
@@ -159,15 +158,15 @@ public class MCH_KirboPvE : MCH_Base
                         ImGui.EndTable();
                     }
                 });
-                ImGuiEx.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
+                ImGuiExtra.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
             }
             catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Action Details"); }
 
-            ImGuiEx.TripleSpacing();
+            ImGuiExtra.TripleSpacing();
 
             try
             {
-                float remainingSpace = ImGuiEx.CalculateRemainingVerticalSpace();
+                float remainingSpace = ImGuiExtra.CalculateRemainingVerticalSpace();
                 ImGui.Text($"Remaining Vertical Space: {remainingSpace} pixels");
 
                 // Calculate the remaining vertical space in the window
@@ -175,7 +174,7 @@ public class MCH_KirboPvE : MCH_Base
                 float remainingSpace2 = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing();
                 if (remainingSpace2 > 0)
                 { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
-                ImGuiEx.DisplayResetButton("Reset Properties");
+                ImGuiExtra.DisplayResetButton("Reset Properties");
             }
             catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Extra + Reset Button"); }
 

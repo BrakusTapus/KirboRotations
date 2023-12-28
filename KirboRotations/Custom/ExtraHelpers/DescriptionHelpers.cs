@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.Utility.ExtraHelpers;
+﻿namespace KirboRotations.Custom.ExtraHelpers;
 
 /// <summary>
 /// Provides methods for generating rotation compatibility descriptions.

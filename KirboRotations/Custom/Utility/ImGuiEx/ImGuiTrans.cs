@@ -1,9 +1,9 @@
-﻿using ECommons;
+﻿//using ECommons;
 using ImGuiNET;
 using System;
 using System.Numerics;
 
-namespace KirboRotations.Utility.ImGuiEx;
+namespace KirboRotations.Custom.Utility.ImGuiEx;
 
 [Obsolete("Deprecated", true)]
 public class ImGuiTrans
@@ -28,12 +28,14 @@ public class ImGuiTrans
         ImGui.PopStyleColor(Enum.GetValues<ImGuiCol>().Length - 1);
     }
 
+/*
     public static void WithTextColor(Vector4 col, Action func)
     {
         PushStyleColor(ImGuiCol.Text, col);
         GenericHelpers.Safe(func);
         ImGui.PopStyleColor();
     }
+*/
 
     public static void Text(Vector4 col, string s)
     {

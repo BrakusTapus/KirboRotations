@@ -4,12 +4,13 @@ using Dalamud.Interface.Internal.Notifications;
 using Dalamud.Interface.Style;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using ECommons;
-using ECommons.DalamudServices;
-using ECommons.GameHelpers;
-using ECommons.Reflection;
+//using ECommons;
+//using ECommons.DalamudServices;
+//using ECommons.GameHelpers;
+//using ECommons.Reflection;
 using ImGuiNET;
-using KirboRotations.Utility.ExtraHelpers;
+using KirboRotations.Custom.ExtraHelpers;
+using KirboRotations.Custom.Utility.ImGuiEx;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -23,49 +24,51 @@ using System.Xml.Linq;
 
 namespace KirboRotations.Utility.ImGuiEx;
 
-public static unsafe partial class ImGuiEx
+public static unsafe partial class ImGuiExtra
 {
-    /// <summary>
-    ///
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="id"></param>
-    /// <param name="order"></param>
-    /// <returns></returns>
-    public static bool EnumOrderer<T>(string id, List<T> order) where T : IConvertible
-    {
-        var ret = false;
-        var enumValues = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
-        foreach (var x in enumValues) if (!order.Contains(x)) order.Add(x);
-        if (order.Count > enumValues.Length)
+    /*
+        /// <summary>
+        ///
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="id"></param>
+        /// <param name="order"></param>
+        /// <returns></returns>
+        public static bool EnumOrderer<T>(string id, List<T> order) where T : IConvertible
         {
-            Serilog.Log.Warning($"EnumOrderer: duplicates or non-existing items found, enum {enumValues.Print()}, list {order.Print()}, cleaning up.");
-            order.RemoveAll(x => !enumValues.Contains(x));
-            var set = order.ToHashSet();
-            order.Clear();
-            order.AddRange(set);
-        }
-        for (int i = 0; i < order.Count; i++)
-        {
-            var e = order[i];
-            ImGui.PushID($"ECommonsEnumOrderer{id}{e}");
-            if (ImGui.ArrowButton("up", ImGuiDir.Up) && i > 0)
+            var ret = false;
+            var enumValues = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
+            foreach (var x in enumValues) if (!order.Contains(x)) order.Add(x);
+            if (order.Count > enumValues.Length)
             {
-                (order[i - 1], order[i]) = (order[i], order[i - 1]);
-                ret = true;
+                Serilog.Log.Warning($"EnumOrderer: duplicates or non-existing items found, enum {enumValues.Print()}, list {order.Print()}, cleaning up.");
+                order.RemoveAll(x => !enumValues.Contains(x));
+                var set = order.ToHashSet();
+                order.Clear();
+                order.AddRange(set);
             }
-            ImGui.SameLine();
-            if (ImGui.ArrowButton("down", ImGuiDir.Down) && i < order.Count - 1)
+            for (int i = 0; i < order.Count; i++)
             {
-                (order[i + 1], order[i]) = (order[i], order[i + 1]);
-                ret = true;
+                var e = order[i];
+                ImGui.PushID($"ECommonsEnumOrderer{id}{e}");
+                if (ImGui.ArrowButton("up", ImGuiDir.Up) && i > 0)
+                {
+                    (order[i - 1], order[i]) = (order[i], order[i - 1]);
+                    ret = true;
+                }
+                ImGui.SameLine();
+                if (ImGui.ArrowButton("down", ImGuiDir.Down) && i < order.Count - 1)
+                {
+                    (order[i + 1], order[i]) = (order[i], order[i + 1]);
+                    ret = true;
+                }
+                ImGui.SameLine();
+                ImGuiExtra.Text($"{e.ToString().Replace("_", " ")}");
+                ImGui.PopID();
             }
-            ImGui.SameLine();
-            ImGuiEx.Text($"{e.ToString().Replace("_", " ")}");
-            ImGui.PopID();
+            return ret;
         }
-        return ret;
-    }
+    */
 
     public static float GlobalScale { get; private set; }
 
@@ -220,16 +223,17 @@ public static unsafe partial class ImGuiEx
     /// <returns>true when clicked, otherwise false</returns>
     public static bool ButtonCheckbox(string name, ref bool value, bool smallButton = false) => ButtonCheckbox(name, ref value, EColor.Red, smallButton);
 
-    /// <summary>
-    /// Draws a button that acts like a checkbox.
-    /// </summary>
-    /// <param name="name">Button text</param>
-    /// <param name="value">Value</param>
-    /// <param name="color">Active button color</param>
-    /// <param name="smallButton">Whether button should be small</param>
-    /// <returns>true when clicked, otherwise false</returns>
-    public static bool ButtonCheckbox(string name, ref bool value, uint color, bool smallButton = false) => ButtonCheckbox(name, ref value, color.ToVector4(), smallButton);
-
+    /*
+        /// <summary>
+        /// Draws a button that acts like a checkbox.
+        /// </summary>
+        /// <param name="name">Button text</param>
+        /// <param name="value">Value</param>
+        /// <param name="color">Active button color</param>
+        /// <param name="smallButton">Whether button should be small</param>
+        /// <returns>true when clicked, otherwise false</returns>
+        public static bool ButtonCheckbox(string name, ref bool value, uint color, bool smallButton = false) => ButtonCheckbox(name, ref value, color.ToVector4(), smallButton);
+    */
     /// <summary>
     /// Draws a button that acts like a checkbox.
     /// </summary>
@@ -325,28 +329,15 @@ public static unsafe partial class ImGuiEx
     }
 
     /// <summary>
-    /// Draws equally sized columns without ability to resize
+    /// 
     /// </summary>
-    /// <param name="id">Unique ImGui ID</param>
-    /// <param name="values">List of actions for each column</param>
-    public static void EzTableColumns(string id, Action[] values)
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    public static void AddTableRow(string description, string value)
     {
-        if (values.Length == 1)
-        {
-            GenericHelpers.Safe(values[0]);
-        }
-        else
-        {
-            if (ImGui.BeginTable(id, values.Length, ImGuiTableFlags.SizingStretchSame))
-            {
-                foreach (Action action in values)
-                {
-                    ImGui.TableNextColumn();
-                    GenericHelpers.Safe(action);
-                }
-                ImGui.EndTable();
-            }
-        }
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn(); ImGui.Text(description);
+        ImGui.TableNextColumn(); ImGui.Text(value);
     }
 
     /// <summary>
@@ -449,68 +440,71 @@ public static unsafe partial class ImGuiEx
         public ImGuiMouseButton ToastTooltipOnClickButton { get; init; } = ImGuiMouseButton.Left;
     }
 
-    private static uint headerLastWindowID = 0;
-    private static ulong headerLastFrame = 0;
-    private static float headerCurrentPos = 0;
-    private static float headerImGuiButtonWidth = 0;
+    /* 
+        private static uint headerLastWindowID = 0;
+        private static ulong headerLastFrame = 0;
+        private static float headerCurrentPos = 0;
+        private static float headerImGuiButtonWidth = 0; 
+    */
 
-    public static bool AddHeaderIcon(string id, FontAwesomeIcon icon, HeaderIconOptions options = null)
-    {
-        if (ImGui.IsWindowCollapsed()) return false;
-
-        var scale = ImGuiHelpers.GlobalScale;
-        var currentID = ImGui.GetID(0);
-        if (currentID != headerLastWindowID || headerLastFrame != Svc.PluginInterface.UiBuilder.FrameCount)
+    /*
+        public static bool AddHeaderIcon(string id, FontAwesomeIcon icon, HeaderIconOptions options = null)
         {
-            headerLastWindowID = currentID;
-            headerLastFrame = Svc.PluginInterface.UiBuilder.FrameCount;
-            headerCurrentPos = 0.25f * ImGui.GetStyle().FramePadding.Length();
-            if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoTitleBar))
-                headerCurrentPos = 1;
-            headerImGuiButtonWidth = 0f;
-            if (CurrentWindowHasCloseButton())
-                headerImGuiButtonWidth += 17 * scale;
-            if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoCollapse))
-                headerImGuiButtonWidth += 17 * scale;
+            if (ImGui.IsWindowCollapsed()) return false;
+
+            var scale = ImGuiHelpers.GlobalScale;
+            var currentID = ImGui.GetID(0);
+            if (currentID != headerLastWindowID || headerLastFrame != Svc.PluginInterface.UiBuilder.FrameCount)
+            {
+                headerLastWindowID = currentID;
+                headerLastFrame = Svc.PluginInterface.UiBuilder.FrameCount;
+                headerCurrentPos = 0.25f * ImGui.GetStyle().FramePadding.Length();
+                if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoTitleBar))
+                    headerCurrentPos = 1;
+                headerImGuiButtonWidth = 0f;
+                if (CurrentWindowHasCloseButton())
+                    headerImGuiButtonWidth += 17 * scale;
+                if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoCollapse))
+                    headerImGuiButtonWidth += 17 * scale;
+            }
+
+            options ??= new();
+            var prevCursorPos = ImGui.GetCursorPos();
+            var buttonSize = new Vector2(20 * scale);
+            var buttonPos = new Vector2((ImGui.GetWindowWidth() - buttonSize.X - headerImGuiButtonWidth * scale * headerCurrentPos) - (ImGui.GetStyle().FramePadding.X * scale), ImGui.GetScrollY() + 1);
+            ImGui.SetCursorPos(buttonPos);
+            var drawList = ImGui.GetWindowDrawList();
+            drawList.PushClipRectFullScreen();
+
+            var pressed = false;
+            ImGui.InvisibleButton(id, buttonSize);
+            var itemMin = ImGui.GetItemRectMin();
+            var itemMax = ImGui.GetItemRectMax();
+            var halfSize = ImGui.GetItemRectSize() / 2;
+            var center = itemMin + halfSize;
+            if (ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(itemMin, itemMax, false))
+            {
+                if (!string.IsNullOrEmpty(options.Tooltip))
+                    ImGui.SetTooltip(options.Tooltip);
+                ImGui.GetWindowDrawList().AddCircleFilled(center, halfSize.X, ImGui.GetColorU32(ImGui.IsMouseDown(ImGuiMouseButton.Left) ? ImGuiCol.ButtonActive : ImGuiCol.ButtonHovered));
+                if (ImGui.IsMouseReleased(options.MouseButton))
+                    pressed = true;
+                if (options.ToastTooltipOnClick && ImGui.IsMouseReleased(options.ToastTooltipOnClickButton))
+                    Svc.PluginInterface.UiBuilder.AddNotification(options.Tooltip!, null, NotificationType.Info);
+            }
+
+            ImGui.SetCursorPos(buttonPos);
+            ImGui.PushFont(UiBuilder.IconFont);
+            var iconString = icon.ToIconString();
+            drawList.AddText(UiBuilder.IconFont, ImGui.GetFontSize(), itemMin + halfSize - ImGui.CalcTextSize(iconString) / 2 + options.Offset, options.Color, iconString);
+            ImGui.PopFont();
+
+            ImGui.PopClipRect();
+            ImGui.SetCursorPos(prevCursorPos);
+
+            return pressed;
         }
-
-        options ??= new();
-        var prevCursorPos = ImGui.GetCursorPos();
-        var buttonSize = new Vector2(20 * scale);
-        var buttonPos = new Vector2((ImGui.GetWindowWidth() - buttonSize.X - headerImGuiButtonWidth * scale * headerCurrentPos) - (ImGui.GetStyle().FramePadding.X * scale), ImGui.GetScrollY() + 1);
-        ImGui.SetCursorPos(buttonPos);
-        var drawList = ImGui.GetWindowDrawList();
-        drawList.PushClipRectFullScreen();
-
-        var pressed = false;
-        ImGui.InvisibleButton(id, buttonSize);
-        var itemMin = ImGui.GetItemRectMin();
-        var itemMax = ImGui.GetItemRectMax();
-        var halfSize = ImGui.GetItemRectSize() / 2;
-        var center = itemMin + halfSize;
-        if (ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(itemMin, itemMax, false))
-        {
-            if (!string.IsNullOrEmpty(options.Tooltip))
-                ImGui.SetTooltip(options.Tooltip);
-            ImGui.GetWindowDrawList().AddCircleFilled(center, halfSize.X, ImGui.GetColorU32(ImGui.IsMouseDown(ImGuiMouseButton.Left) ? ImGuiCol.ButtonActive : ImGuiCol.ButtonHovered));
-            if (ImGui.IsMouseReleased(options.MouseButton))
-                pressed = true;
-            if (options.ToastTooltipOnClick && ImGui.IsMouseReleased(options.ToastTooltipOnClickButton))
-                Svc.PluginInterface.UiBuilder.AddNotification(options.Tooltip!, null, NotificationType.Info);
-        }
-
-        ImGui.SetCursorPos(buttonPos);
-        ImGui.PushFont(UiBuilder.IconFont);
-        var iconString = icon.ToIconString();
-        drawList.AddText(UiBuilder.IconFont, ImGui.GetFontSize(), itemMin + halfSize - ImGui.CalcTextSize(iconString) / 2 + options.Offset, options.Color, iconString);
-        ImGui.PopFont();
-
-        ImGui.PopClipRect();
-        ImGui.SetCursorPos(prevCursorPos);
-
-        return pressed;
-    }
-
+    */
     /// <summary>
     ///
     /// </summary>
@@ -613,45 +607,48 @@ public static unsafe partial class ImGuiEx
         return ImGuiNative.igIsKeyPressed((ImGuiKey)key, repeat2) != 0;
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="color"></param>
-    /// <param name="text"></param>
-    public static void TextUnderlined(uint color, string text)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Text, color);
-        TextUnderlined(text);
-        ImGui.PopStyleColor();
-    }
+    /*
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="text"></param>
+        public static void TextUnderlined(uint color, string text)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
+            TextUnderlined(text);
+            ImGui.PopStyleColor();
+        }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="color"></param>
-    /// <param name="text"></param>
-    public static void TextUnderlined(Vector4 color, string text)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Text, color);
-        TextUnderlined(text);
-        ImGui.PopStyleColor();
-    }
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="color"></param>
+        /// <param name="text"></param>
+        public static void TextUnderlined(Vector4 color, string text)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, color);
+            TextUnderlined(text);
+            ImGui.PopStyleColor();
+        }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="text"></param>
-    public static void TextUnderlined(string text)
-    {
-        var size = ImGui.CalcTextSize(text);
-        var cur = ImGui.GetCursorScreenPos();
-        cur.Y += size.Y;
-        ImGui.GetWindowDrawList().PathLineTo(cur);
-        cur.X += size.X;
-        ImGui.GetWindowDrawList().PathLineTo(cur);
-        ImGui.GetWindowDrawList().PathStroke(ImGuiColors.DalamudWhite.ToUint());
-        ImGuiEx.Text(text);
-    }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="text"></param>
+        public static void TextUnderlined(string text)
+        {
+            var size = ImGui.CalcTextSize(text);
+            var cur = ImGui.GetCursorScreenPos();
+            cur.Y += size.Y;
+            ImGui.GetWindowDrawList().PathLineTo(cur);
+            cur.X += size.X;
+            ImGui.GetWindowDrawList().PathLineTo(cur);
+            ImGui.GetWindowDrawList().PathStroke(ImGuiColors.DalamudWhite.ToUint());
+            ImGuiExtra.Text(text);
+        }
+    */
 
     /// <summary>
     ///
@@ -795,7 +792,7 @@ public static unsafe partial class ImGuiEx
         {
             var buttonSize = ImGuiHelpers.GetButtonSize("Add");
             ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - buttonSize.X - ImGui.GetStyle().ItemSpacing.X);
-            ImGuiEx.InputUint($"##{name.Replace("#", "_")}", ref InputListValuesUint[name].Value);
+            ImGuiExtra.InputUint($"##{name.Replace("#", "_")}", ref InputListValuesUint[name].Value);
             ImGui.SameLine();
             if (ImGui.Button("Add"))
             {
@@ -855,18 +852,19 @@ public static unsafe partial class ImGuiEx
         }
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="col"></param>
-    /// <param name="func"></param>
-    public static void WithTextColor(Vector4 col, Action func)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Text, col);
-        GenericHelpers.Safe(func);
-        ImGui.PopStyleColor();
-    }
-
+    /*
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="col"></param>
+        /// <param name="func"></param>
+        public static void WithTextColor(Vector4 col, Action func)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, col);
+            GenericHelpers.Safe(func);
+            ImGui.PopStyleColor();
+        }
+    */
     /// <summary>
     ///
     /// </summary>
@@ -905,7 +903,7 @@ public static unsafe partial class ImGuiEx
     public static void TextV(Vector4? col, string s)
     {
         if (col != null) ImGui.PushStyleColor(ImGuiCol.Text, col.Value);
-        ImGuiEx.TextV(s);
+        ImGuiExtra.TextV(s);
         if (col != null) ImGui.PopStyleColor();
     }
 
@@ -953,14 +951,14 @@ public static unsafe partial class ImGuiEx
     public static void TextWrapped(Vector4 col, string s)
     {
         ImGui.PushTextWrapPos(0);
-        ImGuiEx.Text(col, s);
+        ImGuiExtra.Text(col, s);
         ImGui.PopTextWrapPos();
     }
 
     public static void TextWrapped(uint col, string s)
     {
         ImGui.PushTextWrapPos();
-        ImGuiEx.Text(col, s);
+        ImGuiExtra.Text(col, s);
         ImGui.PopTextWrapPos();
     }
 
@@ -999,41 +997,42 @@ public static unsafe partial class ImGuiEx
             return ImGuiColors.DalamudRed;
         }
     }
+    /*
+        public static void EzTabBar(string id, params (string name, Action function, Vector4? color, bool child)[] tabs) => EzTabBar(id, false, tabs);
 
-    public static void EzTabBar(string id, params (string name, Action function, Vector4? color, bool child)[] tabs) => EzTabBar(id, false, tabs);
-
-    public static void EzTabBar(string id, bool KoFiTransparent, params (string name, Action function, Vector4? color, bool child)[] tabs)
-    {
-        ImGui.BeginTabBar(id);
-        foreach (var x in tabs)
+        public static void EzTabBar(string id, bool KoFiTransparent, params (string name, Action function, Vector4? color, bool child)[] tabs)
         {
-            if (x.name == null) continue;
-            if (x.color != null)
+            ImGui.BeginTabBar(id);
+            foreach (var x in tabs)
             {
-                ImGui.PushStyleColor(ImGuiCol.Text, x.color.Value);
-            }
-            if (ImGui.BeginTabItem(x.name))
-            {
+                if (x.name == null) continue;
                 if (x.color != null)
                 {
-                    ImGui.PopStyleColor();
+                    ImGui.PushStyleColor(ImGuiCol.Text, x.color.Value);
                 }
-                if (x.child) ImGui.BeginChild(x.name + "child");
-                x.function();
-                if (x.child) ImGui.EndChild();
-                ImGui.EndTabItem();
-            }
-            else
-            {
-                if (x.color != null)
+                if (ImGui.BeginTabItem(x.name))
                 {
-                    ImGui.PopStyleColor();
+                    if (x.color != null)
+                    {
+                        ImGui.PopStyleColor();
+                    }
+                    if (x.child) ImGui.BeginChild(x.name + "child");
+                    x.function();
+                    if (x.child) ImGui.EndChild();
+                    ImGui.EndTabItem();
+                }
+                else
+                {
+                    if (x.color != null)
+                    {
+                        ImGui.PopStyleColor();
+                    }
                 }
             }
+            if (KoFiTransparent) KoFiButton.RightTransparentTab();
+            ImGui.EndTabBar();
         }
-        if (KoFiTransparent) KoFiButton.RightTransparentTab();
-        ImGui.EndTabBar();
-    }
+    */
 
     public static void InvisibleButton(int width = 0)
     {
@@ -1076,7 +1075,7 @@ public static unsafe partial class ImGuiEx
             {
                 if (!EnumComboSearch.ContainsKey(name)) EnumComboSearch.Add(name, new(""));
                 fltr = EnumComboSearch[name];
-                ImGuiEx.SetNextItemFullWidth();
+                ImGuiExtra.SetNextItemFullWidth();
                 ImGui.InputTextWithHint($"##{name.Replace("#", "_")}", "Filter...", ref fltr.Value, 50);
             }
             foreach (var x in values)
@@ -1110,7 +1109,7 @@ public static unsafe partial class ImGuiEx
             {
                 if (!ComboSearch.ContainsKey(name)) ComboSearch.Add(name, new(""));
                 fltr = ComboSearch[name];
-                ImGuiEx.SetNextItemFullWidth();
+                ImGuiExtra.SetNextItemFullWidth();
                 ImGui.InputTextWithHint($"##{name}fltr", "Filter...", ref fltr.Value, 50);
             }
             foreach (var x in values)
@@ -1210,54 +1209,57 @@ public static unsafe partial class ImGuiEx
         }
     }
 
-    public static void TextCopy(Vector4 col, string text)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Text, col);
-        TextCopy(text);
-        ImGui.PopStyleColor();
-    }
+    /*
+        public static void TextCopy(Vector4 col, string text)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, col);
+            TextCopy(text);
+            ImGui.PopStyleColor();
+        }
 
-    public static void TextCopy(string text)
-    {
-        ImGui.TextUnformatted(text);
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-        {
-            ImGui.SetClipboardText(text);
-            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
-        }
-    }
 
-    public static void TextWrappedCopy(string text)
-    {
-        ImGuiEx.TextWrapped(text);
-        if (ImGui.IsItemHovered())
+        public static void TextCopy(string text)
         {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            ImGui.TextUnformatted(text);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            {
+                ImGui.SetClipboardText(text);
+                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
+            }
         }
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-        {
-            ImGui.SetClipboardText(text);
-            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
-        }
-    }
 
-    public static void TextWrappedCopy(Vector4 col, string text)
-    {
-        ImGuiEx.TextWrapped(col, text);
-        if (ImGui.IsItemHovered())
+        public static void TextWrappedCopy(string text)
         {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            ImGuiExtra.TextWrapped(text);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            {
+                ImGui.SetClipboardText(text);
+                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
+            }
         }
-        if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+
+        public static void TextWrappedCopy(Vector4 col, string text)
         {
-            ImGui.SetClipboardText(text);
-            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
+            ImGuiExtra.TextWrapped(col, text);
+            if (ImGui.IsItemHovered())
+            {
+                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
+            }
+            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            {
+                ImGui.SetClipboardText(text);
+                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
+            }
         }
-    }
+    */
 
     public static void TextCentered(string text)
     {
@@ -1296,30 +1298,32 @@ public static unsafe partial class ImGuiEx
         }
     }
 
-    public static void ButtonCopy(string buttonText, string copy)
-    {
-        if (ImGui.Button(buttonText.Replace("$COPY", copy)))
+    /*
+        public static void ButtonCopy(string buttonText, string copy)
         {
-            ImGui.SetClipboardText(copy);
-            Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
+            if (ImGui.Button(buttonText.Replace("$COPY", copy)))
+            {
+                ImGui.SetClipboardText(copy);
+                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
+            }
         }
-    }
 
-    public static void CenterColumnText(string text, bool underlined = false)
-    {
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetColumnWidth() * 0.5f) - (ImGui.CalcTextSize(text).X * 0.5f));
-        if (underlined)
-            TextUnderlined(text);
-        else
-            Text(text);
-    }
+        public static void CenterColumnText(string text, bool underlined = false)
+        {
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetColumnWidth() * 0.5f) - (ImGui.CalcTextSize(text).X * 0.5f));
+            if (underlined)
+                TextUnderlined(text);
+            else
+                Text(text);
+        }
 
-    public static void CenterColumnText(Vector4 colour, string text, bool underlined = false)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Text, colour);
-        CenterColumnText(text, underlined);
-        ImGui.PopStyleColor();
-    }
+        public static void CenterColumnText(Vector4 colour, string text, bool underlined = false)
+        {
+            ImGui.PushStyleColor(ImGuiCol.Text, colour);
+            CenterColumnText(text, underlined);
+            ImGui.PopStyleColor();
+        }
+    */
 
     public static unsafe bool BeginTabItem(string label, ImGuiTabItemFlags flags)
     {
@@ -1449,65 +1453,67 @@ public static unsafe partial class ImGuiEx
 
     #region Actions
 
-    private static void DrawLastAction(string title, ActionID actionname, uint actionid)
-    {
-        // DrawLastAction(DataCenter.LastAction, (uint)DataCenter.LastAction);
-        DrawLastAction(actionname, (uint)actionid);
-        ImGui.Separator();
-
-        ImGui.Text($"{title}"); // Should be 'StatusProvide'
-        ImGui.Indent();
-        foreach (var status in Player.Object.StatusList)
+    /*
+        private static void DrawLastAction(string title, ActionID actionname, uint actionid)
         {
-            // Skip the 'Well Fed' buff with ID 48
-            if (status.StatusId == 48) continue;
+            // DrawLastAction(DataCenter.LastAction, (uint)DataCenter.LastAction);
+            DrawLastAction(actionname, (uint)actionid);
+            ImGui.Separator();
 
-            var source = status.SourceId == Player.Object.ObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-            //ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
-            ImGui.SameLine();
-
-            ImGui.PushID((int)status.StatusId);
-            //var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
-            var statusinfo = $"{status.GameData.Name} = {status.StatusId}";
-            var sourceinfo = $"Source: '{source}'";
-            var providestatus = $"StatusProvide = new StatusID[] { status.GameData.Name },";
-            if (ImGui.Button("Copy"))
+            ImGui.Text($"{title}"); // Should be 'StatusProvide'
+            ImGui.Indent();
+            foreach (var status in Player.Object.StatusList)
             {
-                //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{providestatus}");
-                Notify.Success("copied to clipboard.");
-            }
-            ImGui.PopID();
-        }
-        ImGui.Unindent();
+                // Skip the 'Well Fed' buff with ID 48
+                if (status.StatusId == 48) continue;
 
-        ImGuiEx.TripleSpacing();
-
-        ImGui.Text($"{title}"); // Should be 'TargetStatus'
-        ImGui.Indent();
-        if (Svc.Targets.Target is BattleChara b)
-        {
-            foreach (var status in b.StatusList)
-            {
                 var source = status.SourceId == Player.Object.ObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
                 //ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
                 ImGui.SameLine();
 
-                // Copy Button Uses a unique ID for each button
-                ImGui.PushID((int)status.StatusId); // Ensure status.StatusId is unique for each status
+                ImGui.PushID((int)status.StatusId);
                 //var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
                 var statusinfo = $"{status.GameData.Name} = {status.StatusId}";
                 var sourceinfo = $"Source: '{source}'";
-                var targetstatus = $"TargetStatus = new StatusID[] { status.GameData.Name },";
+                var providestatus = $"StatusProvide = new StatusID[] { status.GameData.Name },";
                 if (ImGui.Button("Copy"))
                 {
-                    //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{targetstatus}");
-                    ECommons.ImGuiMethods.Notify.Success("copied to clipboard.");
+                    //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{providestatus}");
+                    Notify.Success("copied to clipboard.");
                 }
-                ImGui.PopID(); // End of unique ID scope
+                ImGui.PopID();
             }
+            ImGui.Unindent();
+
+            ImGuiExtra.TripleSpacing();
+
+            ImGui.Text($"{title}"); // Should be 'TargetStatus'
+            ImGui.Indent();
+            if (Svc.Targets.Target is BattleChara b)
+            {
+                foreach (var status in b.StatusList)
+                {
+                    var source = status.SourceId == Player.Object.ObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
+                    //ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
+                    ImGui.SameLine();
+
+                    // Copy Button Uses a unique ID for each button
+                    ImGui.PushID((int)status.StatusId); // Ensure status.StatusId is unique for each status
+                    //var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
+                    var statusinfo = $"{status.GameData.Name} = {status.StatusId}";
+                    var sourceinfo = $"Source: '{source}'";
+                    var targetstatus = $"TargetStatus = new StatusID[] { status.GameData.Name },";
+                    if (ImGui.Button("Copy"))
+                    {
+                        //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{targetstatus}");
+                        ECommons.ImGuiMethods.Notify.Success("copied to clipboard.");
+                    }
+                    ImGui.PopID(); // End of unique ID scope
+                }
+            }
+            ImGui.Unindent();
         }
-        ImGui.Unindent();
-    }
+    */
 
     private static void DrawAction(string type, ActionID name, uint actionid)
     {
@@ -1613,7 +1619,7 @@ public static unsafe partial class ImGuiEx
         {
             OpenerHelpers.ResetOpenerProperties();
         }
-        ImGuiEx.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
+        ImGuiExtra.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
     }
 
     #endregion Buttons
@@ -1632,7 +1638,7 @@ public struct ImGuiWindow
     [FieldOffset(0x130)] public Vector2 CursorMaxPos;
 }
 
-public static partial class ImGuiEx
+public static partial class ImGuiExtra
 {
     [LibraryImport("cimgui")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]

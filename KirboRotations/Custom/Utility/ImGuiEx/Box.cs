@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.Utility.ImGuiEx;
+﻿namespace KirboRotations.Custom.Utility.ImGuiEx;
 
 public class Box<T>
 {

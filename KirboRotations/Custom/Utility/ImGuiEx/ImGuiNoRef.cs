@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KirboRotations.Utility.ImGuiEx
+namespace KirboRotations.Custom.Utility.ImGuiEx
 {
     public static class ImGuiNoRef
     {

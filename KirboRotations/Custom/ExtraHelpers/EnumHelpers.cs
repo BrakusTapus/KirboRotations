@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.Utility.ExtraHelpers;
+﻿namespace KirboRotations.Custom.ExtraHelpers;
 
 /// <summary>
 /// <br>NotCompatible: Indicates that the rotation is not compatible with any content.</br>

@@ -1,8 +1,8 @@
-﻿using ECommons.MathHelpers;
+﻿//using ECommons.MathHelpers;
 using System;
 using System.Numerics;
 
-namespace KirboRotations.Utility.ImGuiEx;
+namespace KirboRotations.Custom.Utility.ImGuiEx;
 
 public static class GradientColor
 {
