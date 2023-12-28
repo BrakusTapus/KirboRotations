@@ -80,87 +80,77 @@ public class MCH_KirboPvE : MCH_Base
     {
         try
         {
-            try
+            ImGuiExtra.TripleSpacing();
+            ImGuiExtra.CollapsingHeaderWithContent("General Info", () =>
             {
-                try
-                { }
-                catch
-                { }
-
-                ImGuiExtra.TripleSpacing();
-                ImGuiExtra.CollapsingHeaderWithContent("General Info", () =>
+                if (ImGui.BeginTable("generalInfoTable", 2))
                 {
-                    ImGui.Text($"Rotation: {RotationName} - {DescriptionHelpers.RotationVersion}");
-                    ImGuiExtra.ImGuiColoredText("Rotation  Job: ", ClassJob.Abbreviation, EColor.LightBlue);
-                    ImGuiExtra.SeperatorWithSpacing();
-                    ImGui.Text($"Player Name: {Player.Name}");
-                    ImGui.Text($"Player HP: {Player.GetHealthRatio() * 100:F2}%%");
-                    ImGuiExtra.ImGuiColoredText("Player MP: ", (int)Player.CurrentMp, EColor.Blue);
-                    ImGuiExtra.SeperatorWithSpacing();
-                    ImGui.Text("In Combat: " + InCombat);
+                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+                    ImGuiExtra.AddTableRow("Rotation", $"{RotationName} - {DescriptionHelpers.RotationVersion}");
+                    ImGuiExtra.AddTableRow("Rotation Job", ClassJob.Abbreviation);
+                    ImGuiExtra.AddTableRow("Player Name", Player.Name.ToString());
+                    ImGuiExtra.AddTableRow("Player HP", $"{Player.GetHealthRatio() * 100:F2}%");
+                    ImGuiExtra.AddTableRow("Player MP", ((int)Player.CurrentMp).ToString());
+                    ImGuiExtra.AddTableRow("In Combat", InCombat.ToString());
                     // ... other general info ...
-                });
-                ImGuiExtra.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - General Info"); }
+                    ImGui.EndTable();
+                }
+            });
+            ImGuiExtra.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
 
             ImGuiExtra.TripleSpacing();
 
-            try
+            ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
             {
-                ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
+                if (ImGui.BeginTable("rotationStatusTable", 2))
                 {
+                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
                     string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
-                    ImGui.Text($"Rotation Selection: {rotationText}");
-                    ImGui.Text("Openerstep: " + OpenerHelpers.OpenerStep);
-                    ImGui.Text("OpenerActionsAvailable: " + OpenerHelpers.OpenerActionsAvailable);
-                    ImGui.Text("OpenerInProgress: " + OpenerHelpers.OpenerInProgress);
-                    ImGui.Text("OpenerHasFailed: " + OpenerHelpers.OpenerHasFailed);
-                    ImGui.Text("OpenerHasFinished: " + OpenerHelpers.OpenerHasFinished);
+                    ImGuiExtra.AddTableRow("Rotation Selection", rotationText);
+                    ImGuiExtra.AddTableRow("Openerstep", OpenerHelpers.OpenerStep.ToString());
+                    ImGuiExtra.AddTableRow("OpenerActionsAvailable", OpenerHelpers.OpenerActionsAvailable.ToString());
+                    ImGuiExtra.AddTableRow("OpenerInProgress", OpenerHelpers.OpenerInProgress.ToString());
+                    ImGuiExtra.AddTableRow("OpenerHasFailed", OpenerHelpers.OpenerHasFailed.ToString());
+                    ImGuiExtra.AddTableRow("OpenerHasFinished", OpenerHelpers.OpenerHasFinished.ToString());
                     // ... other rotation status ...
-                });
-                ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Rotation Status"); }
+                    ImGui.EndTable();
+                }
+            });
+            ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
 
             ImGuiExtra.TripleSpacing();
 
-            try
+            ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
             {
-                ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
+                if (ImGui.BeginTable("burstStatusTable", 2))
                 {
-                    string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
-                    ImGui.Text($"Rotation Selection: {rotationText}");
-                    ImGui.Text("BurstStep: " + BurstHelpers.BurstStep);
-                    ImGui.Text("BurstActionsAvailable: " + BurstHelpers.BurstActionsAvailable);
-                    ImGui.Text("BurstInProgress: " + BurstHelpers.BurstInProgress);
-                    ImGui.Text("BurstHasFailed: " + BurstHelpers.BurstHasFailed);
-                    ImGui.Text("BurstHasFinished: " + BurstHelpers.BurstHasFinished);
+                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+                    string burstText = GetRotationText(Configs.GetCombo("RotationSelection"));
+                    ImGuiExtra.AddTableRow("Rotation Selection", burstText);
+                    ImGuiExtra.AddTableRow("BurstStep", BurstHelpers.BurstStep.ToString());
+                    ImGuiExtra.AddTableRow("BurstActionsAvailable", BurstHelpers.BurstActionsAvailable.ToString());
+                    ImGuiExtra.AddTableRow("BurstInProgress", BurstHelpers.BurstInProgress.ToString());
+                    ImGuiExtra.AddTableRow("BurstHasFailed", BurstHelpers.BurstHasFailed.ToString());
+                    ImGuiExtra.AddTableRow("BurstHasFinished", BurstHelpers.BurstHasFinished.ToString());
                     // ... other Burst status ...
-                });
-                ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Burst Status"); }
+                    ImGui.EndTable();
+                }
+            });
+            ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
 
             ImGuiExtra.TripleSpacing();
 
-            try
+            ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
             {
-                ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
+                if (ImGui.BeginTable("actionTable", 2))
                 {
-                    if (ImGui.BeginTable("actionTable", 2))
-                    {
-                        ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn(); ImGui.Text("GCD Remain:"); ImGui.TableNextColumn(); ImGui.Text(WeaponRemain.ToString());
-                        // Add more rows as needed...
-
-                        ImGui.EndTable();
-                    }
-                });
-                ImGuiExtra.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Action Details"); }
+                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+                    ImGuiExtra.AddTableRow("GCD Remain", WeaponRemain.ToString());
+                    // Add more rows as needed...
+                    ImGui.EndTable();
+                }
+            });
+            ImGuiExtra.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
 
             ImGuiExtra.TripleSpacing();
 
@@ -177,10 +167,13 @@ public class MCH_KirboPvE : MCH_Base
                 ImGuiExtra.DisplayResetButton("Reset Properties");
             }
             catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Extra + Reset Button"); }
-
         }
-        catch { Serilog.Log.Warning($"{DebugWindowHelpers.ErrorDebug} - DisplayStatus"); }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning($"{DebugWindowHelpers.ErrorDebug} - DisplayStatus: {ex.Message}");
+        }
     }
+
     private string GetRotationText(int rotationSelection)
     {
         return rotationSelection switch
