@@ -9,7 +9,6 @@ on:
     branches: [main]
 
 env:
-  PLUGIN_REPO: BrakusTapus/PluginHUB
   PROJECT_NAME: KirboRotations
 
 jobs:
