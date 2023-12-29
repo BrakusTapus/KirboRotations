@@ -3,7 +3,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+Table-conversion.cs
 todo.txt
+skeletons.txt
 .gitattributes
 #Utility/
 
@@ -366,3 +368,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /.editorconfig
+/KirboRotations/Ranged/3.0.6.3_MCH_Kirbo_AIO.cs
+/KirboRotations/Ranged/MCH_Kirbo_AIO.cs
+/KirboRotations/Custom/ExtraHelpers/RotationTestHelper.cs

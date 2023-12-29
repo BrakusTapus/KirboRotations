@@ -1,6 +1,8 @@
-﻿using KirboRotations.Utility.ImGuiEx;
+﻿using KirboRotations.Custom.ExtraHelpers;
+using KirboRotations.Custom.Utility.ImGuiEx;
+using KirboRotations.Utility.ImGuiEx;
 using static ImGuiNET.ImGui;
-using static KirboRotations.Utility.Methods;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Ranged;
 
@@ -16,14 +18,6 @@ public class PLD_KirboPvP : PLD_Base
     #endregion
 
     #region New PvP IBaseActions
-    /// <summary>
-    /// 1-2-3 combo for PLD
-    /// </summary>
-    private static IBaseAction PvP_RoyalAuthorityCombo { get; } = new BaseAction(ActionID.PvP_RoyalAuthorityCombo)
-    {
-
-    };
-
     /// <summary>
     /// Delivers an attack with a potency of 3,000.
     /// </summary>
@@ -171,7 +165,7 @@ public class PLD_KirboPvP : PLD_Base
 
             if (Player != null)
             {
-                ImGuiEx.ImGuiColoredText("Job: ", ClassJob.Abbreviation, EColor.LightBlue); // Light blue for the abbreviation
+                ImGuiExtra.ImGuiColoredText("Job: ", ClassJob.Abbreviation, EColor.LightBlue); // Light blue for the abbreviation
                 Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
                 Text($"Player.CurrentHp: {Player.CurrentHp}");
                 Separator();
@@ -249,7 +243,7 @@ public class PLD_KirboPvP : PLD_Base
         bool lowHPNoAttacks = Configs.GetBool("LowHPNoAttacks");
         int lowHPThreshold = Configs.GetInt("LowHPThreshold");
 
-        if (Methods.InPvP())
+        if (GeneralHelpers.InPvP())
         {
             if (guardCancel && playerHasGuard)
             {
