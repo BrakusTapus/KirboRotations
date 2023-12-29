@@ -1,3 +1,4 @@
+using KirboRotations.Custom.Data;
 using KirboRotations.Custom.ExtraHelpers;
 
 namespace KirboRotations.Healer;
@@ -10,25 +11,8 @@ public sealed class SGE_Kirbo : SGE_Base
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
     public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{DefaultDescription}";
-    private string DefaultDescription =>
-        $"{GeneralHelpers.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
-        $"This is a modified version of the {ClassJob.Name} rotation from Archi's DefaultRotations\n" +
-        $"Note: For more information check out the 'Status' category\n" +
-        $"\nContent compatibility list:\n" +
-        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n" +
-        $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibilities)}\n" +
-        $"\nFeature list:\n" +
-        $"{DescriptionHelpers.GetFeaturesDescription(FeaturesList)}";
+    public override string Description => $"{GeneralHelpers.USERNAME}'s {ClassJob.Name}";        
 
-    private List<UltimateCompatibility> UltimateCompatibilities { get; } = new List<UltimateCompatibility>
-    { UltimateCompatibility.NotCompatible, };
-
-    private List<ContentCompatibility> ContentCompatibilities { get; } = new List<ContentCompatibility>
-    { ContentCompatibility.DutyRoulette, ContentCompatibility.FATEs, ContentCompatibility.TreasureHunt, ContentCompatibility.DeepDungeons, ContentCompatibility.VariantDungeons, };
-
-    private List<Features> FeaturesList { get; } = new List<Features>
-    { Features.HasUserConfig, };
     #endregion
 
     #region New IBaseActions

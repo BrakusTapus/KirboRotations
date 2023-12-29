@@ -19,14 +19,6 @@ public class PLD_KirboPvP : PLD_Base
 
     #region New PvP IBaseActions
     /// <summary>
-    /// 1-2-3 combo for PLD
-    /// </summary>
-    private static IBaseAction PvP_RoyalAuthorityCombo { get; } = new BaseAction(ActionID.PvP_RoyalAuthorityCombo)
-    {
-
-    };
-
-    /// <summary>
     /// Delivers an attack with a potency of 3,000.
     /// </summary>
     private static IBaseAction PvP_Fastblade { get; } = new BaseAction(ActionID.PvP_Fastblade)

@@ -1,0 +1,23 @@
+{
+    "Author": "Kirbo",
+    "Name": "KirboRotations",
+    "InternalName": "KirboRotations",
+    "Description": "N/A",
+    "ApplicableVersion": "any",
+    "Tags": [
+        "combat",
+        "rotation"
+    ],
+    "CategoryTags": [
+        "jobs"
+    ],
+    "DalamudApiLevel": 9,
+    "LoadRequiredState": 0,
+    "LoadSync": false,
+    "CanUnloadAsync": false,
+    "LoadPriority": 0,
+    "IsTestingExclusive": false,
+    "IconUrl": null,
+    "Punchline": "N/A",
+    "AcceptsFeedback": false
+}

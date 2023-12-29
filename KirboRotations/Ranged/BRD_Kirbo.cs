@@ -1,8 +1,9 @@
 ﻿using KirboRotations.Utility.ImGuiEx;
 using static KirboRotations.Custom.Data.StatusID_Buffs;
-using KirboRotations.Custom.Actions;
 using KirboRotations.Custom.ExtraHelpers;
 using KirboRotations.Custom.Utility.ImGuiEx;
+using KirboRotations.Custom.UI;
+using KirboRotations.Custom.Data;
 
 namespace KirboRotations.Ranged;
 
@@ -14,26 +15,7 @@ public class BRD_Kirbo : BRD_Base
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
     public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{DefaultDescription}";
-
-    private string DefaultDescription =>
-        $"{GeneralHelpers.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
-        $"This is a modified version of the {ClassJob.Name} rotation from Archi's DefaultRotations\n" +
-        $"Note: For more information check out the 'Status' category\n" +
-        $"\nContent compatibility list:\n" +
-        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n" +
-        $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibilities)}\n" +
-        $"\nFeature list:\n" +
-        $"{DescriptionHelpers.GetFeaturesDescription(FeaturesList)}";
-
-    private List<UltimateCompatibility> UltimateCompatibilities { get; } = new List<UltimateCompatibility>
-    { UltimateCompatibility.NotCompatible, };
-
-    private List<ContentCompatibility> ContentCompatibilities { get; } = new List<ContentCompatibility>
-    { ContentCompatibility.DutyRoulette, };
-
-    private List<Features> FeaturesList { get; } = new List<Features>
-    { Features.UseTincture, Features.HasUserConfig };
+    public override string Description => $"{GeneralHelpers.USERNAME}'s {ClassJob.Name}";
 
     #endregion Rotation Info
 
@@ -45,106 +27,10 @@ public class BRD_Kirbo : BRD_Base
     public override bool ShowStatus => true;
     public override void DisplayStatus()
     {
-        try
-        {
-            try 
-            {}
-            catch 
-            {}
-
-            try
-            {
-                ImGuiExtra.TripleSpacing();
-                ImGuiExtra.CollapsingHeaderWithContent("General Info", () =>
-                {
-                    ImGui.Text($"Rotation: {RotationName} {DescriptionHelpers.RotationVersion}");
-                    ImGuiExtra.ImGuiColoredText("Rotation  Job: ", ClassJob.Abbreviation, EColor.GreenBright);
-                    ImGuiExtra.SeperatorWithSpacing();
-                    ImGui.Text($"Player Name: {Player.Name}");
-                    ImGui.Text($"Player HP: {Player.GetHealthRatio() * 100:F2}%%");
-                    ImGuiExtra.ImGuiColoredText("Player MP: ", (int)Player.CurrentMp, EColor.Blue);
-                    ImGuiExtra.SeperatorWithSpacing();
-                    ImGui.Text("In Combat: " + InCombat);
-                    // ... other general info ...
-                });
-                ImGuiExtra.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - General Info"); }
-
-            ImGuiExtra.TripleSpacing();
-
-            try
-            {
-                ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
-                {
-                    ImGui.Text("Openerstep: " + OpenerHelpers.OpenerStep);
-                    ImGui.Text("OpenerActionsAvailable: " + OpenerHelpers.OpenerActionsAvailable);
-                    ImGui.Text("OpenerInProgress: " + OpenerHelpers.OpenerInProgress);
-                    ImGui.Text("OpenerHasFailed: " + OpenerHelpers.OpenerHasFailed);
-                    ImGui.Text("OpenerHasFinished: " + OpenerHelpers.OpenerHasFinished);
-                    ImGui.Text("_openerFlag: " + OpenerHelpers._openerFlag);
-                    // ... other rotation status ...
-                });
-                ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Rotation Status"); }
-
-            ImGuiExtra.TripleSpacing();
-
-            try
-            {
-                ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
-                {
-                    ImGui.Text("BurstStep: " + BurstHelpers.BurstStep);
-                    ImGui.Text("BurstActionsAvailable: " + BurstHelpers.BurstActionsAvailable);
-                    ImGui.Text("BurstInProgress: " + BurstHelpers.BurstInProgress);
-                    ImGui.Text("BurstHasFailed: " + BurstHelpers.BurstHasFailed);
-                    ImGui.Text("BurstHasFinished: " + BurstHelpers.BurstHasFinished);
-                    // ... other Burst status ...
-                });
-                ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Burst Status"); }
-
-            ImGuiExtra.TripleSpacing();
-
-            try
-            {
-                ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
-                {
-                    if (ImGui.BeginTable("actionTable", 2, ImGuiTableFlags.BordersOuter))
-                    {
-                        ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn(); ImGui.Text("GCD Remain:"); ImGui.TableNextColumn(); ImGui.Text(WeaponRemain.ToString());
-                        ImGui.TableNextRow();
-                        ImGui.TableNextColumn(); ImGui.Text($"TimeSinceLastAction:"); ImGui.TableNextColumn(); ImGui.Text(TimeSinceLastAction.TotalSeconds.ToString());
-                        // Add more rows as needed...
-
-                        ImGui.EndTable();
-                    }
-                });
-                ImGuiExtra.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Action Details"); }
-
-            ImGuiExtra.TripleSpacing();
-
-            try
-            {
-                float remainingSpace = ImGuiExtra.CalculateRemainingVerticalSpace();
-                ImGui.Text($"Remaining Vertical Space: {remainingSpace} pixels");
-
-                // Calculate the remaining vertical space in the window
-                // Subtracting button height with spacing
-                float remainingSpace2 = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing();
-                if (remainingSpace2 > 0)
-                { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
-                ImGuiExtra.DisplayResetButton("Reset Properties");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Extra + Reset Button"); }
-        }
-        catch { Serilog.Log.Warning($"{DebugWindowHelpers.ErrorDebug} - DisplayStatus"); }
+        RotationData rotationData = new RotationData();
+        rotationData.AddContentCompatibility(ContentCompatibility.DutyRoulette);
+        rotationData.AddFeatures(Features.HasUserConfig);
+        DebugWindow.DisplayDebugWindow(RotationName, rotationData.RotationVersion, rotationData);
     }
     #endregion Debug window
 

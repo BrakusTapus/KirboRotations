@@ -752,56 +752,6 @@ public static unsafe partial class ImGuiExtra
         ImGui.Dummy(Vector2.Zero);
     }
 
-    private static Dictionary<string, Box<string>> InputListValuesString = new();
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="list"></param>
-    /// <param name="overrideValues"></param>
-    public static void InputListString(string name, List<string> list, Dictionary<string, string> overrideValues = null)
-    {
-        if (!InputListValuesString.ContainsKey(name)) InputListValuesString[name] = new("");
-        InputList(name, list, overrideValues, delegate
-        {
-            var buttonSize = ImGuiHelpers.GetButtonSize("Add");
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - buttonSize.X - ImGui.GetStyle().ItemSpacing.X);
-            ImGui.InputText($"##{name.Replace("#", "_")}", ref InputListValuesString[name].Value, 100);
-            ImGui.SameLine();
-            if (ImGui.Button("Add"))
-            {
-                list.Add(InputListValuesString[name].Value);
-                InputListValuesString[name].Value = "";
-            }
-        });
-    }
-
-    private static Dictionary<string, Box<uint>> InputListValuesUint = new();
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="list"></param>
-    /// <param name="overrideValues"></param>
-    public static void InputListUint(string name, List<uint> list, Dictionary<uint, string> overrideValues = null)
-    {
-        if (!InputListValuesUint.ContainsKey(name)) InputListValuesUint[name] = new(0);
-        InputList(name, list, overrideValues, delegate
-        {
-            var buttonSize = ImGuiHelpers.GetButtonSize("Add");
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - buttonSize.X - ImGui.GetStyle().ItemSpacing.X);
-            ImGuiExtra.InputUint($"##{name.Replace("#", "_")}", ref InputListValuesUint[name].Value);
-            ImGui.SameLine();
-            if (ImGui.Button("Add"))
-            {
-                list.Add(InputListValuesUint[name].Value);
-                InputListValuesUint[name].Value = 0;
-            }
-        });
-    }
-
     /// <summary>
     ///
     /// </summary>
@@ -1039,96 +989,6 @@ public static unsafe partial class ImGuiExtra
         ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0);
         ImGui.Button(" ");
         ImGui.PopStyleVar();
-    }
-
-    public static Dictionary<string, Box<string>> EnumComboSearch = new();
-
-    /// <summary>
-    /// Draws an easy combo selector for an enum with a search field for long lists.
-    /// </summary>
-    /// <typeparam name="T">Enum</typeparam>
-    /// <param name="name">ImGui ID</param>
-    /// <param name="refConfigField">Value</param>
-    /// <param name="names">Optional Name overrides</param>
-    public static bool EnumCombo<T>(string name, ref T refConfigField, IDictionary<T, string> names) where T : IConvertible
-    {
-        return EnumCombo(name, ref refConfigField, null, names);
-    }
-
-    /// <summary>
-    /// Draws an easy combo selector for an enum with a search field for long lists.
-    /// </summary>
-    /// <typeparam name="T">Enum</typeparam>
-    /// <param name="name">ImGui ID</param>
-    /// <param name="refConfigField">Value</param>
-    /// <param name="filter">Optional filter</param>
-    /// <param name="names">Optional Name overrides</param>
-    /// <returns></returns>
-    public static bool EnumCombo<T>(string name, ref T refConfigField, Func<T, bool> filter = null, IDictionary<T, string> names = null) where T : IConvertible
-    {
-        var ret = false;
-        if (ImGui.BeginCombo(name, (names != null && names.TryGetValue(refConfigField, out var n)) ? n : refConfigField.ToString().Replace("_", " ")))
-        {
-            var values = Enum.GetValues(typeof(T));
-            Box<string> fltr = null;
-            if (values.Length > 10)
-            {
-                if (!EnumComboSearch.ContainsKey(name)) EnumComboSearch.Add(name, new(""));
-                fltr = EnumComboSearch[name];
-                ImGuiExtra.SetNextItemFullWidth();
-                ImGui.InputTextWithHint($"##{name.Replace("#", "_")}", "Filter...", ref fltr.Value, 50);
-            }
-            foreach (var x in values)
-            {
-                var equals = EqualityComparer<T>.Default.Equals((T)x, refConfigField);
-                var element = (names != null && names.TryGetValue((T)x, out n)) ? n : x.ToString().Replace("_", " ");
-                if ((filter == null || filter((T)x))
-                    && (fltr == null || element.Contains(fltr.Value, StringComparison.OrdinalIgnoreCase))
-                    && ImGui.Selectable(element, equals)
-                    )
-                {
-                    ret = true;
-                    refConfigField = (T)x;
-                }
-                if (ImGui.IsWindowAppearing() && equals) ImGui.SetScrollHereY();
-            }
-            ImGui.EndCombo();
-        }
-        return ret;
-    }
-
-    public static Dictionary<string, Box<string>> ComboSearch = new();
-
-    public static bool Combo<T>(string name, ref T refConfigField, IEnumerable<T> values, Func<T, bool> filter = null, Dictionary<T, string> names = null)
-    {
-        var ret = false;
-        if (ImGui.BeginCombo(name, (names != null && names.TryGetValue(refConfigField, out var n)) ? n : refConfigField.ToString()))
-        {
-            Box<string> fltr = null;
-            if (values.Count() > 10)
-            {
-                if (!ComboSearch.ContainsKey(name)) ComboSearch.Add(name, new(""));
-                fltr = ComboSearch[name];
-                ImGuiExtra.SetNextItemFullWidth();
-                ImGui.InputTextWithHint($"##{name}fltr", "Filter...", ref fltr.Value, 50);
-            }
-            foreach (var x in values)
-            {
-                var equals = EqualityComparer<T>.Default.Equals(x, refConfigField);
-                var element = (names != null && names.TryGetValue(x, out n)) ? n : x.ToString();
-                if ((filter == null || filter(x))
-                    && (fltr == null || element.Contains(fltr.Value, StringComparison.OrdinalIgnoreCase))
-                    && ImGui.Selectable(element, equals)
-                    )
-                {
-                    ret = true;
-                    refConfigField = x;
-                }
-                if (ImGui.IsWindowAppearing() && equals) ImGui.SetScrollHereY();
-            }
-            ImGui.EndCombo();
-        }
-        return ret;
     }
 
     public static bool IconButton(FontAwesomeIcon icon, string id = "ECommonsButton", Vector2 size = default)
@@ -1618,6 +1478,18 @@ public static unsafe partial class ImGuiExtra
         if (ImGui.Button($"{label}"))
         {
             OpenerHelpers.ResetOpenerProperties();
+        }
+        ImGuiExtra.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
+    }
+
+    /// <summary>
+    /// Resets the Opener Value's
+    /// </summary>
+    internal static void StartRotationTimer(string label)
+    {
+        if (ImGui.Button($"{label}"))
+        {
+            //RotationTestHelper.StartRotationTimer();
         }
         ImGuiExtra.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
     }

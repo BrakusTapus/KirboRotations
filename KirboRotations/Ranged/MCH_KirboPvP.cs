@@ -1,5 +1,4 @@
-﻿//using ExCSS;
-//using Lumina.Excel.GeneratedSheets;
+﻿using KirboRotations.Custom.ExtraHelpers;
 using KirboRotations.Custom.Utility.ImGuiEx;
 using static ImGuiNET.ImGui;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
@@ -13,9 +12,8 @@ public class MCH_KirboPvP : MCH_Base
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;
     public override string GameVersion => "6.51";
-    public override string RotationName => "Kirbo's Machinist (PvP)";
-    public override string Description => "Kirbo's Machinist for PvP";
-    public static string ApiVersionRS => "3.5.7";
+    public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string Description => $"{GeneralHelpers.USERNAME}'s {ClassJob.Name}";
     #endregion
 
     #region IBaseActions
@@ -195,7 +193,6 @@ public class MCH_KirboPvP : MCH_Base
     {
         try
         {
-            Text("RS API Version: " + ApiVersionRS);
             Separator();
             Spacing();
 

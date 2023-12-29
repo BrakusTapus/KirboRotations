@@ -1,14 +1,14 @@
 ﻿using KirboRotations.Utility.ImGuiEx;
 using static KirboRotations.Custom.Data.StatusID_Buffs;
-using static KirboRotations.Custom.Data.StatusID_DeBuffs;
 using Lumina.Excel.GeneratedSheets;
-using KirboRotations.Custom.Actions;
 using KirboRotations.Custom.ExtraHelpers;
-using KirboRotations.Custom.Utility.ImGuiEx;
+using KirboRotations.Custom.UI;
+using KirboRotations.Custom.Data;
 
 namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.Wildfire)]
+[LinkDescription("https://i.imgur.com/23r8kFK.png", "Early AA")]
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
 public class MCH_KirboPvE : MCH_Base
 {
@@ -16,25 +16,6 @@ public class MCH_KirboPvE : MCH_Base
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
     public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{DefaultDescription}";
-    private string DefaultDescription =>
-        $"{GeneralHelpers.USERNAME}'s {ClassJob.Name} - {DescriptionHelpers.RotationVersion}\n" +
-        $"Does Delayed Tools and Early AA. Should be optimised for Boss Level 90 content with 2.5 GCD\n" +
-        $"Note: For more information check out the 'Status' category\n" +
-        $"\nContent compatibility list:\n" +
-        $"{DescriptionHelpers.GetUltimateCompatibilityDescription(UltimateCompatibilities)}\n" +
-        $"{DescriptionHelpers.GetContentCompatibilityDescription(ContentCompatibilities)}\n" +
-        $"\nFeature list:\n" +
-        $"{DescriptionHelpers.GetFeaturesDescription(FeaturesList)}";
-
-    private List<UltimateCompatibility> UltimateCompatibilities { get; } = new List<UltimateCompatibility>
-    { UltimateCompatibility.UCoB, };
-
-    private List<ContentCompatibility> ContentCompatibilities { get; } = new List<ContentCompatibility>
-    { ContentCompatibility.DutyRoulette, ContentCompatibility.ExtremeTrials, ContentCompatibility.SavageRaids, ContentCompatibility.DeepDungeons, ContentCompatibility.TreasureHunt, ContentCompatibility.Hunts };
-
-    private List<Features> FeaturesList { get; } = new List<Features>
-    { Features.UseTincture, Features.SavageOptimized, Features.HasUserConfig };
     #endregion
 
     #region New PvE IBaseActions
@@ -78,111 +59,153 @@ public class MCH_KirboPvE : MCH_Base
     public override bool ShowStatus => true;
     public override void DisplayStatus()
     {
-        try
-        {
-            ImGuiExtra.TripleSpacing();
-            ImGuiExtra.CollapsingHeaderWithContent("General Info", () =>
-            {
-                if (ImGui.BeginTable("generalInfoTable", 2))
+        RotationData rotationData = new RotationData();
+        rotationData.AddUltimateCompatibility(UltimateCompatibility.UCoB);
+        rotationData.AddContentCompatibility(ContentCompatibility.DutyRoulette);
+        rotationData.AddContentCompatibility(ContentCompatibility.SavageRaids);
+        rotationData.AddContentCompatibility(ContentCompatibility.ExtremeTrials);
+        rotationData.AddContentCompatibility(ContentCompatibility.Criterion);
+        rotationData.AddContentCompatibility(ContentCompatibility.Hunts);
+        rotationData.AddFeatures(Features.UseTincture);
+        rotationData.AddFeatures(Features.SavageOptimized);
+        rotationData.AddFeatures(Features.HasUserConfig);
+
+        rotationData.SetRotationOpeners("Early AA", "Delayed Tools"/*, "Early All"*/);
+        rotationData.CurrentRotationSelection = Configs.GetCombo("RotationSelection");
+
+        /*
+                try
                 {
-                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    ImGuiExtra.AddTableRow("Rotation", $"{RotationName} - {DescriptionHelpers.RotationVersion}");
-                    ImGuiExtra.AddTableRow("Rotation Job", ClassJob.Abbreviation);
-                    ImGuiExtra.AddTableRow("Player Name", Player.Name.ToString());
-                    ImGuiExtra.AddTableRow("Player HP", $"{Player.GetHealthRatio() * 100:F2}%");
-                    ImGuiExtra.AddTableRow("Player MP", ((int)Player.CurrentMp).ToString());
-                    ImGuiExtra.AddTableRow("In Combat", InCombat.ToString());
-                    // ... other general info ...
-                    ImGui.EndTable();
+                    ImGuiExtra.TripleSpacing();
+                    ImGuiExtra.CollapsingHeaderWithContent("General Info", () =>
+                    {
+                        ImGuiExtra.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
+                        if (ImGui.BeginTable("generalInfoTable", 2))
+                        {
+                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+                            ImGuiExtra.AddTableRow("Rotation", $"{RotationName} - {RotationData.RotationVersion}");
+                            ImGuiExtra.AddTableRow("Rotation Job", ClassJob.Abbreviation);
+                            ImGuiExtra.AddTableRow("Player Name", Player.Name.ToString());
+                            ImGuiExtra.AddTableRow("Player HP", $"{Player.GetHealthRatio() * 100:F2}%");
+                            ImGuiExtra.AddTableRow("Player MP", ((int)Player.CurrentMp).ToString());
+                            ImGuiExtra.AddTableRow("In Combat", InCombat.ToString());
+                            // ... other general info ...
+                            ImGui.EndTable();
+                        }
+
+                        if (ImGui.CollapsingHeader("Features"))
+                        {
+                            ImGui.Indent();  // Indent the nested headers
+                            ImGuiExtra.TripleSpacing();
+                            ImGuiExtra.CollapsingHeaderWithContent("Compatible Ultimates", () =>
+                            {
+                                ImGuiExtra.Tooltip("Displays compatible Ultimates like:\n-UCoB\n-TEA\n-TOP");
+                                foreach (var item in rotationData.UltimateCompatibilities)
+                                {
+                                    ImGui.Text(item.ToString());
+                                }
+
+                            });
+
+                            ImGuiExtra.TripleSpacing();
+                            ImGuiExtra.CollapsingHeaderWithContent("Content Compatibilities", () =>
+                            {
+                                ImGuiExtra.Tooltip("Displays compatible content like:\n-DutyRoulette\n-DeepDungeons\n-SavageRaids");
+                                foreach (var item in rotationData.ContentCompatibilities)
+                                {
+                                    ImGui.Text(item.ToString());
+                                }
+
+                            });
+
+                            ImGuiExtra.TripleSpacing();
+                            ImGuiExtra.CollapsingHeaderWithContent("Rotation Features", () =>
+                            {
+                                ImGuiExtra.Tooltip("Displays rotation features like:\n-Tincture use\n-High End ready or not\n-Has user configurations");
+                                foreach (var item in rotationData.FeaturesList)
+                                {
+                                    ImGui.Text(item.ToString());
+                                }
+
+                            });
+                            ImGui.Unindent();  // Reset indentation
+                        }
+                    });
+
+
+                    ImGuiExtra.TripleSpacing();
+                    ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
+                    {
+                        ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
+                        if (ImGui.BeginTable("rotationStatusTable", 2))
+                        {
+                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+                            string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
+                            ImGuiExtra.AddTableRow("Rotation Selection", rotationText);
+                            ImGuiExtra.AddTableRow("Openerstep", OpenerHelpers.OpenerStep.ToString());
+                            ImGuiExtra.AddTableRow("OpenerActionsAvailable", OpenerHelpers.OpenerActionsAvailable.ToString());
+                            ImGuiExtra.AddTableRow("OpenerInProgress", OpenerHelpers.OpenerInProgress.ToString());
+                            ImGuiExtra.AddTableRow("OpenerHasFailed", OpenerHelpers.OpenerHasFailed.ToString());
+                            ImGuiExtra.AddTableRow("OpenerHasFinished", OpenerHelpers.OpenerHasFinished.ToString());
+                            // ... other rotation status ...
+                            ImGui.EndTable();
+                        }
+                    });
+
+
+                    ImGuiExtra.TripleSpacing();
+                    ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
+                    {
+                        ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
+                        if (ImGui.BeginTable("burstStatusTable", 2))
+                        {
+                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+                            ImGuiExtra.AddTableRow("BurstStep", BurstHelpers.BurstStep.ToString());
+                            ImGuiExtra.AddTableRow("BurstActionsAvailable", BurstHelpers.BurstActionsAvailable.ToString());
+                            ImGuiExtra.AddTableRow("BurstInProgress", BurstHelpers.BurstInProgress.ToString());
+                            ImGuiExtra.AddTableRow("BurstHasFailed", BurstHelpers.BurstHasFailed.ToString());
+                            ImGuiExtra.AddTableRow("BurstHasFinished", BurstHelpers.BurstHasFinished.ToString());
+                            // ... other Burst status ...
+                            ImGui.EndTable();
+                        }
+                    });
+
+
+                    ImGuiExtra.TripleSpacing();
+                    ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
+                    {
+                        ImGuiExtra.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
+                        if (ImGui.BeginTable("actionTable", 2))
+                        {
+                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+                            ImGuiExtra.AddTableRow("GCD Remain", WeaponRemain.ToString());
+                            ImGuiExtra.AddTableRow("LastGCD", DataCenter.LastGCD.ToString());
+                            ImGuiExtra.AddTableRow("LastAbility", DataCenter.LastAbility.ToString());
+                            // Add more rows as needed...
+                            ImGui.EndTable();
+                        }
+                    });
+
+                    try
+                    {
+                        // Calculate the remaining vertical space in the window
+                        // Subtracting button height with spacing
+                        float remainingSpace2 = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing();
+                        if (remainingSpace2 > 0)
+                        { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
+
+                        ImGuiExtra.DisplayResetButton("Reset Properties");
+                    }
+                    catch { Serilog.Log.Error($"{DebugWindow.ErrorMsg} - Extra + Reset Button"); }
                 }
-            });
-            ImGuiExtra.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
-
-            ImGuiExtra.TripleSpacing();
-
-            ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
-            {
-                if (ImGui.BeginTable("rotationStatusTable", 2))
+                catch (Exception ex)
                 {
-                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
-                    ImGuiExtra.AddTableRow("Rotation Selection", rotationText);
-                    ImGuiExtra.AddTableRow("Openerstep", OpenerHelpers.OpenerStep.ToString());
-                    ImGuiExtra.AddTableRow("OpenerActionsAvailable", OpenerHelpers.OpenerActionsAvailable.ToString());
-                    ImGuiExtra.AddTableRow("OpenerInProgress", OpenerHelpers.OpenerInProgress.ToString());
-                    ImGuiExtra.AddTableRow("OpenerHasFailed", OpenerHelpers.OpenerHasFailed.ToString());
-                    ImGuiExtra.AddTableRow("OpenerHasFinished", OpenerHelpers.OpenerHasFinished.ToString());
-                    // ... other rotation status ...
-                    ImGui.EndTable();
+                    Serilog.Log.Warning($"{DebugWindow.ErrorMsg} - DisplayStatus: {ex.Message}");
                 }
-            });
-            ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
+        */
 
-            ImGuiExtra.TripleSpacing();
+        DebugWindow.DisplayDebugWindow(RotationName, rotationData.RotationVersion, rotationData);
 
-            ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
-            {
-                if (ImGui.BeginTable("burstStatusTable", 2))
-                {
-                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    string burstText = GetRotationText(Configs.GetCombo("RotationSelection"));
-                    ImGuiExtra.AddTableRow("Rotation Selection", burstText);
-                    ImGuiExtra.AddTableRow("BurstStep", BurstHelpers.BurstStep.ToString());
-                    ImGuiExtra.AddTableRow("BurstActionsAvailable", BurstHelpers.BurstActionsAvailable.ToString());
-                    ImGuiExtra.AddTableRow("BurstInProgress", BurstHelpers.BurstInProgress.ToString());
-                    ImGuiExtra.AddTableRow("BurstHasFailed", BurstHelpers.BurstHasFailed.ToString());
-                    ImGuiExtra.AddTableRow("BurstHasFinished", BurstHelpers.BurstHasFinished.ToString());
-                    // ... other Burst status ...
-                    ImGui.EndTable();
-                }
-            });
-            ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
-
-            ImGuiExtra.TripleSpacing();
-
-            ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
-            {
-                if (ImGui.BeginTable("actionTable", 2))
-                {
-                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    ImGuiExtra.AddTableRow("GCD Remain", WeaponRemain.ToString());
-                    // Add more rows as needed...
-                    ImGui.EndTable();
-                }
-            });
-            ImGuiExtra.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
-
-            ImGuiExtra.TripleSpacing();
-
-            try
-            {
-                float remainingSpace = ImGuiExtra.CalculateRemainingVerticalSpace();
-                ImGui.Text($"Remaining Vertical Space: {remainingSpace} pixels");
-
-                // Calculate the remaining vertical space in the window
-                // Subtracting button height with spacing
-                float remainingSpace2 = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing();
-                if (remainingSpace2 > 0)
-                { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
-                ImGuiExtra.DisplayResetButton("Reset Properties");
-            }
-            catch { Serilog.Log.Error($"{DebugWindowHelpers.ErrorDebug} - Extra + Reset Button"); }
-        }
-        catch (Exception ex)
-        {
-            Serilog.Log.Warning($"{DebugWindowHelpers.ErrorDebug} - DisplayStatus: {ex.Message}");
-        }
-    }
-
-    private string GetRotationText(int rotationSelection)
-    {
-        return rotationSelection switch
-        {
-            0 => "Early AA",
-            1 => "Delayed Tools",
-            2 => "Early All",
-            _ => "Unknown",
-        };
     }
     #endregion
 
@@ -540,6 +563,7 @@ public class MCH_KirboPvE : MCH_Base
         {
             return Opener(out act);
         }
+
         if (!OpenerHelpers.OpenerInProgress)
         {
             if (AutoCrossbow.CanUse(out act, (CanUseOption)1, 2) && ObjectHelper.DistanceToPlayer(HostileTarget) <= 12f)
@@ -623,48 +647,9 @@ public class MCH_KirboPvE : MCH_Base
         {
             return true;
         }
-        if (Configs.GetBool("DumpSkills") && HostileTarget.IsDying() && HostileTarget.IsBossFromIcon())
+        if (DumpSkills(nextGCD, out act) && Configs.GetBool("DumpSkills") && HostileTarget.IsDying() && HostileTarget.IsBossFromIcon())
         {
-            if (!Player.HasStatus(true, StatusID.Reassemble) && Reassemble.CanUse(out act, (CanUseOption)2) && Reassemble.CurrentCharges > 0 && (nextGCD == ChainSaw || nextGCD == AirAnchor || nextGCD == Drill))
-            {
-                return true;
-            }
-            if (BarrelStabilizer.CanUse(out act, CanUseOption.MustUse))
-            {
-                return true;
-            }
-            if (AirAnchor.CanUse(out act, CanUseOption.MustUse))
-            {
-                return true;
-            }
-            if (ChainSaw.CanUse(out act, CanUseOption.MustUse))
-            {
-                return true;
-            }
-            if (Drill.CanUse(out act, CanUseOption.MustUse))
-            {
-                return true;
-            }
-            if (RookAutoturret.CanUse(out act, CanUseOption.MustUse) && Battery >= 50)
-            {
-                return true;
-            }
-            if (Hypercharge.CanUse(out act) && !WillhaveTool && Heat >= 50)
-            {
-                return true;
-            }
-            if (HostileTarget.GetHealthRatio() < 0.03 && nextGCD == CleanShot && Reassemble.CurrentCharges > 0 && Reassemble.CanUse(out act, CanUseOption.IgnoreClippingCheck))
-            {
-                return true;
-            }
-            if (HostileTarget.GetHealthRatio() < 0.03 && RookAutoturret.ElapsedAfter(5f) && QueenOverdrive.CanUse(out act))
-            {
-                return true;
-            }
-            if (HostileTarget.GetHealthRatio() < 0.02 && ((Player.HasStatus(true, StatusID.Wildfire)) || BurstHelpers.InBurst) && Wildfire.ElapsedAfter(5f) && Detonator.CanUse(out act))
-            {
-                return true;
-            }
+            return true;
         }
 
         // LvL 90+
@@ -690,17 +675,26 @@ public class MCH_KirboPvE : MCH_Base
                 }
                 return true;
             }
-            if (Reassemble.CanUse(out act, CanUseOption.MustUseEmpty) && !Player.HasStatus(true, StatusID.Reassemble))
+
+            if (Reassemble.CanUse(out act, CanUseOption.MustUseEmpty) /*&& !Player.HasStatus(true, StatusID.Reassemble)*/)
             {
                 if (IActionHelper.IsTheSameTo(nextGCD, true, ChainSaw))
                 {
+                    Serilog.Log.Debug("Next GCD is ChainSaw.  Returning True");
                     return true;
                 }
-                if ((IActionHelper.IsTheSameTo(nextGCD, true, AirAnchor) || IActionHelper.IsTheSameTo(nextGCD, true, Drill)) && !Wildfire.WillHaveOneCharge(55f))
+                if (IActionHelper.IsTheSameTo(nextGCD, true, AirAnchor) && !Wildfire.WillHaveOneCharge(55f))
                 {
+                    Serilog.Log.Debug("Next GCD is AA.  And Wildfire will not be ready within the next 55 seconds.   Returning True");
+                    return true;
+                }
+                if (IActionHelper.IsTheSameTo(nextGCD, true, Drill) && !Wildfire.WillHaveOneCharge(55f))
+                {
+                    Serilog.Log.Debug("Next GCD is Drill.  And Wildfire will not be ready within the next 55 seconds.   Returning True");
                     return true;
                 }
             }
+
             if (RookAutoturret.CanUse(out act, (CanUseOption)16) && HostileTarget && HostileTarget.IsTargetable && InCombat)
             {
                 if (CombatElapsedLess(60f) && !CombatElapsedLess(45f) && Battery >= 50)
@@ -878,6 +872,51 @@ public class MCH_KirboPvE : MCH_Base
         // If none of the above conditions are met, default to using GaussRound.
         // This is a fallback in case other conditions fail to determine a clear action.
         return GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
+    }
+
+    private bool DumpSkills(IAction nextGCD, out IAction act)
+    {
+        if (!Player.HasStatus(true, StatusID.Reassemble) && Reassemble.CanUse(out act, (CanUseOption)2) && Reassemble.CurrentCharges > 0 && (nextGCD == ChainSaw || nextGCD == AirAnchor || nextGCD == Drill))
+        {
+            return true;
+        }
+        if (BarrelStabilizer.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+        if (AirAnchor.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+        if (ChainSaw.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+        if (Drill.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+        if (RookAutoturret.CanUse(out act, CanUseOption.MustUse) && Battery >= 50)
+        {
+            return true;
+        }
+        if (Hypercharge.CanUse(out act) && !WillhaveTool && Heat >= 50)
+        {
+            return true;
+        }
+        if (HostileTarget.GetHealthRatio() < 0.03 && nextGCD == CleanShot && Reassemble.CurrentCharges > 0 && Reassemble.CanUse(out act, CanUseOption.IgnoreClippingCheck))
+        {
+            return true;
+        }
+        if (HostileTarget.GetHealthRatio() < 0.03 && RookAutoturret.ElapsedAfter(5f) && QueenOverdrive.CanUse(out act))
+        {
+            return true;
+        }
+        if (HostileTarget.GetHealthRatio() < 0.02 && ((Player.HasStatus(true, StatusID.Wildfire)) || BurstHelpers.InBurst) && Wildfire.ElapsedAfter(5f) && Detonator.CanUse(out act))
+        {
+            return true;
+        }
+        return false;
     }
     #endregion
 
