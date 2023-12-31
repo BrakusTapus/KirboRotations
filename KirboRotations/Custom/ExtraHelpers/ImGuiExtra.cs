@@ -2,8 +2,6 @@
 using Dalamud.Interface.Utility;
 using KirboRotations.Custom.ExtraHelpers;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
-
-using KirboRotations.Custom.Utility.ImGuiEx;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;

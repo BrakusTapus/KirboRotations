@@ -1,6 +1,5 @@
 ﻿using KirboRotations.Custom.Data;
 using KirboRotations.Custom.ExtraHelpers;
-using KirboRotations.Custom.Utility.ImGuiEx;
 using KirboRotations.Utility.ImGuiEx;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 

@@ -17,8 +17,7 @@
 
     <!-- Rotation Solver's ECommons Path -->
     <PropertyGroup>
-        <RSversion>3.5.6.9</RSversion>
-        <RSInstallPath>$(AppData)\XIVPlugins\Projects\RotationSolver\Kirbo\RotationSolver\RotationSolver\bin\Release</RSInstallPath>
+        <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\3.5.6.9\</RSInstallPath>
         <ECommonsHintPath>$(RSInstallPath)</ECommonsHintPath>
     </PropertyGroup>
 
@@ -34,6 +33,11 @@
         <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
         <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
     </PropertyGroup>
+    <ItemGroup>
+      <Compile Remove="Custom\Utility\**" />
+      <EmbeddedResource Remove="Custom\Utility\**" />
+      <None Remove="Custom\Utility\**" />
+    </ItemGroup>
 
     <!-- Files Management -->
     <!-- Exclude from Compiler -->
@@ -41,8 +45,6 @@
         <Compile Remove="Custom\ExtraHelpers\OpenerHelpers - Copy.cs" />
         <Compile Remove="Custom\ExtraHelpers\RotationTestHelper.cs" />
         <Compile Remove="Custom\UI\PvPDebugWindow.cs" />
-        <Compile Remove="Custom\Utility\ImGuiEx\CImGui.cs" />
-        <Compile Remove="Custom\Utility\ImGuiEx\ImGuiTrans.cs" />
         <Compile Remove="Healer\AST_KirboPvP.cs" />
         <Compile Remove="Healer\SCH_KirboPvP.cs" />
         <Compile Remove="Healer\SGE_Default.cs" />
@@ -63,22 +65,13 @@
         <Compile Remove="Ranged\MCH_KirboPvP_Copy.cs" />
         <Compile Remove="Ranged\MCH_Kirbo_AIO.cs" />
         <Compile Remove="Ranged\MCH_Template.cs" />
-        <Compile Remove="Custom\Utility\ImGuiEx\ImGuiEx2.cs" />
         <Compile Remove="Tank\GNB_KirboPvP.cs" />
-        <Compile Remove="Custom\Utility\Rotations\**" />
-        <Compile Remove="Custom\Utility\KirboRotation\**" />
-        <Compile Remove="Custom\Utility\Service\**" />
-        <EmbeddedResource Remove="Custom\Utility\Service\**" />
-        <None Remove="Custom\Utility\Service\**" />
     </ItemGroup>
 
     <!-- Files Management -->
     <!-- Include for access/reference -->
     <ItemGroup>
         <None Include="$(AppData)\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
-        <None Include="Custom\UI\PvPDebugWindow.cs" />
-        <None Include="Custom\Utility\ImGuiEx\CImGui.cs" />
-        <None Include="Custom\Utility\ImGuiEx\ImGuiTrans.cs" />
         <None Include="Healer\AST_KirboPvP.cs" />
         <None Include="Healer\SCH_KirboPvP.cs" />
         <None Include="Healer\SGE_KirboPvP.cs" />

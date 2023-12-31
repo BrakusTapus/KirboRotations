@@ -1,7 +1,7 @@
 ﻿using Dalamud.Interface.Colors;
 using KirboRotations.Utility.ImGuiEx;
 
-namespace KirboRotations.Custom.Utility.ImGuiEx;
+namespace KirboRotations.Custom.ExtraHelpers;
 
 /// <summary>
 /// A set of fancy color for use in plugins. You can redefine them to match necessary style!
