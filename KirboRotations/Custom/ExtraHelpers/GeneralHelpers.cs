@@ -6,11 +6,16 @@ public static class GeneralHelpers
 {
     public const string USERNAME = "Kirbo";
 
+    private const string K = "[KirboRotations]";
+
+    // Used so i can filter XLLog on rotation name
+    public static string v = K;
+
     /// <summary> Checks if the player is in a PVP enabled zone. </summary>
     /// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
     internal static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
 
-    #region Conditions
+/*  #region Conditions
     /// <summary>
     /// 
     /// </summary>
@@ -96,4 +101,5 @@ public static class GeneralHelpers
     /// </summary>
     public static unsafe bool IsPerforming => Conditions.Instance()->Flags[16];
     #endregion
+*/
 }

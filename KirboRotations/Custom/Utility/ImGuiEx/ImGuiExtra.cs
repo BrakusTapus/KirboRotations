@@ -1,75 +1,24 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Colors;
-using Dalamud.Interface.Internal.Notifications;
-using Dalamud.Interface.Style;
+﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
-//using ECommons;
-//using ECommons.DalamudServices;
-//using ECommons.GameHelpers;
-//using ECommons.Reflection;
-using ImGuiNET;
 using KirboRotations.Custom.ExtraHelpers;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+
 using KirboRotations.Custom.Utility.ImGuiEx;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Xml.Linq;
 
 namespace KirboRotations.Utility.ImGuiEx;
 
+/// <summary>
+/// 
+/// </summary>
 public static unsafe partial class ImGuiExtra
 {
-    /*
-        /// <summary>
-        ///
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="id"></param>
-        /// <param name="order"></param>
-        /// <returns></returns>
-        public static bool EnumOrderer<T>(string id, List<T> order) where T : IConvertible
-        {
-            var ret = false;
-            var enumValues = Enum.GetValues(typeof(T)).Cast<T>().ToArray();
-            foreach (var x in enumValues) if (!order.Contains(x)) order.Add(x);
-            if (order.Count > enumValues.Length)
-            {
-                Serilog.Log.Warning($"EnumOrderer: duplicates or non-existing items found, enum {enumValues.Print()}, list {order.Print()}, cleaning up.");
-                order.RemoveAll(x => !enumValues.Contains(x));
-                var set = order.ToHashSet();
-                order.Clear();
-                order.AddRange(set);
-            }
-            for (int i = 0; i < order.Count; i++)
-            {
-                var e = order[i];
-                ImGui.PushID($"ECommonsEnumOrderer{id}{e}");
-                if (ImGui.ArrowButton("up", ImGuiDir.Up) && i > 0)
-                {
-                    (order[i - 1], order[i]) = (order[i], order[i - 1]);
-                    ret = true;
-                }
-                ImGui.SameLine();
-                if (ImGui.ArrowButton("down", ImGuiDir.Down) && i < order.Count - 1)
-                {
-                    (order[i + 1], order[i]) = (order[i], order[i + 1]);
-                    ret = true;
-                }
-                ImGui.SameLine();
-                ImGuiExtra.Text($"{e.ToString().Replace("_", " ")}");
-                ImGui.PopID();
-            }
-            return ret;
-        }
-    */
-
+    /// <summary>
+    /// 
+    /// </summary>
     public static float GlobalScale { get; private set; }
 
     /// <summary>
@@ -119,20 +68,6 @@ public static unsafe partial class ImGuiExtra
         var txt = num.ToString();
         var ret = ImGui.InputText(id, ref txt, 50);
         long.TryParse(txt, out num);
-        return ret;
-    }
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="text"></param>
-    /// <param name="col"></param>
-    /// <returns></returns>
-    public static bool CollapsingHeader(string text, Vector4? col = null)
-    {
-        if (col != null) ImGui.PushStyleColor(ImGuiCol.Text, col.Value);
-        var ret = ImGui.CollapsingHeader(text);
-        if (col != null) ImGui.PopStyleColor();
         return ret;
     }
 
@@ -223,17 +158,6 @@ public static unsafe partial class ImGuiExtra
     /// <returns>true when clicked, otherwise false</returns>
     public static bool ButtonCheckbox(string name, ref bool value, bool smallButton = false) => ButtonCheckbox(name, ref value, EColor.Red, smallButton);
 
-    /*
-        /// <summary>
-        /// Draws a button that acts like a checkbox.
-        /// </summary>
-        /// <param name="name">Button text</param>
-        /// <param name="value">Value</param>
-        /// <param name="color">Active button color</param>
-        /// <param name="smallButton">Whether button should be small</param>
-        /// <returns>true when clicked, otherwise false</returns>
-        public static bool ButtonCheckbox(string name, ref bool value, uint color, bool smallButton = false) => ButtonCheckbox(name, ref value, color.ToVector4(), smallButton);
-    */
     /// <summary>
     /// Draws a button that acts like a checkbox.
     /// </summary>
@@ -341,6 +265,68 @@ public static unsafe partial class ImGuiExtra
     }
 
     /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    public static void AddTableRow(string description, bool value)
+    {
+        Vector4 color = value ? EColor.GreenBright : EColor.RedBright; // Green for true, red for false
+        string valueText = value.ToString();
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(color, valueText);
+    }
+
+    /// <summary>
+    /// The text in both collums wil be colored
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    /// <param name="textColor"></param>
+    public static void AddTableRow(string description, string value, Vector4 textColor)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.TextColored(textColor, description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(textColor, value);
+    }
+
+    /// <summary>
+    /// First Colum text will be white and text in the second colum will be whatever color is picked
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    /// <param name="textColor"></param>
+    public static void AddTableRowColorLast(string description, string value, Vector4 textColor)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(textColor, value);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="text"></param>
+    /// <param name="col"></param>
+    /// <returns></returns>
+    public static bool CollapsingHeader(string text, Vector4? col = null)
+    {
+        if (col != null) ImGui.PushStyleColor(ImGuiCol.Text, col.Value);
+        var ret = ImGui.CollapsingHeader(text);
+        if (col != null) ImGui.PopStyleColor();
+        return ret;
+    }
+
+
+    /// <summary>
     ///
     /// </summary>
     /// <param name="text"></param>
@@ -398,9 +384,6 @@ public static unsafe partial class ImGuiExtra
         return ImGui.BeginPopup(popupId);
     }
 
-    [Obsolete("Please switch to CollectionCheckbox")]
-    public static bool HashSetCheckbox<T>(string label, T value, HashSet<T> collection) => CollectionCheckbox(label, value, collection);
-
     /// <summary>
     ///
     /// </summary>
@@ -440,71 +423,6 @@ public static unsafe partial class ImGuiExtra
         public ImGuiMouseButton ToastTooltipOnClickButton { get; init; } = ImGuiMouseButton.Left;
     }
 
-    /* 
-        private static uint headerLastWindowID = 0;
-        private static ulong headerLastFrame = 0;
-        private static float headerCurrentPos = 0;
-        private static float headerImGuiButtonWidth = 0; 
-    */
-
-    /*
-        public static bool AddHeaderIcon(string id, FontAwesomeIcon icon, HeaderIconOptions options = null)
-        {
-            if (ImGui.IsWindowCollapsed()) return false;
-
-            var scale = ImGuiHelpers.GlobalScale;
-            var currentID = ImGui.GetID(0);
-            if (currentID != headerLastWindowID || headerLastFrame != Svc.PluginInterface.UiBuilder.FrameCount)
-            {
-                headerLastWindowID = currentID;
-                headerLastFrame = Svc.PluginInterface.UiBuilder.FrameCount;
-                headerCurrentPos = 0.25f * ImGui.GetStyle().FramePadding.Length();
-                if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoTitleBar))
-                    headerCurrentPos = 1;
-                headerImGuiButtonWidth = 0f;
-                if (CurrentWindowHasCloseButton())
-                    headerImGuiButtonWidth += 17 * scale;
-                if (!GetCurrentWindowFlags().HasFlag(ImGuiWindowFlags.NoCollapse))
-                    headerImGuiButtonWidth += 17 * scale;
-            }
-
-            options ??= new();
-            var prevCursorPos = ImGui.GetCursorPos();
-            var buttonSize = new Vector2(20 * scale);
-            var buttonPos = new Vector2((ImGui.GetWindowWidth() - buttonSize.X - headerImGuiButtonWidth * scale * headerCurrentPos) - (ImGui.GetStyle().FramePadding.X * scale), ImGui.GetScrollY() + 1);
-            ImGui.SetCursorPos(buttonPos);
-            var drawList = ImGui.GetWindowDrawList();
-            drawList.PushClipRectFullScreen();
-
-            var pressed = false;
-            ImGui.InvisibleButton(id, buttonSize);
-            var itemMin = ImGui.GetItemRectMin();
-            var itemMax = ImGui.GetItemRectMax();
-            var halfSize = ImGui.GetItemRectSize() / 2;
-            var center = itemMin + halfSize;
-            if (ImGui.IsWindowHovered() && ImGui.IsMouseHoveringRect(itemMin, itemMax, false))
-            {
-                if (!string.IsNullOrEmpty(options.Tooltip))
-                    ImGui.SetTooltip(options.Tooltip);
-                ImGui.GetWindowDrawList().AddCircleFilled(center, halfSize.X, ImGui.GetColorU32(ImGui.IsMouseDown(ImGuiMouseButton.Left) ? ImGuiCol.ButtonActive : ImGuiCol.ButtonHovered));
-                if (ImGui.IsMouseReleased(options.MouseButton))
-                    pressed = true;
-                if (options.ToastTooltipOnClick && ImGui.IsMouseReleased(options.ToastTooltipOnClickButton))
-                    Svc.PluginInterface.UiBuilder.AddNotification(options.Tooltip!, null, NotificationType.Info);
-            }
-
-            ImGui.SetCursorPos(buttonPos);
-            ImGui.PushFont(UiBuilder.IconFont);
-            var iconString = icon.ToIconString();
-            drawList.AddText(UiBuilder.IconFont, ImGui.GetFontSize(), itemMin + halfSize - ImGui.CalcTextSize(iconString) / 2 + options.Offset, options.Color, iconString);
-            ImGui.PopFont();
-
-            ImGui.PopClipRect();
-            ImGui.SetCursorPos(prevCursorPos);
-
-            return pressed;
-        }
-    */
     /// <summary>
     ///
     /// </summary>
@@ -607,49 +525,6 @@ public static unsafe partial class ImGuiExtra
         return ImGuiNative.igIsKeyPressed((ImGuiKey)key, repeat2) != 0;
     }
 
-    /*
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="color"></param>
-        /// <param name="text"></param>
-        public static void TextUnderlined(uint color, string text)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, color);
-            TextUnderlined(text);
-            ImGui.PopStyleColor();
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="color"></param>
-        /// <param name="text"></param>
-        public static void TextUnderlined(Vector4 color, string text)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, color);
-            TextUnderlined(text);
-            ImGui.PopStyleColor();
-        }
-
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="text"></param>
-        public static void TextUnderlined(string text)
-        {
-            var size = ImGui.CalcTextSize(text);
-            var cur = ImGui.GetCursorScreenPos();
-            cur.Y += size.Y;
-            ImGui.GetWindowDrawList().PathLineTo(cur);
-            cur.X += size.X;
-            ImGui.GetWindowDrawList().PathLineTo(cur);
-            ImGui.GetWindowDrawList().PathStroke(ImGuiColors.DalamudWhite.ToUint());
-            ImGuiExtra.Text(text);
-        }
-    */
-
     /// <summary>
     ///
     /// </summary>
@@ -683,7 +558,7 @@ public static unsafe partial class ImGuiExtra
     ///
     /// </summary>
     /// <param name="text"></param>
-    public static void SetTooltip(string text)
+    private static void SetTooltip(string text)
     {
         ImGui.BeginTooltip();
         ImGui.TextUnformatted(text);
@@ -802,19 +677,6 @@ public static unsafe partial class ImGuiExtra
         }
     }
 
-    /*
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="col"></param>
-        /// <param name="func"></param>
-        public static void WithTextColor(Vector4 col, Action func)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, col);
-            GenericHelpers.Safe(func);
-            ImGui.PopStyleColor();
-        }
-    */
     /// <summary>
     ///
     /// </summary>
@@ -947,42 +809,6 @@ public static unsafe partial class ImGuiExtra
             return ImGuiColors.DalamudRed;
         }
     }
-    /*
-        public static void EzTabBar(string id, params (string name, Action function, Vector4? color, bool child)[] tabs) => EzTabBar(id, false, tabs);
-
-        public static void EzTabBar(string id, bool KoFiTransparent, params (string name, Action function, Vector4? color, bool child)[] tabs)
-        {
-            ImGui.BeginTabBar(id);
-            foreach (var x in tabs)
-            {
-                if (x.name == null) continue;
-                if (x.color != null)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Text, x.color.Value);
-                }
-                if (ImGui.BeginTabItem(x.name))
-                {
-                    if (x.color != null)
-                    {
-                        ImGui.PopStyleColor();
-                    }
-                    if (x.child) ImGui.BeginChild(x.name + "child");
-                    x.function();
-                    if (x.child) ImGui.EndChild();
-                    ImGui.EndTabItem();
-                }
-                else
-                {
-                    if (x.color != null)
-                    {
-                        ImGui.PopStyleColor();
-                    }
-                }
-            }
-            if (KoFiTransparent) KoFiButton.RightTransparentTab();
-            ImGui.EndTabBar();
-        }
-    */
 
     public static void InvisibleButton(int width = 0)
     {
@@ -991,7 +817,7 @@ public static unsafe partial class ImGuiExtra
         ImGui.PopStyleVar();
     }
 
-    public static bool IconButton(FontAwesomeIcon icon, string id = "ECommonsButton", Vector2 size = default)
+    public static bool IconButton(FontAwesomeIcon icon, string id = "IconButton", Vector2 size = default)
     {
         ImGui.PushFont(UiBuilder.IconFont);
         var result = ImGui.Button($"{icon.ToIconString()}##{icon.ToIconString()}-{id}", size);
@@ -999,7 +825,7 @@ public static unsafe partial class ImGuiExtra
         return result;
     }
 
-    public static bool SmallIconButton(string icon, string id = "ECommonsButton")
+    public static bool SmallIconButton(string icon, string id = "SmallIconButton")
     {
         ImGui.PushFont(UiBuilder.IconFont);
         var result = ImGui.SmallButton($"{icon}##{icon}-{id}");
@@ -1007,7 +833,7 @@ public static unsafe partial class ImGuiExtra
         return result;
     }
 
-    public static bool IconButton(string icon, string id = "ECommonsButton")
+    public static bool IconButton(string icon, string id = "IconButton")
     {
         ImGui.PushFont(UiBuilder.IconFont);
         var result = ImGui.Button($"{icon}##{icon}-{id}");
@@ -1069,58 +895,6 @@ public static unsafe partial class ImGuiExtra
         }
     }
 
-    /*
-        public static void TextCopy(Vector4 col, string text)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, col);
-            TextCopy(text);
-            ImGui.PopStyleColor();
-        }
-
-
-        public static void TextCopy(string text)
-        {
-            ImGui.TextUnformatted(text);
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            }
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-            {
-                ImGui.SetClipboardText(text);
-                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
-            }
-        }
-
-        public static void TextWrappedCopy(string text)
-        {
-            ImGuiExtra.TextWrapped(text);
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            }
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-            {
-                ImGui.SetClipboardText(text);
-                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
-            }
-        }
-
-        public static void TextWrappedCopy(Vector4 col, string text)
-        {
-            ImGuiExtra.TextWrapped(col, text);
-            if (ImGui.IsItemHovered())
-            {
-                ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-            }
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
-            {
-                ImGui.SetClipboardText(text);
-                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", DalamudReflector.GetPluginName(), NotificationType.Success);
-            }
-        }
-    */
-
     public static void TextCentered(string text)
     {
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X / 2 - ImGui.CalcTextSize(text).X / 2);
@@ -1157,33 +931,6 @@ public static unsafe partial class ImGuiExtra
             TextCentered(col.Value, text);
         }
     }
-
-    /*
-        public static void ButtonCopy(string buttonText, string copy)
-        {
-            if (ImGui.Button(buttonText.Replace("$COPY", copy)))
-            {
-                ImGui.SetClipboardText(copy);
-                Svc.PluginInterface.UiBuilder.AddNotification("Text copied to clipboard", null, NotificationType.Success);
-            }
-        }
-
-        public static void CenterColumnText(string text, bool underlined = false)
-        {
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImGui.GetColumnWidth() * 0.5f) - (ImGui.CalcTextSize(text).X * 0.5f));
-            if (underlined)
-                TextUnderlined(text);
-            else
-                Text(text);
-        }
-
-        public static void CenterColumnText(Vector4 colour, string text, bool underlined = false)
-        {
-            ImGui.PushStyleColor(ImGuiCol.Text, colour);
-            CenterColumnText(text, underlined);
-            ImGui.PopStyleColor();
-        }
-    */
 
     public static unsafe bool BeginTabItem(string label, ImGuiTabItemFlags flags)
     {
@@ -1228,10 +975,7 @@ public static unsafe partial class ImGuiExtra
         }
     }
 
-    #region My Extensions
-
     #region Text
-
     /// <summary>
     /// Custom extension for displaying a centered text
     /// </summary>
@@ -1276,11 +1020,9 @@ public static unsafe partial class ImGuiExtra
         ImGui.Text(integer.ToString());
         ImGui.PopStyleColor();
     }
-
     #endregion Text
 
     #region Spacing
-
     /// <summary>
     /// Simple way of adding some space and a seperator in between elements.
     /// </summary>
@@ -1308,92 +1050,9 @@ public static unsafe partial class ImGuiExtra
     {
         ImGui.Separator();
     }
-
     #endregion Spacing
 
-    #region Actions
-
-    /*
-        private static void DrawLastAction(string title, ActionID actionname, uint actionid)
-        {
-            // DrawLastAction(DataCenter.LastAction, (uint)DataCenter.LastAction);
-            DrawLastAction(actionname, (uint)actionid);
-            ImGui.Separator();
-
-            ImGui.Text($"{title}"); // Should be 'StatusProvide'
-            ImGui.Indent();
-            foreach (var status in Player.Object.StatusList)
-            {
-                // Skip the 'Well Fed' buff with ID 48
-                if (status.StatusId == 48) continue;
-
-                var source = status.SourceId == Player.Object.ObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-                //ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
-                ImGui.SameLine();
-
-                ImGui.PushID((int)status.StatusId);
-                //var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
-                var statusinfo = $"{status.GameData.Name} = {status.StatusId}";
-                var sourceinfo = $"Source: '{source}'";
-                var providestatus = $"StatusProvide = new StatusID[] { status.GameData.Name },";
-                if (ImGui.Button("Copy"))
-                {
-                    //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{providestatus}");
-                    Notify.Success("copied to clipboard.");
-                }
-                ImGui.PopID();
-            }
-            ImGui.Unindent();
-
-            ImGuiExtra.TripleSpacing();
-
-            ImGui.Text($"{title}"); // Should be 'TargetStatus'
-            ImGui.Indent();
-            if (Svc.Targets.Target is BattleChara b)
-            {
-                foreach (var status in b.StatusList)
-                {
-                    var source = status.SourceId == Player.Object.ObjectId ? "You" : Svc.Objects.SearchById(status.SourceId) == null ? "None" : "Others";
-                    //ImGui.Text($"ActionName: '{DataBase.LastAction}' | ActionID '{(uint)DataBase.LastAction}' | StatusName: '{status.GameData.Name}' | ID: '{status.StatusId}' | Source: '{source}'");
-                    ImGui.SameLine();
-
-                    // Copy Button Uses a unique ID for each button
-                    ImGui.PushID((int)status.StatusId); // Ensure status.StatusId is unique for each status
-                    //var actioninfo = $"{DataBase.LastAction} = {(uint)DataBase.LastAction}";
-                    var statusinfo = $"{status.GameData.Name} = {status.StatusId}";
-                    var sourceinfo = $"Source: '{source}'";
-                    var targetstatus = $"TargetStatus = new StatusID[] { status.GameData.Name },";
-                    if (ImGui.Button("Copy"))
-                    {
-                        //ImGui.SetClipboardText($"{actioninfo}\n{statusinfo}\n{sourceinfo}\n{targetstatus}");
-                        ECommons.ImGuiMethods.Notify.Success("copied to clipboard.");
-                    }
-                    ImGui.PopID(); // End of unique ID scope
-                }
-            }
-            ImGui.Unindent();
-        }
-    */
-
-    private static void DrawAction(string type, ActionID name, uint actionid)
-    {
-        ImGui.Text($"{type} | {name} | {actionid}");
-    }
-
-    /// <summary>
-    /// Easy way to display the action name and id of the last action that was used
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="actionid"></param>
-    public static void DrawLastAction(ActionID name, uint actionid)
-    {
-        ImGui.Text($"'{name}' | ActionID: '{actionid}'");
-    }
-
-    #endregion Actions
-
     #region Structured Data
-
     /// <summary>
     /// Creates a collapsing header with a label.
     /// </summary>
@@ -1410,11 +1069,9 @@ public static unsafe partial class ImGuiExtra
         }
         return false;
     }
-
     #endregion Structured Data
 
     #region Buttons
-
     /// <summary>
     /// Custom extension for a simple toggle button
     /// </summary>
@@ -1471,32 +1128,38 @@ public static unsafe partial class ImGuiExtra
     }
 
     /// <summary>
-    /// Resets the Opener Value's
+    /// Creates a Icon button that resets the Opener Value's
     /// </summary>
     internal static void DisplayResetButton(string label)
     {
-        if (ImGui.Button($"{label}"))
+        if (ImGuiExtra.IconButton(FontAwesomeIcon.Medkit, "Reset", default))
         {
             OpenerHelpers.ResetOpenerProperties();
         }
-        ImGuiExtra.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
     }
 
     /// <summary>
-    /// Resets the Opener Value's
+    /// 
     /// </summary>
-    internal static void StartRotationTimer(string label)
+    /// <param name="label"></param>
+    internal static void CopyCurrentValues(string label)
     {
-        if (ImGui.Button($"{label}"))
+        if (ImGuiExtra.IconButton(FontAwesomeIcon.Clipboard, "ClipBoard", default))
         {
-            //RotationTestHelper.StartRotationTimer();
+            // Gather the current values
+            string values = $"OpenerHasFailed: {OpenerHelpers.OpenerHasFailed}\n" +
+                        $"OpenerHasFinished: {OpenerHelpers.OpenerHasFinished}\n" +
+                        $"OpenerStep: {OpenerHelpers.OpenerStep}\n" +
+                        $"OpenerInProgress: {OpenerHelpers.OpenerInProgress}\n" +
+                        $"OpenerActionsAvailable: {OpenerHelpers.OpenerActionsAvailable}\n" +
+                        $"Lvl70UltimateOpenerActionsAvailable: {OpenerHelpers.LvL70_Ultimate_OpenerActionsAvailable}\n" +
+                        $"Lvl80UltimateOpenerActionsAvailable: {OpenerHelpers.LvL80_Ultimate_OpenerActionsAvailable}";
+
+            // Copy to clipboard
+            Clipboard.SetText(values);
         }
-        ImGuiExtra.Tooltip("Resets Opener properties\nUse this is Opener gets stuck");
     }
-
     #endregion Buttons
-
-    #endregion My Extensions
 }
 
 [StructLayout(LayoutKind.Explicit)]
@@ -1510,7 +1173,7 @@ public struct ImGuiWindow
     [FieldOffset(0x130)] public Vector2 CursorMaxPos;
 }
 
-public static partial class ImGuiExtra
+public static unsafe partial class ImGuiExtra
 {
     [LibraryImport("cimgui")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]

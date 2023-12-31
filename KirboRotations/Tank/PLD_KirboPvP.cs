@@ -194,7 +194,7 @@ public class PLD_KirboPvP : PLD_Base
         }
         catch
         {
-            Serilog.Log.Warning("Something wrong with DisplayStatus");
+            Serilog.Log.Warning($"{v} Something wrong with DisplayStatus");
         }
     }
     #endregion
@@ -220,7 +220,7 @@ public class PLD_KirboPvP : PLD_Base
         .SetBool(CombatType.PvP, "SafetyCheck", true, "Turn on to prevent using actions on targets that have a dangerous status\n(For example a SAM with Chiten)")
         .SetBool(CombatType.PvP, "LowHPNoAttacks", true, "Prevents the use of actions if player is moving with low HP\n(HP Threshold set in next option)")
         .SetInt(CombatType.PvP, "LowHPThreshold", 20000, "HP Threshold for the 'LowHPNoAttacks' option", 1, 60000)
-        .SetBool(CombatType.PvP, "UseIntervene", false, "Let rotation use Intervene");
+        .SetBool(CombatType.PvP, "UseDash", false, "Let rotation use Intervene");
     #endregion
 
     #region GCD Logic
@@ -330,7 +330,7 @@ public class PLD_KirboPvP : PLD_Base
         bool safetyCheck = Configs.GetBool("SafetyCheck");
         bool lowHPNoAttacks = Configs.GetBool("LowHPNoAttacks");
         int lowHPThreshold = Configs.GetInt("LowHPThreshold");
-        bool useIntervene = Configs.GetBool("UseIntervene");
+        bool UseDash = Configs.GetBool("UseDash");
 
         if (guardCancel && playerHasGuard)
         {
@@ -369,7 +369,7 @@ public class PLD_KirboPvP : PLD_Base
         // Maybe After Use follow Intervene up with a Shield Bash
         if (PvP_Intervene.CanUse(out act, CanUseOption.MustUseEmpty) && targetIsNotPlayer && Target.DistanceToPlayer() <= 20)
         {
-            if (!useIntervene)
+            if (!UseDash)
             {
                 return false;
             }
@@ -394,87 +394,7 @@ public class PLD_KirboPvP : PLD_Base
     #endregion
 
     #region Extra Helper Methods
-    // Updates Status of other extra helper methods on every frame
-    /*protected override void UpdateInfo()
-    {
-        HandleOpenerAvailability();
-        ToolKitCheck();
-        StateOfOpener();
-    }*/
-
-    // Checks if any major tool skill will almost come off CD (only at lvl 90), and sets "InBurst" to true if Player has Wildfire active
-    /*private void ToolKitCheck()
-    {
-        bool WillHaveDrill = Drill.WillHaveOneCharge(5f);
-        bool WillHaveAirAnchor = AirAnchor.WillHaveOneCharge(5f);
-        bool WillHaveChainSaw = ChainSaw.WillHaveOneCharge(5f);
-        if (Player.Level >= 90)
-        {
-            WillhaveTool = WillHaveDrill || WillHaveAirAnchor || WillHaveChainSaw;
-        }
-
-        InBurst = Player.HasStatus(true, StatusID.Wildfire);
-    }*/
-
-    // Controls various Opener properties depending on various conditions
-    /*public void StateOfOpener()
-    {
-        if (Player.IsDead)
-        {
-            OpenerHasFailed = false;
-            OpenerHasFinished = false;
-            Openerstep = 0;
-        }
-        if (!InCombat)
-        {
-            OpenerHasFailed = false;
-            OpenerHasFinished = false;
-            Openerstep = 0;
-        }
-        if (OpenerHasFailed)
-        {
-            OpenerInProgress = false;
-        }
-        if (OpenerHasFinished)
-        {
-            OpenerInProgress = false;
-        }
-    }*/
-
-    // Used by Reset button to in Displaystatus
-    /*private void ResetRotationProperties()
-    {
-        Openerstep = 0;
-        OpenerHasFinished = false;
-        OpenerHasFailed = false;
-        OpenerActionsAvailable = false;
-        OpenerInProgress = false;
-        Serilog.Log.Debug($"Openerstep = {Openerstep}");
-        Serilog.Log.Debug($"OpenerHasFinished = {OpenerHasFinished}");
-        Serilog.Log.Debug($"OpenerHasFailed = {OpenerHasFailed}");
-        Serilog.Log.Debug($"OpenerActionsAvailable = {OpenerActionsAvailable}");
-        Serilog.Log.Debug($"OpenerInProgress = {OpenerInProgress}");
-    }*/
-
-    // Used to check OpenerAvailability
-    /*public void HandleOpenerAvailability()
-    {
-        bool Lvl90 = Player.Level >= 90;
-        bool HasChainSaw = !ChainSaw.IsCoolingDown;
-        bool HasAirAnchor = !AirAnchor.IsCoolingDown;
-        bool HasDrill = !Drill.IsCoolingDown;
-        bool HasBarrelStabilizer = !BarrelStabilizer.IsCoolingDown;
-        bool HasRicochet = Ricochet.CurrentCharges == 3;
-        bool HasWildfire = !Wildfire.IsCoolingDown;
-        bool HasGaussRound = GaussRound.CurrentCharges == 3;
-        bool ReassembleOneCharge = Reassemble.CurrentCharges >= 1;
-        bool NoHeat = Heat == 0;
-        bool NoBattery = Battery == 0;
-        bool Openerstep0 = Openerstep == 0;
-        OpenerActionsAvailable = ReassembleOneCharge && HasChainSaw && HasAirAnchor && HasDrill && HasBarrelStabilizer && HasRicochet && HasWildfire && HasGaussRound && Lvl90 && NoBattery && NoHeat && Openerstep0;
-
-        // Future Opener conditions for ULTS
-    }*/
+    // WIP
     #endregion
 
 }

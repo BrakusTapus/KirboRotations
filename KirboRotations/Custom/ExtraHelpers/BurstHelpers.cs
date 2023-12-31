@@ -1,4 +1,6 @@
-﻿namespace KirboRotations.Custom.ExtraHelpers;
+﻿using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+
+namespace KirboRotations.Custom.ExtraHelpers;
 
 public static class BurstHelpers
 {
@@ -63,9 +65,9 @@ public static class BurstHelpers
         BurstStep = 0;
         BurstHasFinished = false;
         BurstHasFailed = false;
-        Serilog.Log.Debug($"OpenerHasFailed = {InBurst}");
-        Serilog.Log.Debug($"OpenerInProgress = {BurstInProgress} - Step: {BurstStep}");
-        Serilog.Log.Debug($"OpenerHasFinished = {BurstHasFinished}");
+        Serilog.Log.Debug($"{v} OpenerHasFailed = {InBurst}");
+        Serilog.Log.Debug($"{v} OpenerInProgress = {BurstInProgress} - Step: {BurstStep}");
+        Serilog.Log.Debug($"{v} OpenerHasFinished = {BurstHasFinished}");
     }
 
     /// <summary>
@@ -100,7 +102,7 @@ public static class BurstHelpers
     {
         if (_burstFlag)
         {
-            Serilog.Log.Debug($"Burst Event");
+            Serilog.Log.Debug($"{v} Burst Event");
             _burstFlag = false;
         }
     }

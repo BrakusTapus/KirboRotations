@@ -234,7 +234,7 @@ public class MCH_KirboPvP : MCH_Base
         }
         catch
         {
-            Serilog.Log.Warning("Something wrong with DisplayStatus");
+            Serilog.Log.Warning($"{v} Something wrong with DisplayStatus");
         }
     }
     #endregion

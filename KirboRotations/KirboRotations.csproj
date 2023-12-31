@@ -4,7 +4,7 @@
     <PropertyGroup>
         <AssemblyName>KirboRotations</AssemblyName>
         <Authors>Kirbo</Authors>
-        <Version>1.0.0.17</Version>
+        <Version>1.0.0.18</Version>
         <TargetFramework>net7.0-windows</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
         <Platforms>AnyCPU</Platforms>
@@ -38,7 +38,10 @@
     <!-- Files Management -->
     <!-- Exclude from Compiler -->
     <ItemGroup>
+        <Compile Remove="Custom\ExtraHelpers\OpenerHelpers - Copy.cs" />
         <Compile Remove="Custom\ExtraHelpers\RotationTestHelper.cs" />
+        <Compile Remove="Custom\UI\PvPDebugWindow.cs" />
+        <Compile Remove="Custom\Utility\ImGuiEx\CImGui.cs" />
         <Compile Remove="Custom\Utility\ImGuiEx\ImGuiTrans.cs" />
         <Compile Remove="Healer\AST_KirboPvP.cs" />
         <Compile Remove="Healer\SCH_KirboPvP.cs" />
@@ -73,6 +76,8 @@
     <!-- Include for access/reference -->
     <ItemGroup>
         <None Include="$(AppData)\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+        <None Include="Custom\UI\PvPDebugWindow.cs" />
+        <None Include="Custom\Utility\ImGuiEx\CImGui.cs" />
         <None Include="Custom\Utility\ImGuiEx\ImGuiTrans.cs" />
         <None Include="Healer\AST_KirboPvP.cs" />
         <None Include="Healer\SCH_KirboPvP.cs" />

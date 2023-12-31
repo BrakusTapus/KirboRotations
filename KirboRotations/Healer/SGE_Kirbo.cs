@@ -334,7 +334,7 @@ public sealed class SGE_Kirbo : SGE_Base
     // Updates Status of other extra helper methods on every frame draw.
     protected override void UpdateInfo()
     {
-        OpenerHelpers.StateOfOpener();
+        /* OpenerHelpers.StateOfOpener(); */
     }
     #endregion
 }
