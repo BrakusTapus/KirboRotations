@@ -12,7 +12,7 @@ namespace KirboRotations.Custom.ExtraHelpers;
 /// <summary>
 /// 
 /// </summary>
-public static unsafe class ImGuiExtra
+public static unsafe partial class ImGuiExtra
 {
     /// <summary>
     /// 
@@ -122,18 +122,6 @@ public static unsafe class ImGuiExtra
         }
         if (col != null) ImGui.PopStyleColor(3);
         return ret;
-    }
-
-    /// <summary>
-    /// Converts RGB color to <see cref="Vector4"/> for ImGui
-    /// </summary>
-    /// <param name="col">Color in format 0xRRGGBB</param>
-    /// <param name="alpha">Optional transparency value between 0 and 1</param>
-    /// <returns>Color in <see cref="Vector4"/> format ready to be used with <see cref="ImGui"/> functions</returns>
-    public static Vector4 Vector4FromRGB(this uint col, float alpha = 1.0f)
-    {
-        byte* bytes = (byte*)&col;
-        return new Vector4((float)bytes[2] / 255f, (float)bytes[1] / 255f, (float)bytes[0] / 255f, alpha);
     }
 
     /// <summary>
@@ -248,65 +236,6 @@ public static unsafe class ImGuiExtra
         prefix?.Invoke();
         if (ImGui.RadioButton(labelFalse, !value)) value = false;
         suffix?.Invoke();
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="description"></param>
-    /// <param name="value"></param>
-    public static void AddTableRow(string description, string value)
-    {
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn(); ImGui.Text(description);
-        ImGui.TableNextColumn(); ImGui.Text(value);
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="description"></param>
-    /// <param name="value"></param>
-    public static void AddTableRow(string description, bool value)
-    {
-        Vector4 color = value ? EColor.GreenBright : EColor.RedBright; // Green for true, red for false
-        string valueText = value.ToString();
-
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-        ImGui.Text(description);
-        ImGui.TableNextColumn();
-        ImGui.TextColored(color, valueText);
-    }
-
-    /// <summary>
-    /// The text in both collums wil be colored
-    /// </summary>
-    /// <param name="description"></param>
-    /// <param name="value"></param>
-    /// <param name="textColor"></param>
-    public static void AddTableRow(string description, string value, Vector4 textColor)
-    {
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-        ImGui.TextColored(textColor, description);
-        ImGui.TableNextColumn();
-        ImGui.TextColored(textColor, value);
-    }
-
-    /// <summary>
-    /// First Colum text will be white and text in the second colum will be whatever color is picked
-    /// </summary>
-    /// <param name="description"></param>
-    /// <param name="value"></param>
-    /// <param name="textColor"></param>
-    public static void AddTableRowColorLast(string description, string value, Vector4 textColor)
-    {
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-        ImGui.Text(description);
-        ImGui.TableNextColumn();
-        ImGui.TextColored(textColor, value);
     }
 
     /// <summary>
@@ -552,16 +481,7 @@ public static unsafe class ImGuiExtra
         return f * ImGuiHelpers.GlobalScale;
     }
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="text"></param>
-    private static void SetTooltip(string text)
-    {
-        ImGui.BeginTooltip();
-        ImGui.TextUnformatted(text);
-        ImGui.EndTooltip();
-    }
+
 
     private static readonly Dictionary<string, float> CenteredLineWidths = new();
 
@@ -1160,6 +1080,95 @@ public static unsafe class ImGuiExtra
     #endregion Buttons
 }
 
+/// <summary>
+/// 
+/// </summary>
+public static unsafe partial class ImGuiExtra
+{
+    /// <summary>
+    /// Converts RGB color to <see cref="Vector4"/> for ImGui
+    /// </summary>
+    /// <param name="col">Color in format 0xRRGGBB</param>
+    /// <param name="alpha">Optional transparency value between 0 and 1</param>
+    /// <returns>Color in <see cref="Vector4"/> format ready to be used with <see cref="ImGui"/> functions</returns>
+    public static Vector4 Vector4FromRGB(this uint col, float alpha = 1.0f)
+    {
+        byte* bytes = (byte*)&col;
+        return new Vector4((float)bytes[2] / 255f, (float)bytes[1] / 255f, (float)bytes[0] / 255f, alpha);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    public static void AddTableRow(string description, string value)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn(); ImGui.Text(description);
+        ImGui.TableNextColumn(); ImGui.Text(value);
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    public static void AddTableRow(string description, bool value)
+    {
+        Vector4 color = value ? EColor.GreenBright : EColor.RedBright; // Green for true, red for false
+        string valueText = value.ToString();
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(color, valueText);
+    }
+
+    /// <summary>
+    /// The text in both collums wil be colored
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    /// <param name="textColor"></param>
+    public static void AddTableRow(string description, string value, Vector4 textColor)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.TextColored(textColor, description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(textColor, value);
+    }
+
+    /// <summary>
+    /// First Colum text will be white and text in the second colum will be whatever color is picked
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    /// <param name="textColor"></param>
+    public static void AddTableRowColorLast(string description, string value, Vector4 textColor)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(textColor, value);
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="text"></param>
+    private static void SetTooltip(string text)
+    {
+        ImGui.BeginTooltip();
+        ImGui.TextUnformatted(text);
+        ImGui.EndTooltip();
+    }
+}
+
+/*
 [StructLayout(LayoutKind.Explicit)]
 public struct ImGuiWindow
 {
@@ -1170,7 +1179,7 @@ public struct ImGuiWindow
     // 0x118 is the start of ImGuiWindowTempData
     [FieldOffset(0x130)] public Vector2 CursorMaxPos;
 }
-/*
+
 
 public static unsafe class ImGuiExtra
 {
@@ -1185,6 +1194,7 @@ public static unsafe class ImGuiExtra
     public static unsafe bool CurrentWindowHasCloseButton() => GetCurrentWindow()->HasCloseButton != 0;
 }
 */
+
 public class KirboColor
 {
     public string Name { get; private set; }
