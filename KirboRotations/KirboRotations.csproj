@@ -33,62 +33,39 @@
         <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
         <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
     </PropertyGroup>
-    <ItemGroup>
-      <Compile Remove="Custom\Utility\**" />
-      <EmbeddedResource Remove="Custom\Utility\**" />
-      <None Remove="Custom\Utility\**" />
-    </ItemGroup>
 
     <!-- Files Management -->
     <!-- Exclude from Compiler -->
     <ItemGroup>
         <Compile Remove="Custom\ExtraHelpers\OpenerHelpers - Copy.cs" />
-        <Compile Remove="Custom\ExtraHelpers\RotationTestHelper.cs" />
-        <Compile Remove="Custom\UI\PvPDebugWindow.cs" />
         <Compile Remove="Healer\AST_KirboPvP.cs" />
         <Compile Remove="Healer\SCH_KirboPvP.cs" />
-        <Compile Remove="Healer\SGE_Default.cs" />
         <Compile Remove="Healer\SGE_KirboPvP.cs" />
-        <Compile Remove="Magical\BLU_Default.cs" />
         <Compile Remove="Magical\BLU_Extra.cs" />
         <Compile Remove="Magical\RDM_KirboPvP.cs" />
-        <Compile Remove="Melee\DRG_KirboPVP.cs" />
-        <Compile Remove="Melee\NIN_Default.cs" />
         <Compile Remove="Melee\RPR_KirboPvP.cs" />
         <Compile Remove="Melee\SAM_KirboPvP.cs" />
-        <Compile Remove="Ranged\3.0.6.3_MCH_Kirbo_AIO.cs" />
-        <Compile Remove="Ranged\BRD_Default.cs" />
         <Compile Remove="Ranged\DNC_KirboPvP.cs" />
-        <Compile Remove="Ranged\MCH_Default.cs" />
-        <Compile Remove="Ranged\MCH_KirboComplete.cs" />
-        <Compile Remove="Ranged\MCH_KirboPvE_Copy.cs" />
-        <Compile Remove="Ranged\MCH_KirboPvP_Copy.cs" />
-        <Compile Remove="Ranged\MCH_Kirbo_AIO.cs" />
-        <Compile Remove="Ranged\MCH_Template.cs" />
         <Compile Remove="Tank\GNB_KirboPvP.cs" />
     </ItemGroup>
 
     <!-- Files Management -->
-    <!-- Include for access/reference -->
     <ItemGroup>
-        <None Include="$(AppData)\XIVPlugins\Personal_Projects\KirboRotations\KirboRotations\.editorconfig" />
+        <None Include="Custom\ExtraHelpers\OpenerHelpers - Copy.cs" />
         <None Include="Healer\AST_KirboPvP.cs" />
         <None Include="Healer\SCH_KirboPvP.cs" />
         <None Include="Healer\SGE_KirboPvP.cs" />
         <None Include="Magical\BLU_Extra.cs" />
-        <None Include="Magical\BLU_Default.cs" />
         <None Include="Magical\RDM_KirboPvP.cs" />
-        <None Include="Melee\DRG_KirboPVP.cs" />
-        <None Include="Melee\NIN_Default.cs" />
-        <None Include="Melee\SAM_KirboPvP.cs" />
         <None Include="Melee\RPR_KirboPvP.cs" />
-        <None Include="Ranged\3.0.6.3_MCH_Kirbo_AIO.cs" />
+        <None Include="Melee\SAM_KirboPvP.cs" />
         <None Include="Ranged\DNC_KirboPvP.cs" />
-        <None Include="Ranged\MCH_Kirbo_AIO.cs" />
         <None Include="Tank\GNB_KirboPvP.cs" />
     </ItemGroup>
+
+    <!-- Package reference -->
     <ItemGroup>
-      <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
+        <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
     </ItemGroup>
 
     <!-- Default Dalamud Reference Libraries -->
@@ -137,27 +114,6 @@
             <HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
             <Private>False</Private>
         </Reference>
-    </ItemGroup>    
-
-    <!-- Global Namespace usings -->
-    <ItemGroup>
-        <Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
-        <Using Include="Dalamud.Game.ClientState.Objects.Types" />
-        <Using Include="Dalamud.Interface" />
-        <Using Include="ImGuiNET" />
-        <Using Include="Newtonsoft.Json" />
-        <Using Include="RotationSolver.Basic" />
-        <Using Include="RotationSolver.Basic.Actions" />
-        <Using Include="RotationSolver.Basic.Attributes" />
-        <Using Include="RotationSolver.Basic.Configuration.RotationConfig" />
-        <Using Include="RotationSolver.Basic.Data" />
-        <Using Include="RotationSolver.Basic.Helpers" />
-        <Using Include="RotationSolver.Basic.Rotations" />
-        <Using Include="RotationSolver.Basic.Rotations.Basic" />
-        <Using Include="System.ComponentModel" />
-        <Using Include="System.Numerics" />
-        <Using Include="System.Reflection" />
-
     </ItemGroup>
 
 </Project>

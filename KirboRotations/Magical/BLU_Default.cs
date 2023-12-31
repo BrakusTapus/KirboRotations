@@ -1,4 +1,14 @@
-﻿namespace KirboRotations.Magical;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations;
+using RotationSolver.Basic.Rotations.Basic;
+using KirboRotations.Custom.ExtraHelpers;
+
+namespace KirboRotations.Magical;
 
 [SourceCode(Path = "main/KirboRotations/Magical/BLU_Default.cs")]
 public sealed class BLU_Default : BLU_Base
@@ -310,7 +320,7 @@ public sealed class BLU_Default : BLU_Base
             if (Level5Death.CanUse(out act, CanUseOption.MustUse)) return true;
         }
 
-        if (false)
+        /*if (false)
         {
             if (AcornBomb.CanUse(out act, CanUseOption.MustUse))
             {
@@ -322,7 +332,7 @@ public sealed class BLU_Default : BLU_Base
             if (BadBreath.CanUse(out act, CanUseOption.MustUse)) return true;
             if (Chirp.CanUse(out act, CanUseOption.MustUse)) return true;
             if (Level5Petrify.CanUse(out act, CanUseOption.MustUse)) return true;
-        }
+        }*/
 
         //陆行鸟陨石
         if (HasCompanion && ChocoMeteor.CanUse(out act, CanUseOption.MustUse)) return true;

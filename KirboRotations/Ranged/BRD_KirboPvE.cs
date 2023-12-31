@@ -1,6 +1,12 @@
-﻿using static KirboRotations.Custom.Data.StatusID_Buffs;
-using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+﻿using Dalamud.Game.ClientState.JobGauge.Enums;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations.Basic;
 using KirboRotations.Custom.ExtraHelpers;
+using static KirboRotations.Custom.Data.StatusID_Buffs;
 using KirboRotations.Custom.UI;
 using KirboRotations.Custom.Data;
 
@@ -8,7 +14,7 @@ namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.BattleVoice)]
 [SourceCode(Path = "main/KirboRotations/Ranged/BRD_Default.cs")]
-public class BRD_Kirbo : BRD_Base
+public class BRD_KirboPvE : BRD_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;

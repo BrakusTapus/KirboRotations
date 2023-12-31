@@ -1,4 +1,10 @@
-﻿namespace KirboRotations.Melee;
+﻿using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations.Basic;
+
+namespace KirboRotations.Melee;
 
 [BetaRotation]
 [RotationDesc(ActionID.ArcaneCircle)]

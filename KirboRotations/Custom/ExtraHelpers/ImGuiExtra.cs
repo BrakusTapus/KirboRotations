@@ -1,11 +1,11 @@
 ﻿using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility;
-using KirboRotations.Custom.ExtraHelpers;
-using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using ImGuiNET;
+using System.Numerics;
+using Dalamud.Interface;
 
 namespace KirboRotations.Custom.ExtraHelpers;
 

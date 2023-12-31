@@ -1,4 +1,5 @@
-﻿using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+﻿using RotationSolver.Basic.Rotations;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Custom.ExtraHelpers;
 

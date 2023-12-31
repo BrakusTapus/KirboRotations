@@ -1,4 +1,5 @@
-﻿using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+﻿using RotationSolver.Basic.Rotations;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Custom.ExtraHelpers;
 
@@ -76,6 +77,7 @@ public static class OpenerHelpers
     {
         get
         {
+            bool previousValue = false; // sus
             // Log only if the value changes
             if (_openerHasFailed != previousValue)
             {

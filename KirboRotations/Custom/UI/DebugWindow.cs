@@ -1,4 +1,5 @@
-﻿using KirboRotations.Custom.Data;
+﻿using ImGuiNET;
+using KirboRotations.Custom.Data;
 using KirboRotations.Custom.ExtraHelpers;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 

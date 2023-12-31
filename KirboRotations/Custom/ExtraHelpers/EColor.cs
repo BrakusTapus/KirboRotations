@@ -1,4 +1,5 @@
-﻿using Dalamud.Interface.Colors;
+﻿using System.Numerics;
+using Dalamud.Interface.Colors;
 
 namespace KirboRotations.Custom.ExtraHelpers;
 

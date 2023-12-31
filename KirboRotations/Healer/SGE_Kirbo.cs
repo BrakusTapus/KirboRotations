@@ -1,4 +1,9 @@
-using KirboRotations.Custom.Data;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations.Basic;
 using KirboRotations.Custom.ExtraHelpers;
 
 namespace KirboRotations.Healer;

@@ -1,5 +1,11 @@
-namespace KirboRotations.Tank;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations.Basic;
 
+namespace KirboRotations.Tank;
 
 [RotationDesc(ActionID.BloodWeapon, ActionID.Delirium)]
 [SourceCode(Path = "main/KirboRotations/Tank/DRK_Balance.cs")]
