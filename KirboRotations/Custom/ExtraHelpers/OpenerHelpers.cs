@@ -1,4 +1,4 @@
-﻿//using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Custom.ExtraHelpers;
@@ -90,7 +90,7 @@ public static class OpenerHelpers
         return OpenerHasFinished || OpenerHasFailed;
     }
 
-    private static void SetWithLogging<T>(ref T field, T value, string propertyName, [System.Runtime.CompilerServices.CallerMemberName] string caller = null)
+    private static void SetWithLogging<T>(ref T field, T value, string propertyName, [CallerMemberName] string caller = null)
     {
         if (!EqualityComparer<T>.Default.Equals(field, value))
         {
@@ -99,7 +99,7 @@ public static class OpenerHelpers
         }
     }
 
-    internal static bool OpenerController(bool lastAction, bool nextAction, [System.Runtime.CompilerServices.CallerMemberName] string caller = null)
+    internal static bool OpenerController(bool lastAction, bool nextAction, [CallerMemberName] string caller = null)
     {
         if (lastAction)
         {
