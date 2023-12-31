@@ -7,12 +7,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace KirboRotations.Utility.ImGuiEx;
+namespace KirboRotations.Custom.ExtraHelpers;
 
 /// <summary>
 /// 
 /// </summary>
-public static unsafe partial class ImGuiExtra
+public static unsafe class ImGuiExtra
 {
     /// <summary>
     /// 
@@ -1170,8 +1170,9 @@ public struct ImGuiWindow
     // 0x118 is the start of ImGuiWindowTempData
     [FieldOffset(0x130)] public Vector2 CursorMaxPos;
 }
+/*
 
-public static unsafe partial class ImGuiExtra
+public static unsafe class ImGuiExtra
 {
     [LibraryImport("cimgui")]
     [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
@@ -1183,7 +1184,7 @@ public static unsafe partial class ImGuiExtra
 
     public static unsafe bool CurrentWindowHasCloseButton() => GetCurrentWindow()->HasCloseButton != 0;
 }
-
+*/
 public class KirboColor
 {
     public string Name { get; private set; }

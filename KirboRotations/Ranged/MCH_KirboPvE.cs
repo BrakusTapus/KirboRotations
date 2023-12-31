@@ -4,7 +4,6 @@ using KirboRotations.Custom.ExtraHelpers;
 using KirboRotations.Custom.UI;
 using static KirboRotations.Custom.Data.StatusID_Buffs;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
-using Dalamud.Logging;
 
 namespace KirboRotations.Ranged;
 

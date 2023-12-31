@@ -145,7 +145,6 @@
         <Using Include="Dalamud.Game.ClientState.Objects.Types" />
         <Using Include="Dalamud.Interface" />
         <Using Include="ImGuiNET" />
-        <Using Include="KirboRotations.Utility" />
         <Using Include="Newtonsoft.Json" />
         <Using Include="RotationSolver.Basic" />
         <Using Include="RotationSolver.Basic.Actions" />

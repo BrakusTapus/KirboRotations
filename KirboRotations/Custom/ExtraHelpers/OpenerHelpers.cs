@@ -1,6 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
+namespace KirboRotations.Custom.ExtraHelpers;
+
 public static class OpenerHelpers
 {
     #region Backing fields for properties
