@@ -54,9 +54,6 @@ public class RotationData
     {
         FeaturesList.Add(features);
     }
-
-
-
 }
 
 /// <summary>
