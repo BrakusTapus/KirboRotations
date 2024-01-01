@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v3 # Updated to v3
         with:
           name: ${{env.PROJECT_NAME}}
-          path: ${{env.PROJECT_NAME}}/bin/Release/net7.0-windows/${{env.PROJECT_NAME}}
+          path: ${{env.PROJECT_NAME}}/bin/Release/net7.0-windows/
           if-no-files-found: error
 
   release:
