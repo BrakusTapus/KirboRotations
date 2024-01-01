@@ -86,6 +86,7 @@ public class MCH_KirboPvE : MCH_Base
         rotationData.CurrentRotationSelection = Configs.GetCombo("RotationSelection");
 
         ImGui.Text($"Your character combat: {Player.IsInCombat()}");
+        ImGui.Text($"SaveAction: {GeneralHelpers.SaveAction}");
 
         DebugWindow.DisplayDebugWindow(RotationName, rotationData.RotationVersion, rotationData);
     }
@@ -520,7 +521,6 @@ public class MCH_KirboPvE : MCH_Base
             // Logic when the player is recently revived
             return false;
         }
-
         if (ShouldUseBurstMedicine(out act))
         {
             return true;
@@ -703,6 +703,26 @@ public class MCH_KirboPvE : MCH_Base
         BurstHelpers.InBurst = Player.HasStatus(true, StatusID.Wildfire);
     }
 
+    // This should be relevant to the Action shown in the [RotationDesc(ActionID.Action]
+    private void SaveAction()
+    {
+        TerritoryContentType Content = TerritoryContentType;
+        bool UltimateRaids = (int)Content == 28;
+        bool UwUorUCoB = UltimateRaids && Player.Level == 70;
+        bool saveneeded = Target.GetHealthRatio() <= 0.25 && CombatTime < 150;
+
+
+        if (!saveneeded)
+        {
+            GeneralHelpers.SaveAction = false;
+        }
+
+        if (UwUorUCoB && saveneeded)
+        {
+            GeneralHelpers.SaveAction = true;
+        }
+    }
+
     // Tincture Conditions
     private bool ShouldUseBurstMedicine(out IAction act)
     {
@@ -851,9 +871,11 @@ public class MCH_KirboPvE : MCH_Base
         BurstActionCheck();
         ToolKitCheck();
         StateOfOpener(); // Call StateOfOpener to update opener properties        
-        //OpenerHelpers.StateOfOpener();
+                         //OpenerHelpers.StateOfOpener();
+        SaveAction();
     }
 
+    // Controls the opener flow
     private static void StateOfOpener()
     {
         if (Player.InCombat() && OpenerHelpers.OpenerActionsAvailable)

@@ -12,6 +12,9 @@ public static class GeneralHelpers
     // Used so i can filter XLLog on rotation name
     public static string v = K;
 
+    // 
+    public static bool SaveAction { get; set; } = false;
+
     /// <summary> Checks if the player is in a PVP enabled zone. </summary>
     /// <returns> A value indicating whether the player is in a PVP enabled zone. </returns>
     internal static bool InPvP() => GameMain.IsInPvPArea() || GameMain.IsInPvPInstance();
