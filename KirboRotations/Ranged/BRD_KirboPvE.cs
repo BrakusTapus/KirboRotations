@@ -1,7 +1,12 @@
-﻿using KirboRotations.Utility.ImGuiEx;
-using static KirboRotations.Custom.Data.StatusID_Buffs;
+﻿using Dalamud.Game.ClientState.JobGauge.Enums;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations.Basic;
 using KirboRotations.Custom.ExtraHelpers;
-using KirboRotations.Custom.Utility.ImGuiEx;
+using static KirboRotations.Custom.Data.StatusID_Buffs;
 using KirboRotations.Custom.UI;
 using KirboRotations.Custom.Data;
 
@@ -9,7 +14,7 @@ namespace KirboRotations.Ranged;
 
 [RotationDesc(ActionID.BattleVoice)]
 [SourceCode(Path = "main/KirboRotations/Ranged/BRD_Default.cs")]
-public class BRD_Kirbo : BRD_Base
+public class BRD_KirboPvE : BRD_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
@@ -79,10 +84,10 @@ public class BRD_Kirbo : BRD_Base
         act = default(IAction);
         while (OpenerHelpers.OpenerInProgress)
         {
-            if (!OpenerHelpers._openerFlag && (Player.IsDead) || (TimeSinceLastAction.TotalSeconds > 3.0))
+            if (/*!OpenerHelpers.OpenerFlag && */(Player.IsDead) || (TimeSinceLastAction.TotalSeconds > 3.0))
             {
                 OpenerHelpers.OpenerHasFailed = true;
-                OpenerHelpers._openerFlag = true;
+                /* OpenerHelpers.OpenerFlag = true; */
             }
             switch (OpenerHelpers.OpenerStep)
             {
@@ -130,8 +135,8 @@ public class BRD_Kirbo : BRD_Base
 
                 case 14:
                     OpenerHelpers.OpenerHasFinished = true;
-                    OpenerHelpers.OpenerInProgress = false;
-                    Serilog.Log.Information($"{OpenerHelpers.OpenerComplete} - BRD Opener");
+                    //OpenerHelpers.OpenerInProgress = false;
+                    //Serilog.Log.Information($"{v} {OpenerHelpers.OpenerComplete} - BRD Opener");
                     // Finished Opener
                     break;
             }
@@ -511,7 +516,7 @@ public class BRD_Kirbo : BRD_Base
     protected override void UpdateInfo()
     {
         HandleOpenerAvailability();
-        OpenerHelpers.StateOfOpener();
+        /* OpenerHelpers.StateOfOpener(); */
         BurstActionCheck();
     }
 

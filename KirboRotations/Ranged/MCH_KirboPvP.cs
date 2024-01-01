@@ -1,7 +1,16 @@
-﻿using KirboRotations.Custom.ExtraHelpers;
-using KirboRotations.Custom.Utility.ImGuiEx;
-using static ImGuiNET.ImGui;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations;
+using RotationSolver.Basic.Rotations.Basic;
+using KirboRotations.Custom.ExtraHelpers;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+using KirboRotations.Custom.UI;
+using KirboRotations.Custom.Data;
+using ImGuiNET;
 
 namespace KirboRotations.Ranged;
 
@@ -40,9 +49,10 @@ public class MCH_KirboPvP : MCH_Base
         },
         ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.PvP_Guard),
     };
+    // Wont use drill if overheated
     private static new IBaseAction PvP_Drill { get; } = new BaseAction(ActionID.PvP_Drill)
     {
-        ActionCheck = (BattleChara b, bool m) => !Player.HasStatus(true, StatusID.PvP_Overheated) && !CustomRotation.Player.HasStatus(true, StatusID.PvP_Guard),
+        ActionCheck = (BattleChara b, bool m) => !Player.HasStatus(true, StatusID.PvP_Overheated),
         StatusNeed = new StatusID[1] { StatusID.PvP_DrillPrimed },
         StatusProvide = new StatusID[1] { StatusID.PvP_BioblasterPrimed },
     };
@@ -62,12 +72,14 @@ public class MCH_KirboPvP : MCH_Base
         StatusNeed = new StatusID[1] { StatusID.PvP_BioblasterPrimed },
         StatusProvide = new StatusID[1] { StatusID.PvP_AirAnchorPrimed },
     };
+    // Wont use PvP_AirAnchor if overheated and if target has Guard active
     private static new IBaseAction PvP_AirAnchor { get; } = new BaseAction(ActionID.PvP_AirAnchor)
     {
         ActionCheck = (BattleChara b, bool m) => !Player.HasStatus(true, StatusID.PvP_Overheated) && !CustomRotation.Player.HasStatus(true, StatusID.PvP_Guard),
         StatusNeed = new StatusID[1] { StatusID.PvP_AirAnchorPrimed },
         StatusProvide = new StatusID[1] { StatusID.PvP_ChainSawPrimed },
     };
+    // Wont use PvP_ChainSaw if overheated and if target has Guard active
     private static new IBaseAction PvP_ChainSaw { get; } = new BaseAction(ActionID.PvP_ChainSaw)
     {
         ActionCheck = (BattleChara b, bool m) => !Player.HasStatus(true, StatusID.PvP_Overheated) && !CustomRotation.Player.HasStatus(true, StatusID.PvP_Guard),
@@ -88,6 +100,7 @@ public class MCH_KirboPvP : MCH_Base
             return null;
         }
     };
+    // Wont use PvP_Scattergun if overheated and if target has Guard active
     private static new IBaseAction PvP_Scattergun { get; } = new BaseAction(ActionID.PvP_Scattergun)
     {
         ActionCheck = (BattleChara b, bool m) => !Player.HasStatus(true, StatusID.PvP_Overheated) && !CustomRotation.Player.HasStatus(true, StatusID.PvP_Guard),
@@ -98,35 +111,36 @@ public class MCH_KirboPvP : MCH_Base
         ChoiceTarget = (Targets, mustUse) =>
         {
             // Define HP thresholds for each role
-            const float rangedMagicalHpThreshold = 33000; // CurrentHp
+            const float rangedMagicalHpThreshold = 30000; // CurrentHp
             const float rangedPhysicalHpThreshold = 30000; // CurrentHp
             const float healerHpThreshold = 30000; // CurrentHp
             const float tankHpThreshold = 15000; // CurrentHp
+            const float tooLowHpThreshold = 5000; // CurrentHp
 
             // Filter and prioritize targets based on role and HP
+            var healerTarget = Targets.GetJobCategory(JobRole.Healer)
+            .Where(b => b.CurrentHp < healerHpThreshold && b.CurrentHp > tooLowHpThreshold)
+            .OrderBy(ObjectHelper.GetHealthRatio)
+            .FirstOrDefault();
+            if (healerTarget != null)
+                return healerTarget;
+
             var mageTarget = Targets.GetJobCategory(JobRole.RangedMagical)
-            .Where(b => b.CurrentHp < rangedMagicalHpThreshold)
+            .Where(b => b.CurrentHp < rangedMagicalHpThreshold && b.CurrentHp > tooLowHpThreshold)
             .OrderBy(ObjectHelper.GetHealthRatio)
             .FirstOrDefault();
             if (mageTarget != null)
                 return mageTarget;
 
             var rangeTarget = Targets.GetJobCategory(JobRole.RangedPhysical)
-            .Where(b => b.CurrentHp < rangedPhysicalHpThreshold)
+            .Where(b => b.CurrentHp < rangedPhysicalHpThreshold && b.CurrentHp > tooLowHpThreshold)
             .OrderBy(ObjectHelper.GetHealthRatio)
             .FirstOrDefault();
             if (rangeTarget != null)
                 return rangeTarget;
 
-            var healerTarget = Targets.GetJobCategory(JobRole.Healer)
-            .Where(b => b.CurrentHp < healerHpThreshold)
-            .OrderBy(ObjectHelper.GetHealthRatio)
-            .FirstOrDefault();
-            if (healerTarget != null)
-                return healerTarget;
-
             var tankTarget = Targets.GetJobCategory(JobRole.Tank)
-            .Where(b => b.CurrentHp < tankHpThreshold)
+            .Where(b => b.CurrentHp < tankHpThreshold && b.CurrentHp > tooLowHpThreshold)
             .OrderBy(ObjectHelper.GetHealthRatio)
             .FirstOrDefault();
             return tankTarget ?? null;
@@ -149,11 +163,11 @@ public class MCH_KirboPvP : MCH_Base
         },
         ActionCheck = (BattleChara b, bool m) => Player.HasStatus(true, StatusID.PvP_Overheated) && !CustomRotation.Player.HasStatus(true, StatusID.PvP_Guard),
     };
-
+    // sample text
     private static new IBaseAction PvP_Analysis { get; } = new BaseAction(ActionID.PvP_Analysis, ActionOption.Friendly)
     {
         StatusProvide = new StatusID[1] { StatusID.PvP_Analysis },
-        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.PvP_Analysis) && CustomRotation.HasHostilesInRange && PvP_Analysis.CurrentCharges > 0 && !CustomRotation.Player.HasStatus(true, StatusID.PvP_Guard),
+        ActionCheck = (BattleChara b, bool m) => !CustomRotation.Player.HasStatus(true, StatusID.PvP_Analysis) && CustomRotation.HasHostilesInRange && PvP_Analysis.CurrentCharges > 0,
 
     };
     // Will try and determine the best AoE target based on how many targets are present
@@ -191,51 +205,11 @@ public class MCH_KirboPvP : MCH_Base
     public override bool ShowStatus => true;
     public override void DisplayStatus()
     {
-        try
-        {
-            Separator();
-            Spacing();
+        RotationData rotationData = new RotationData();
 
-            Text("GCD Speed: " + WeaponTotal);
-            Text("GCD remain: " + WeaponRemain);
-            Separator();
-            Spacing();
+        ImGui.Text($"Your character combat: {Player.IsInCombat()}");
 
-            if (Player != null)
-            {
-                Utility.ImGuiEx.ImGuiExtra.ImGuiColoredText("Job: ", ClassJob.Abbreviation, EColor.LightBlue); // Light blue for the abbreviation
-                Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-                Text($"Player.CurrentHp: {Player.CurrentHp}");
-                Separator();
-                Spacing();
-            }
-            if (InPvP())
-            {
-                Text("IsPvPOverheated: " + IsPvPOverheated);
-                Text("PvP_HeatStacks: " + PvP_HeatStacks);
-                Text("PvP_Analysis CurrentCharges: " + PvP_Analysis.CurrentCharges);
-                Separator();
-                Spacing();
-            }
-            // Calculate the remaining vertical space in the window
-            float remainingSpace = GetContentRegionAvail().Y - GetFrameHeightWithSpacing(); // Subtracting button height with spacing
-            if (remainingSpace > 0)
-            {
-                SetCursorPosY(GetCursorPosY() + remainingSpace);
-            }
-
-            if (Button("Reset Rotation"))
-            {
-                /*ResetRotationProperties();
-                Serilog.Log.Debug($"BurstActionsAvailable = {BurstActionsAvailable}");
-                Serilog.Log.Debug($"BurstInProgress = {BurstInProgress}");
-                Serilog.Log.Debug($"BurstIsFinished = {BurstIsFinished}");*/
-            }
-        }
-        catch
-        {
-            Serilog.Log.Warning("Something wrong with DisplayStatus");
-        }
+        DebugWindow.DisplayPvPDebugWindow(RotationName, rotationData.RotationVersion, rotationData);
     }
     #endregion
 
@@ -252,7 +226,7 @@ public class MCH_KirboPvP : MCH_Base
             return pvp_heatstacks == byte.MaxValue ? (byte)5 : pvp_heatstacks;
         }
     }
-    private bool IsPvPOverheated => Player.HasStatus(true, StatusID.PvP_Overheated);
+    private static bool IsPvPOverheated => Player.HasStatus(true, StatusID.PvP_Overheated);
     #endregion
 
     #region Rotation Config

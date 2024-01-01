@@ -1,9 +1,19 @@
-﻿using KirboRotations.Utility.ImGuiEx;
-using static KirboRotations.Custom.Data.StatusID_Buffs;
-using Lumina.Excel.GeneratedSheets;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations;
+using RotationSolver.Basic.Rotations.Basic;
 using KirboRotations.Custom.ExtraHelpers;
-using KirboRotations.Custom.UI;
+using Lumina.Excel.GeneratedSheets;
 using KirboRotations.Custom.Data;
+using KirboRotations.Custom.UI;
+using static KirboRotations.Custom.Data.StatusID_Buffs;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+using ImGuiNET;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 
 namespace KirboRotations.Ranged;
 
@@ -61,159 +71,30 @@ public class MCH_KirboPvE : MCH_Base
     {
         RotationData rotationData = new RotationData();
         rotationData.AddUltimateCompatibility(UltimateCompatibility.UCoB);
+
         rotationData.AddContentCompatibility(ContentCompatibility.DutyRoulette);
         rotationData.AddContentCompatibility(ContentCompatibility.SavageRaids);
         rotationData.AddContentCompatibility(ContentCompatibility.ExtremeTrials);
         rotationData.AddContentCompatibility(ContentCompatibility.Criterion);
         rotationData.AddContentCompatibility(ContentCompatibility.Hunts);
+
         rotationData.AddFeatures(Features.UseTincture);
         rotationData.AddFeatures(Features.SavageOptimized);
         rotationData.AddFeatures(Features.HasUserConfig);
 
-        rotationData.SetRotationOpeners("Early AA", "Delayed Tools"/*, "Early All"*/);
+        rotationData.SetRotationOpeners("Early AA", "Delayed Tools");
         rotationData.CurrentRotationSelection = Configs.GetCombo("RotationSelection");
 
-        /*
-                try
-                {
-                    ImGuiExtra.TripleSpacing();
-                    ImGuiExtra.CollapsingHeaderWithContent("General Info", () =>
-                    {
-                        ImGuiExtra.Tooltip("Displays General information like:\n-Rotation Name\n-Player's Health\n-InCombat Status");
-                        if (ImGui.BeginTable("generalInfoTable", 2))
-                        {
-                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                            ImGuiExtra.AddTableRow("Rotation", $"{RotationName} - {RotationData.RotationVersion}");
-                            ImGuiExtra.AddTableRow("Rotation Job", ClassJob.Abbreviation);
-                            ImGuiExtra.AddTableRow("Player Name", Player.Name.ToString());
-                            ImGuiExtra.AddTableRow("Player HP", $"{Player.GetHealthRatio() * 100:F2}%");
-                            ImGuiExtra.AddTableRow("Player MP", ((int)Player.CurrentMp).ToString());
-                            ImGuiExtra.AddTableRow("In Combat", InCombat.ToString());
-                            // ... other general info ...
-                            ImGui.EndTable();
-                        }
-
-                        if (ImGui.CollapsingHeader("Features"))
-                        {
-                            ImGui.Indent();  // Indent the nested headers
-                            ImGuiExtra.TripleSpacing();
-                            ImGuiExtra.CollapsingHeaderWithContent("Compatible Ultimates", () =>
-                            {
-                                ImGuiExtra.Tooltip("Displays compatible Ultimates like:\n-UCoB\n-TEA\n-TOP");
-                                foreach (var item in rotationData.UltimateCompatibilities)
-                                {
-                                    ImGui.Text(item.ToString());
-                                }
-
-                            });
-
-                            ImGuiExtra.TripleSpacing();
-                            ImGuiExtra.CollapsingHeaderWithContent("Content Compatibilities", () =>
-                            {
-                                ImGuiExtra.Tooltip("Displays compatible content like:\n-DutyRoulette\n-DeepDungeons\n-SavageRaids");
-                                foreach (var item in rotationData.ContentCompatibilities)
-                                {
-                                    ImGui.Text(item.ToString());
-                                }
-
-                            });
-
-                            ImGuiExtra.TripleSpacing();
-                            ImGuiExtra.CollapsingHeaderWithContent("Rotation Features", () =>
-                            {
-                                ImGuiExtra.Tooltip("Displays rotation features like:\n-Tincture use\n-High End ready or not\n-Has user configurations");
-                                foreach (var item in rotationData.FeaturesList)
-                                {
-                                    ImGui.Text(item.ToString());
-                                }
-
-                            });
-                            ImGui.Unindent();  // Reset indentation
-                        }
-                    });
-
-
-                    ImGuiExtra.TripleSpacing();
-                    ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
-                    {
-                        ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
-                        if (ImGui.BeginTable("rotationStatusTable", 2))
-                        {
-                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                            string rotationText = GetRotationText(Configs.GetCombo("RotationSelection"));
-                            ImGuiExtra.AddTableRow("Rotation Selection", rotationText);
-                            ImGuiExtra.AddTableRow("Openerstep", OpenerHelpers.OpenerStep.ToString());
-                            ImGuiExtra.AddTableRow("OpenerActionsAvailable", OpenerHelpers.OpenerActionsAvailable.ToString());
-                            ImGuiExtra.AddTableRow("OpenerInProgress", OpenerHelpers.OpenerInProgress.ToString());
-                            ImGuiExtra.AddTableRow("OpenerHasFailed", OpenerHelpers.OpenerHasFailed.ToString());
-                            ImGuiExtra.AddTableRow("OpenerHasFinished", OpenerHelpers.OpenerHasFinished.ToString());
-                            // ... other rotation status ...
-                            ImGui.EndTable();
-                        }
-                    });
-
-
-                    ImGuiExtra.TripleSpacing();
-                    ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
-                    {
-                        ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
-                        if (ImGui.BeginTable("burstStatusTable", 2))
-                        {
-                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                            ImGuiExtra.AddTableRow("BurstStep", BurstHelpers.BurstStep.ToString());
-                            ImGuiExtra.AddTableRow("BurstActionsAvailable", BurstHelpers.BurstActionsAvailable.ToString());
-                            ImGuiExtra.AddTableRow("BurstInProgress", BurstHelpers.BurstInProgress.ToString());
-                            ImGuiExtra.AddTableRow("BurstHasFailed", BurstHelpers.BurstHasFailed.ToString());
-                            ImGuiExtra.AddTableRow("BurstHasFinished", BurstHelpers.BurstHasFinished.ToString());
-                            // ... other Burst status ...
-                            ImGui.EndTable();
-                        }
-                    });
-
-
-                    ImGuiExtra.TripleSpacing();
-                    ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
-                    {
-                        ImGuiExtra.Tooltip("Displays action information like:\n-LastAction Used\n-LastGCD Used\n-LastAbility Used");
-                        if (ImGui.BeginTable("actionTable", 2))
-                        {
-                            ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                            ImGuiExtra.AddTableRow("GCD Remain", WeaponRemain.ToString());
-                            ImGuiExtra.AddTableRow("LastGCD", DataCenter.LastGCD.ToString());
-                            ImGuiExtra.AddTableRow("LastAbility", DataCenter.LastAbility.ToString());
-                            // Add more rows as needed...
-                            ImGui.EndTable();
-                        }
-                    });
-
-                    try
-                    {
-                        // Calculate the remaining vertical space in the window
-                        // Subtracting button height with spacing
-                        float remainingSpace2 = ImGui.GetContentRegionAvail().Y - ImGui.GetFrameHeightWithSpacing();
-                        if (remainingSpace2 > 0)
-                        { ImGui.SetCursorPosY(ImGui.GetCursorPosY() + remainingSpace2); }
-
-                        ImGuiExtra.DisplayResetButton("Reset Properties");
-                    }
-                    catch { Serilog.Log.Error($"{DebugWindow.ErrorMsg} - Extra + Reset Button"); }
-                }
-                catch (Exception ex)
-                {
-                    Serilog.Log.Warning($"{DebugWindow.ErrorMsg} - DisplayStatus: {ex.Message}");
-                }
-        */
+        ImGui.Text($"Your character combat: {Player.IsInCombat()}");
 
         DebugWindow.DisplayDebugWindow(RotationName, rotationData.RotationVersion, rotationData);
-
     }
     #endregion
 
     #region Action Related Properties
     // Check at every frame if 1 of our major tools will come off cooldown soon
     private bool WillhaveTool { get; set; }
-    // Sets InBurst to true if player has the wildfire Buff
-    //private bool InBurst { get; set; }
+
     // Holds the remaining amount of Heat stacks
     private static byte HeatStacks
     {
@@ -230,7 +111,8 @@ public class MCH_KirboPvE : MCH_Base
         .SetCombo(CombatType.PvE, "RotationSelection", 0, "Select which Rotation will be used. (Openers will only be followed at level 90)", "Early AA", "Delayed Tools"/*, "Early All"*/)
         .SetBool(CombatType.PvE, "BatteryStuck", false, "Battery overcap protection\n(Will try and use Rook AutoTurret if Battery is at 100 and next skill increases Battery)")
         .SetBool(CombatType.PvE, "HeatStuck", false, "Heat overcap protection\n(Will try and use HyperCharge if Heat is at 100 and next skill increases Heat)")
-        .SetBool(CombatType.PvE, "DumpSkills", false, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)");
+        .SetBool(CombatType.PvE, "DumpSkills", false, "Dump Skills when Target is dying\n(Will try and spend remaining resources before boss dies)")
+        .SetBool(CombatType.PvE, "NoWaste", false, "(NO ACTUAL CODE IMPLEMENTED YET)\nTries to save important actions for Boss\n(Example: If Boss is out of reach and you're stuck killing adds)");
     #endregion
 
     #region Countdown Logic
@@ -357,11 +239,11 @@ public class MCH_KirboPvE : MCH_Base
         act = default(IAction);
         while (OpenerHelpers.OpenerInProgress)
         {
-            if (!OpenerHelpers._openerFlag && (Player.IsDead) || (TimeSinceLastAction.TotalSeconds > 3.0))
-            {
-                OpenerHelpers.OpenerHasFailed = true;
-                OpenerHelpers._openerFlag = true;
-            }
+            //if (/*!OpenerHelpers.OpenerFlag && */(Player.IsDead) || (TimeSinceLastAction.TotalSeconds > 3.0))
+            //{
+            //OpenerHelpers.OpenerHasFailed = true;
+            /* OpenerHelpers.OpenerFlag = true; */
+            //}
             switch (Configs.GetCombo("RotationSelection"))
             {
                 case 0: // Early AA
@@ -424,7 +306,7 @@ public class MCH_KirboPvE : MCH_Base
                         case 27:
                             OpenerHelpers.OpenerHasFinished = true;
                             OpenerHelpers.OpenerInProgress = false;
-                            Serilog.Log.Information($"{OpenerHelpers.OpenerComplete} - Early AA");
+                            //Serilog.Log.Information($"{v} {OpenerHelpers.OpenerComplete} - Early AA");
                             // Finished Early AA
                             break;
                     }
@@ -488,8 +370,8 @@ public class MCH_KirboPvE : MCH_Base
                             return OpenerHelpers.OpenerController(IsLastGCD(false, Drill), Drill.CanUse(out act, CanUseOption.MustUse));
                         case 27:
                             OpenerHelpers.OpenerHasFinished = true;
-                            OpenerHelpers.OpenerInProgress = false;
-                            Serilog.Log.Information($"{OpenerHelpers.OpenerComplete} - Delayed Tools");
+                            //OpenerHelpers.OpenerInProgress = false;
+                            //Serilog.Log.Information($"{v} {OpenerHelpers.OpenerComplete} - Delayed Tools");
                             // Finished Delayed Tools
                             break;
                     }
@@ -535,7 +417,7 @@ public class MCH_KirboPvE : MCH_Base
                             return OpenerHelpers.OpenerController(IsLastAbility(false, Hypercharge), Hypercharge.CanUse(out act, CanUseOption.OnLastAbility));
                         case 18:
                             OpenerHelpers.OpenerHasFinished = true;
-                            OpenerHelpers.OpenerInProgress = false;
+                            //OpenerHelpers.OpenerInProgress = false;
                             // Finished Early All
                             break;
                     }
@@ -553,7 +435,7 @@ public class MCH_KirboPvE : MCH_Base
     {
         act = null;
 
-        if (Player.HasStatus(true, (StatusID)Transcendent))
+        if (Player.HasStatus(true, (StatusID)Transcendent) || !Player.InCombat())
         {
             // Logic when the player is recently revived
             return false;
@@ -631,6 +513,14 @@ public class MCH_KirboPvE : MCH_Base
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
+        act = null;
+
+        if (Player.HasStatus(true, (StatusID)Transcendent) || !Player.InCombat())
+        {
+            // Logic when the player is recently revived
+            return false;
+        }
+
         if (ShouldUseBurstMedicine(out act))
         {
             return true;
@@ -676,28 +566,37 @@ public class MCH_KirboPvE : MCH_Base
                 return true;
             }
 
-            if (Reassemble.CanUse(out act, CanUseOption.MustUseEmpty) /*&& !Player.HasStatus(true, StatusID.Reassemble)*/)
+            if (Reassemble.CanUse(out act, CanUseOption.MustUseEmpty))
             {
-                if (IActionHelper.IsTheSameTo(nextGCD, true, ChainSaw))
+                if (Reassemble.CurrentCharges > 1)
                 {
-                    Serilog.Log.Debug("Next GCD is ChainSaw.  Returning True");
+                    if (nextGCD == ChainSaw || nextGCD == AirAnchor || nextGCD == Drill)
+                    {
+                        Serilog.Log.Information($"{v} More then 1 Reassemble Charge. using Reassemble on any major action");
+                        return true;
+                    }
+                }
+
+                if (IActionHelper.IsTheSameTo(nextGCD, false, ChainSaw))
+                {
+                    Serilog.Log.Information($"{v} Next GCD is ChainSaw.  Using Reassemble");
                     return true;
                 }
                 if (IActionHelper.IsTheSameTo(nextGCD, true, AirAnchor) && !Wildfire.WillHaveOneCharge(55f))
                 {
-                    Serilog.Log.Debug("Next GCD is AA.  And Wildfire will not be ready within the next 55 seconds.   Returning True");
+                    Serilog.Log.Information($"{v} Next GCD is AA.  And Wildfire will not be ready within the next 55 seconds.   Using Reassemble");
                     return true;
                 }
-                if (IActionHelper.IsTheSameTo(nextGCD, true, Drill) && !Wildfire.WillHaveOneCharge(55f))
+                if (IActionHelper.IsTheSameTo(nextGCD, false, Drill) && !Wildfire.WillHaveOneCharge(55f))
                 {
-                    Serilog.Log.Debug("Next GCD is Drill.  And Wildfire will not be ready within the next 55 seconds.   Returning True");
+                    Serilog.Log.Information($"{v} Next GCD is Drill.  And Wildfire will not be ready within the next 55 seconds.   Using Reassemble");
                     return true;
                 }
             }
 
             if (RookAutoturret.CanUse(out act, (CanUseOption)16) && HostileTarget && HostileTarget.IsTargetable && InCombat)
             {
-                if (CombatElapsedLess(60f) && !CombatElapsedLess(45f) && Battery >= 50)
+                if (CombatElapsedLess(60f) && !CombatElapsedLess(48f) && Battery >= 50)
                 {
                     return true;
                 }
@@ -832,6 +731,30 @@ public class MCH_KirboPvE : MCH_Base
         return false;
     }
 
+    // Specific Hypercharge Conditions
+    private bool ShouldUseFineTunedHC(out IAction act)
+    {
+        act = null; // Initialize the action as null.
+        if (CombatTime > 60 && Heat >= 80)
+        {
+            return Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty);
+        }
+
+        return Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty);
+    }
+
+    // Specific Rook Auto Turret Conditions
+    private bool ShouldUseFineTunedTurret(out IAction act)
+    {
+        act = null; // Initialize the action as null.
+        if (Wildfire.WillHaveOneCharge(16))
+        {
+            return RookAutoturret.CanUse(out act, CanUseOption.MustUseEmpty);
+        }
+
+        return RookAutoturret.CanUse(out act, CanUseOption.MustUseEmpty);
+    }
+
     // GaussRound & Ricochet Condition
     private bool ShouldUseGaussroundOrRicochet(out IAction act)
     {
@@ -927,7 +850,40 @@ public class MCH_KirboPvE : MCH_Base
         HandleOpenerAvailability();
         BurstActionCheck();
         ToolKitCheck();
-        OpenerHelpers.StateOfOpener();
+        StateOfOpener(); // Call StateOfOpener to update opener properties        
+        //OpenerHelpers.StateOfOpener(); // Call StateOfOpener to update opener properties
+    }
+
+    private static void StateOfOpener()
+    {
+        if (Player.InCombat() && OpenerHelpers.OpenerActionsAvailable)
+        {
+            OpenerHelpers.OpenerInProgress = true;
+        }
+
+        if (Player.InCombat() && OpenerHelpers.OpenerHasFailed)
+        {
+            OpenerHelpers.OpenerInProgress = false;
+        }
+
+        if (Player.InCombat() && OpenerHelpers.OpenerHasFinished)
+        {
+            OpenerHelpers.OpenerInProgress = false;
+        }
+
+        if (Player.IsDead)
+        {
+            OpenerHelpers.OpenerHasFailed = false;
+            OpenerHelpers.OpenerHasFinished = false;
+            OpenerHelpers.OpenerStep = 0;
+        }
+
+        if (!Player.InCombat())
+        {
+            OpenerHelpers.OpenerHasFailed = false;
+            OpenerHelpers.OpenerHasFinished = false;
+            OpenerHelpers.OpenerStep = 0;
+        }
     }
 
     // Checks if any major tool skill will almost come off CD (only at lvl 90), and sets "InBurst" to true if Player has Wildfire active

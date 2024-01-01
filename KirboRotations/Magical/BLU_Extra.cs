@@ -1,4 +1,14 @@
-﻿namespace KirboRotations.Magical;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations;
+using RotationSolver.Basic.Rotations.Basic;
+using KirboRotations.Custom.ExtraHelpers;
+
+namespace KirboRotations.Magical;
 
 [SourceCode(Path = "main/KirboRotations/Magical/BLU_Extra.cs")]
 public sealed class BLU_Extra : BLU_Base

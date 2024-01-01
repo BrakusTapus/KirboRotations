@@ -1,3 +1,9 @@
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations.Basic;
+
 namespace KirboRotations.Tank;
 
 [SourceCode(Path = "main/KirboRotations/Tank/WAR_Default.cs")]

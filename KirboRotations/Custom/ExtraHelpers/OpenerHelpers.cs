@@ -1,96 +1,115 @@
-﻿namespace KirboRotations.Custom.ExtraHelpers;
+﻿using System.Runtime.CompilerServices;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
+using RotationSolver.Basic.Rotations;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+
+namespace KirboRotations.Custom.ExtraHelpers;
 
 public static class OpenerHelpers
 {
+    #region Backing fields for properties
+    private static bool _openerHasFailed = false;
+    private static bool _openerHasFinished = false;
+    private static int _openerStep = 0;
+    private static bool _openerInProgress = false;
+    private static bool _openerActionsAvailable = false;
+    private static bool _lvl70UltimateOpenerActionsAvailable = false;
+    private static bool _lvl80UltimateOpenerActionsAvailable = false;
+    #endregion
+
+    #region Properties with logging
     /// <summary>
     /// Flag used to indicate a state change
     /// </summary>
-    internal static bool _openerFlag { get; set; } = false;
+    private static bool _openerFlag  = false;
 
-    /// <summary>
-    /// Checks if actions needed for the opener available.
-    /// </summary>
-    internal static bool OpenerActionsAvailable { get; set; } = false;
-
-    /// <summary>
-    /// Checks if actions needed for the opener available.
-    /// </summary>
-    internal static bool LvL70_Ultimate_OpenerActionsAvailable { get; set; } = false;
-
-    /// <summary>
-    /// Checks if actions needed for the opener available.
-    /// </summary>
-    internal static bool LvL80_Ultimate_OpenerActionsAvailable { get; set; } = false;
-
-    /// <summary>
-    /// Indicates wether or not the opener is currently in progress
-    /// </summary>
-    internal static bool OpenerInProgress { get; set; } = false;
-
-    /// <summary>
-    /// Keeps track of the opener step
-    /// </summary>
-    internal static int OpenerStep { get; set; } = 0;
-
-    /// <summary>
-    /// Indicates wether or not the opener was finished succesfully
-    /// </summary>
-    internal static bool OpenerHasFinished { get; set; } = false;
-
-    /// <summary>
-    /// Indicates wether or not the opener has failed
-    /// </summary>
-    internal static bool OpenerHasFailed { get; set; } = false;
-
-    /// <summary>
-    /// Displays "[RotationSolver] Completed Opener"
-    /// </summary>
-    public static string OpenerComplete => "[RotationSolver] Completed Opener";
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="lastaction"></param>
-    /// <param name="nextaction"></param>
-    /// <returns></returns>
-    internal static bool OpenerController(bool lastaction, bool nextaction)
+    internal static bool OpenerFlag
     {
-        if (lastaction)
+        get
         {
-            OpenerStep++;
-            return false;
+            Serilog.Log.Information($"{v} Getting OpenerFlag: {_openerFlag}");
+            return _openerFlag;
         }
-        return nextaction;
+        set
+        {
+            if (_openerActionsAvailable != value)
+            {
+                Serilog.Log.Debug($"{v} Setting OpenerFlag from {_openerFlag} to {value}");
+                _openerFlag = value;
+            }
+        }
     }
 
-    /// <summary>
-    /// Resets opener properties
-    /// </summary>
-    internal static void ResetOpenerProperties()
+    public static bool OpenerHasFailed
     {
-        OpenerActionsAvailable = false;
-        OpenerInProgress = false;
-        OpenerStep = 0;
-        OpenerHasFinished = false;
+        get => _openerHasFailed;
+        set => SetWithLogging(ref _openerHasFailed, value, nameof(OpenerHasFailed));
+    }
+
+    public static bool OpenerHasFinished
+    {
+        get => _openerHasFinished;
+        set => SetWithLogging(ref _openerHasFinished, value, nameof(OpenerHasFinished));
+    }
+
+    public static int OpenerStep
+    {
+        get => _openerStep;
+        set => SetWithLogging(ref _openerStep, value, nameof(OpenerStep));
+    }
+
+    public static bool OpenerInProgress
+    {
+        get => _openerInProgress;
+        set => SetWithLogging(ref _openerInProgress, value, nameof(OpenerInProgress));
+    }
+
+    public static bool OpenerActionsAvailable
+    {
+        get => _openerActionsAvailable;
+        set => SetWithLogging(ref _openerActionsAvailable, value, nameof(OpenerActionsAvailable));
+    }
+
+    public static bool LvL70_Ultimate_OpenerActionsAvailable
+    {
+        get => _lvl70UltimateOpenerActionsAvailable;
+        set => SetWithLogging(ref _lvl70UltimateOpenerActionsAvailable, value, nameof(LvL70_Ultimate_OpenerActionsAvailable));
+    }
+
+    public static bool LvL80_Ultimate_OpenerActionsAvailable
+    {
+        get => _lvl80UltimateOpenerActionsAvailable;
+        set => SetWithLogging(ref _lvl80UltimateOpenerActionsAvailable, value, nameof(LvL80_Ultimate_OpenerActionsAvailable));
+    }
+    #endregion
+
+    #region Methods
+    public static void ResetOpenerProperties()
+    {
         OpenerHasFailed = false;
-        Serilog.Log.Debug($"OpenerActionsAvailable = {OpenerActionsAvailable}");
-        Serilog.Log.Debug($"OpenerInProgress = {OpenerInProgress} - Step: {OpenerStep}");
-        Serilog.Log.Debug($"OpenerHasFinished = {OpenerHasFinished}");
-        Serilog.Log.Debug($"OpenerHasFailed = {OpenerHasFailed}");
+        OpenerHasFinished = true;
+        OpenerStep = 0;
+        OpenerInProgress = false;
+        // Do not reset OpenerActionsAvailable here
+        LvL70_Ultimate_OpenerActionsAvailable = false;
+        LvL80_Ultimate_OpenerActionsAvailable = false;
     }
 
-    /// <summary>
-    /// Handles the current state of the opener based on various condition.
-    /// </summary>
-    internal static void StateOfOpener()
+    public static void StateOfOpener()
     {
-        if (!CustomRotation.InCombat)
-        {
-            _openerFlag = false;
-            OpenerStep = 0;
-            OpenerHasFinished = false;
-            OpenerHasFailed = false;
-        }
+        //if (BattleChara.Player.IsInCombat())
+        //{
+        //    OpenerInProgress = false;
+        //}
+
+        //if (CustomRotation.InCombat)
+        //{
+        //    _openerFlag = false;
+        //    OpenerStep = 0;
+        //    OpenerHasFinished = false;
+        //    OpenerHasFailed = false;
+        //}
         if (OpenerHasFailed)
         {
             _openerFlag = true;
@@ -101,17 +120,47 @@ public static class OpenerHelpers
             _openerFlag = true;
             OpenerInProgress = false;
         }
+
+        if (OpenerSequenceCompleted())
+        {
+            OpenerInProgress = false;
+        }
+        else
+        {
+            ResetOpenerProperties();
+        }
+
     }
 
-    /// <summary>
-    /// Calls the 'ResetBoolAfterDelay' if 'Flag' is true.
-    /// </summary>
-    internal static void OpenerFlagControl()
+    private static bool OpenerSequenceCompleted()
     {
-        if (_openerFlag)
+        return OpenerHasFinished || OpenerHasFailed;
+    }
+
+    private static void SetWithLogging<T>(ref T field, T value, string propertyName, [CallerMemberName] string caller = null)
+    {
+        if (!EqualityComparer<T>.Default.Equals(field, value))
         {
-            Serilog.Log.Debug($"Opener Event");
-            _openerFlag = false;
+            field = value;
+            LogPropertyChange(propertyName, value, caller);
         }
     }
+
+    internal static bool OpenerController(bool lastAction, bool nextAction, [CallerMemberName] string caller = null)
+    {
+        if (lastAction)
+        {
+            OpenerStep++; // Increment using the property
+            Serilog.Log.Information($"{v} OpenerStep incremented to {OpenerStep} (Called by: {caller}).");
+            return false;
+        }
+
+        return nextAction;
+    }
+
+    private static void LogPropertyChange<T>(string propertyName, T value, string caller)
+    {
+        Serilog.Log.Information($"{v} Property {propertyName} changed to: {value} (Called by: {caller})");
+    }
+    #endregion
 }

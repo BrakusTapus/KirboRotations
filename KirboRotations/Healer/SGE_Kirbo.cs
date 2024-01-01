@@ -1,4 +1,9 @@
-using KirboRotations.Custom.Data;
+using RotationSolver.Basic.Actions;
+using RotationSolver.Basic.Attributes;
+using RotationSolver.Basic.Configuration.RotationConfig;
+using RotationSolver.Basic.Data;
+using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations.Basic;
 using KirboRotations.Custom.ExtraHelpers;
 
 namespace KirboRotations.Healer;
@@ -334,7 +339,7 @@ public sealed class SGE_Kirbo : SGE_Base
     // Updates Status of other extra helper methods on every frame draw.
     protected override void UpdateInfo()
     {
-        OpenerHelpers.StateOfOpener();
+        /* OpenerHelpers.StateOfOpener(); */
     }
     #endregion
 }

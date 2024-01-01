@@ -1,6 +1,7 @@
-﻿using KirboRotations.Custom.Data;
+﻿using ImGuiNET;
+using KirboRotations.Custom.Data;
 using KirboRotations.Custom.ExtraHelpers;
-using KirboRotations.Utility.ImGuiEx;
+using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Custom.UI;
 
@@ -13,6 +14,7 @@ public class DebugWindow
 
     public static void DisplayDebugWindow(string RotationName, string RotationVersion, RotationData rotationData)
     {
+        //TerritoryContentType Content = TerritoryContentType;
         try
         {
             ImGuiExtra.TripleSpacing();
@@ -22,8 +24,8 @@ public class DebugWindow
                 if (ImGui.BeginTable("generalInfoTable", 2))
                 {
                     ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    ImGuiExtra.AddTableRow("Rotation", $"{RotationName}");
-                    ImGuiExtra.AddTableRow("RotationVersion", $"{rotationData.RotationVersion}");
+                    ImGuiExtra.AddTableRowColorLast("Rotation Athor", $"{RotationName}", EColor.ParsedPink);
+                    ImGuiExtra.AddTableRowColorLast("RotationVersion", $"{rotationData.RotationVersion}", EColor.ParsedGold);
                     ImGui.EndTable();
                 }
 
@@ -80,46 +82,57 @@ public class DebugWindow
                 if (ImGui.BeginTable("rotationStatusTable", 2))
                 {
                     ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
+
                     if (rotationData.RotationOpeners.Count > 0)
                     {
                         string rotationOpener = rotationData.GetCurrentRotationOpener();
-                        ImGuiExtra.AddTableRow("Rotation Opener", rotationOpener);
+                        ImGuiExtra.AddTableRowColorLast("Rotation Opener", rotationOpener, EColor.ParsedOrange);
                     }
                     else
                     {
                         ImGuiExtra.AddTableRow("Rotation Opener", "No Openers Configured");
                     }
-                    ImGuiExtra.AddTableRow("OpenerActionsAvailable", OpenerHelpers.OpenerActionsAvailable.ToString());
-                    ImGuiExtra.AddTableRow("OpenerInProgress", OpenerHelpers.OpenerInProgress.ToString());
+                    if (!OpenerHelpers.LvL70_Ultimate_OpenerActionsAvailable && (!OpenerHelpers.LvL80_Ultimate_OpenerActionsAvailable))
+                    {
+                        ImGuiExtra.AddTableRow("OpenerActionsAvailable", OpenerHelpers.OpenerActionsAvailable);
+                    }
+                    if (OpenerHelpers.LvL80_Ultimate_OpenerActionsAvailable)
+                    {
+                        ImGuiExtra.AddTableRow("LvL80_Ultimate_OpenerActionsAvailable", OpenerHelpers.LvL80_Ultimate_OpenerActionsAvailable);
+                    }
+                    if (OpenerHelpers.LvL70_Ultimate_OpenerActionsAvailable)
+                    {
+                        ImGuiExtra.AddTableRow("LvL70_Ultimate_OpenerActionsAvailable", OpenerHelpers.LvL70_Ultimate_OpenerActionsAvailable);
+                    }
+                    ImGuiExtra.AddTableRow("OpenerHasFinished", OpenerHelpers.OpenerHasFinished);
+                    ImGuiExtra.AddTableRow("OpenerHasFailed", OpenerHelpers.OpenerHasFailed);
+                    ImGuiExtra.AddTableRow("OpenerInProgress", OpenerHelpers.OpenerInProgress);
                     ImGuiExtra.AddTableRow("Openerstep", OpenerHelpers.OpenerStep.ToString());
-                    ImGuiExtra.AddTableRow("OpenerHasFailed", OpenerHelpers.OpenerHasFailed.ToString());
-                    ImGuiExtra.AddTableRow("OpenerHasFinished", OpenerHelpers.OpenerHasFinished.ToString());
+
+                    ImGui.TableNextRow();
+                    ImGui.TableNextColumn();
+                    ImGuiExtra.DisplayResetButton("Reset");
+                    ImGuiExtra.Tooltip($"Press this button if\n the rotation gets stuck during the Opener!\n All Opener related properties\n and the opener step will be resetted");
+                    ImGui.TableNextColumn();
+                    ImGuiExtra.CopyCurrentValues("ClipBoard");
+                    ImGuiExtra.Tooltip($"Click to copy the current value's of the properties to the clipboard.");
                     ImGui.EndTable();
                 }
 
-                ImGuiExtra.DisplayResetButton("Reset Properties");
-                ImGuiExtra.StartRotationTimer("Rotation Test");
-
             });
 
-            /* Burst Status
             ImGuiExtra.TripleSpacing();
-            ImGuiExtra.CollapsingHeaderWithContent("", () =>
+            ImGuiExtra.CollapsingHeaderWithContent("Burst Status", () =>
             {
                 ImGuiExtra.Tooltip("Displays Burst information like:\n-Burst Available\n-Burst HasFailed");
                 if (ImGui.BeginTable("burstStatusTable", 2))
                 {
                     ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    ImGuiExtra.AddTableRow("BurstStep", BurstHelpers.BurstStep.ToString());
-                    ImGuiExtra.AddTableRow("BurstActionsAvailable", BurstHelpers.BurstActionsAvailable.ToString());
-                    ImGuiExtra.AddTableRow("BurstInProgress", BurstHelpers.BurstInProgress.ToString());
-                    ImGuiExtra.AddTableRow("BurstHasFailed", BurstHelpers.BurstHasFailed.ToString());
-                    ImGuiExtra.AddTableRow("BurstHasFinished", BurstHelpers.BurstHasFinished.ToString());
-                    // ... other Burst status ...
+                    ImGuiExtra.AddTableRow("In Burst", BurstHelpers.InBurst);
+                    ImGuiExtra.AddTableRow("BurstFlag", BurstHelpers._burstFlag);
                     ImGui.EndTable();
                 }
             });
-            */
 
             ImGuiExtra.TripleSpacing();
             ImGuiExtra.CollapsingHeaderWithContent("Action Details", () =>
@@ -128,28 +141,20 @@ public class DebugWindow
                 if (ImGui.BeginTable("actionTable", 2))
                 {
                     ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    //ImGuiExtra.AddTableRow("GCD Remain", DataCenter.WeaponRemain.ToString());
-                    //ImGuiExtra.AddTableRow("LastGCD", DataCenter.LastGCD.ToString());
-                    //ImGuiExtra.AddTableRow("LastAbility", DataCenter.LastAbility.ToString());
                     ImGui.EndTable();
                 }
             });
+
         }
         catch (Exception ex)
         {
-            Serilog.Log.Warning($"{ErrorMsg} - DisplayStatus: {ex.Message}");
+            Serilog.Log.Warning($"{v} {ErrorMsg} - DisplayStatus: {ex.Message}");
         }
     }
 
-    /// <summary>
-    /// WIP.
-    /// </summary>
-    /// <param name="RotationName"></param>
-    /// <param name="RotationVersion"></param>
-    /// <param name="rotationData"></param>
-    [EditorBrowsable(EditorBrowsableState.Never)]
     public static void DisplayPvPDebugWindow(string RotationName, string RotationVersion, RotationData rotationData)
     {
+        //TerritoryContentType Content = TerritoryContentType;
         try
         {
             ImGuiExtra.TripleSpacing();
@@ -159,83 +164,10 @@ public class DebugWindow
                 if (ImGui.BeginTable("generalInfoTable", 2))
                 {
                     ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    ImGuiExtra.AddTableRow("Rotation", $"{RotationName}");
-                    ImGuiExtra.AddTableRow("RotationVersion", $"{rotationData.RotationVersion}");
+                    ImGuiExtra.AddTableRowColorLast("Rotation Athor", $"{RotationName}", EColor.ParsedPink);
+                    ImGuiExtra.AddTableRowColorLast("RotationVersion", $"{rotationData.RotationVersion}", EColor.ParsedGold);
                     ImGui.EndTable();
                 }
-
-                if (ImGui.CollapsingHeader("Rotation Features"))
-                {
-                    if (ImGui.BeginTable("featuresTable", 3))
-                    {
-                        // Set up columns
-                        ImGui.TableSetupColumn("Ultimate Compatibilities");
-                        ImGui.TableSetupColumn("Content Compatibilities");
-                        ImGui.TableSetupColumn("Rotation Features");
-                        ImGui.TableHeadersRow();
-
-                        // Determine the maximum number of rows needed
-                        int maxRows = Math.Max(rotationData.UltimateCompatibilities.Count, Math.Max(rotationData.ContentCompatibilities.Count, rotationData.FeaturesList.Count));
-
-                        for (int i = 0; i < maxRows; i++)
-                        {
-                            ImGui.TableNextRow();
-
-                            // Ultimate Compatibilities Column
-                            ImGui.TableSetColumnIndex(0);
-                            if (i < rotationData.UltimateCompatibilities.Count)
-                            {
-                                ImGui.Text(rotationData.UltimateCompatibilities[i].ToString());
-                            }
-
-                            // Content Compatibilities Column
-                            ImGui.TableSetColumnIndex(1);
-                            if (i < rotationData.ContentCompatibilities.Count)
-                            {
-                                ImGui.Text(rotationData.ContentCompatibilities[i].ToString());
-                            }
-
-                            // Rotation Features Column
-                            ImGui.TableSetColumnIndex(2);
-                            if (i < rotationData.FeaturesList.Count)
-                            {
-                                ImGui.Text(rotationData.FeaturesList[i].ToString());
-                            }
-                        }
-
-                        ImGui.EndTable();
-                    }
-                }
-
-            });
-
-            ImGuiExtra.TripleSpacing();
-            ImGuiExtra.CollapsingHeaderWithContent("Rotation Status", () =>
-            {
-                ImGuiExtra.Tooltip("Displays Rotation information like:\n-Selected Rotation\n-Opener Status");
-
-                if (ImGui.BeginTable("rotationStatusTable", 2))
-                {
-                    ImGui.TableSetupColumn("Description"); ImGui.TableSetupColumn("Value"); ImGui.TableHeadersRow();
-                    if (rotationData.RotationOpeners.Count > 0)
-                    {
-                        string rotationOpener = rotationData.GetCurrentRotationOpener();
-                        ImGuiExtra.AddTableRow("Rotation Opener", rotationOpener);
-                    }
-                    else
-                    {
-                        ImGuiExtra.AddTableRow("Rotation Opener", "No Openers Configured");
-                    }
-                    ImGuiExtra.AddTableRow("OpenerActionsAvailable", OpenerHelpers.OpenerActionsAvailable.ToString());
-                    ImGuiExtra.AddTableRow("OpenerInProgress", OpenerHelpers.OpenerInProgress.ToString());
-                    ImGuiExtra.AddTableRow("Openerstep", OpenerHelpers.OpenerStep.ToString());
-                    ImGuiExtra.AddTableRow("OpenerHasFailed", OpenerHelpers.OpenerHasFailed.ToString());
-                    ImGuiExtra.AddTableRow("OpenerHasFinished", OpenerHelpers.OpenerHasFinished.ToString());
-                    ImGui.EndTable();
-                }
-
-                ImGuiExtra.DisplayResetButton("Reset Properties");
-                ImGuiExtra.StartRotationTimer("Rotation Test");
 
             });
 
@@ -252,7 +184,7 @@ public class DebugWindow
         }
         catch (Exception ex)
         {
-            Serilog.Log.Warning($"{ErrorMsg} - DisplayStatus: {ex.Message}");
+            Serilog.Log.Warning($"{v} {ErrorMsg} - DisplayStatus: {ex.Message}");
         }
     }
 
