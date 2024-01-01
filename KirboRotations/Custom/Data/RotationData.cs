@@ -12,7 +12,7 @@ public class RotationData
         UltimateCompatibilities = new List<UltimateCompatibility>();
         ContentCompatibilities = new List<ContentCompatibility>();
         FeaturesList = new List<Features>();
-        RotationVersion = "v1.0.0.19";
+        RotationVersion = "v1.0.0.16";
     }
 
     public List<string> RotationOpeners { get; private set; } = new List<string>();
