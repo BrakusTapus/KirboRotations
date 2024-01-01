@@ -851,7 +851,7 @@ public class MCH_KirboPvE : MCH_Base
         BurstActionCheck();
         ToolKitCheck();
         StateOfOpener(); // Call StateOfOpener to update opener properties        
-        //OpenerHelpers.StateOfOpener(); // Call StateOfOpener to update opener properties
+        //OpenerHelpers.StateOfOpener();
     }
 
     private static void StateOfOpener()
