@@ -12,6 +12,8 @@ using KirboRotations.Custom.Data;
 using KirboRotations.Custom.UI;
 using static KirboRotations.Custom.Data.StatusID_Buffs;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
+using ImGuiNET;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 
 namespace KirboRotations.Ranged;
 
@@ -82,6 +84,9 @@ public class MCH_KirboPvE : MCH_Base
 
         rotationData.SetRotationOpeners("Early AA", "Delayed Tools");
         rotationData.CurrentRotationSelection = Configs.GetCombo("RotationSelection");
+
+        ImGui.Text($"Your character combat: {Player.IsInCombat()}");
+
         DebugWindow.DisplayDebugWindow(RotationName, rotationData.RotationVersion, rotationData);
     }
     #endregion
@@ -430,7 +435,7 @@ public class MCH_KirboPvE : MCH_Base
     {
         act = null;
 
-        if (Player.HasStatus(true, (StatusID)Transcendent))
+        if (Player.HasStatus(true, (StatusID)Transcendent) || !Player.InCombat())
         {
             // Logic when the player is recently revived
             return false;
@@ -508,6 +513,14 @@ public class MCH_KirboPvE : MCH_Base
     #region oGCD Logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
+        act = null;
+
+        if (Player.HasStatus(true, (StatusID)Transcendent) || !Player.InCombat())
+        {
+            // Logic when the player is recently revived
+            return false;
+        }
+
         if (ShouldUseBurstMedicine(out act))
         {
             return true;
@@ -843,29 +856,33 @@ public class MCH_KirboPvE : MCH_Base
 
     private static void StateOfOpener()
     {
-        if (InCombat && OpenerHelpers.OpenerActionsAvailable)
+        if (Player.InCombat() && OpenerHelpers.OpenerActionsAvailable)
         {
             OpenerHelpers.OpenerInProgress = true;
         }
 
-        if (InCombat && OpenerHelpers.OpenerHasFailed)
+        if (Player.InCombat() && OpenerHelpers.OpenerHasFailed)
         {
-            OpenerHelpers.OpenerInProgress = false; OpenerHelpers.OpenerStep = 0;
+            OpenerHelpers.OpenerInProgress = false;
         }
 
-        if (InCombat && OpenerHelpers.OpenerHasFinished)
+        if (Player.InCombat() && OpenerHelpers.OpenerHasFinished)
         {
-            OpenerHelpers.OpenerInProgress = false; OpenerHelpers.OpenerStep = 0;
+            OpenerHelpers.OpenerInProgress = false;
         }
 
         if (Player.IsDead)
         {
-            OpenerHelpers.OpenerHasFailed = false; OpenerHelpers.OpenerHasFinished = false; OpenerHelpers.OpenerStep = 0;
+            OpenerHelpers.OpenerHasFailed = false;
+            OpenerHelpers.OpenerHasFinished = false;
+            OpenerHelpers.OpenerStep = 0;
         }
 
-        if (!InCombat)
+        if (!Player.InCombat())
         {
-            OpenerHelpers.OpenerHasFailed = false; OpenerHelpers.OpenerHasFinished = false; OpenerHelpers.OpenerStep = 0;
+            OpenerHelpers.OpenerHasFailed = false;
+            OpenerHelpers.OpenerHasFinished = false;
+            OpenerHelpers.OpenerStep = 0;
         }
     }
 

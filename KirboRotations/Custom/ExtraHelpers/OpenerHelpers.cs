@@ -1,4 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
+using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
+using RotationSolver.Basic.Rotations;
 using static KirboRotations.Custom.ExtraHelpers.GeneralHelpers;
 
 namespace KirboRotations.Custom.ExtraHelpers;
@@ -16,6 +19,28 @@ public static class OpenerHelpers
     #endregion
 
     #region Properties with logging
+    /// <summary>
+    /// Flag used to indicate a state change
+    /// </summary>
+    private static bool _openerFlag  = false;
+
+    internal static bool OpenerFlag
+    {
+        get
+        {
+            Serilog.Log.Information($"{v} Getting OpenerFlag: {_openerFlag}");
+            return _openerFlag;
+        }
+        set
+        {
+            if (_openerActionsAvailable != value)
+            {
+                Serilog.Log.Debug($"{v} Setting OpenerFlag from {_openerFlag} to {value}");
+                _openerFlag = value;
+            }
+        }
+    }
+
     public static bool OpenerHasFailed
     {
         get => _openerHasFailed;
@@ -73,6 +98,28 @@ public static class OpenerHelpers
 
     public static void StateOfOpener()
     {
+        //if (BattleChara.Player.IsInCombat())
+        //{
+        //    OpenerInProgress = false;
+        //}
+
+        //if (CustomRotation.InCombat)
+        //{
+        //    _openerFlag = false;
+        //    OpenerStep = 0;
+        //    OpenerHasFinished = false;
+        //    OpenerHasFailed = false;
+        //}
+        if (OpenerHasFailed)
+        {
+            _openerFlag = true;
+            OpenerInProgress = false;
+        }
+        if (OpenerHasFinished)
+        {
+            _openerFlag = true;
+            OpenerInProgress = false;
+        }
 
         if (OpenerSequenceCompleted())
         {
