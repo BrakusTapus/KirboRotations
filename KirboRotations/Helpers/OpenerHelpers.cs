@@ -1,6 +1,8 @@
 ﻿using System.Runtime.CompilerServices;
+using KirboRotations.Configurations;
+using KirboRotations.Helpers.JobHelpers.Enums;
 
-namespace KirboRotations.JobHelpers;
+namespace KirboRotations.Helpers;
 
 internal static class OpenerHelpers
 {
@@ -12,6 +14,7 @@ internal static class OpenerHelpers
     private static bool _openerActionsAvailable = false;
     private static bool _lvl70UltimateOpenerActionsAvailable = false;
     private static bool _lvl80UltimateOpenerActionsAvailable = false;
+    private static OpenerState _openerState = OpenerState.PrePull;
     #endregion Backing fields for properties
 
     #region Properties with logging
@@ -22,19 +25,8 @@ internal static class OpenerHelpers
 
     internal static bool OpenerFlag
     {
-        get
-        {
-            Serilog.Log.Information($"{v} Getting OpenerFlag: {_openerFlag}");
-            return _openerFlag;
-        }
-        set
-        {
-            if (_openerActionsAvailable != value)
-            {
-                Serilog.Log.Debug($"{v} Setting OpenerFlag from {_openerFlag} to {value}");
-                _openerFlag = value;
-            }
-        }
+        get => _openerFlag;
+        set => SetWithLogging(ref _openerFlag, value, nameof(OpenerFlag));
     }
 
     public static bool OpenerHasFailed
@@ -82,6 +74,11 @@ internal static class OpenerHelpers
     #endregion Properties with logging
 
     #region Methods
+    public static OpenerState CurrentOpenerState
+    {
+        get => _openerState;
+        set => SetWithLogging(ref _openerState, value, nameof(CurrentOpenerState));
+    }
 
     public static void ResetOpenerProperties()
     {
@@ -133,7 +130,17 @@ internal static class OpenerHelpers
     {
         return OpenerHasFinished || OpenerHasFailed;
     }
+    internal static bool OpenerController(bool lastAction, bool nextAction, [CallerMemberName] string caller = null)
+    {
+        if (lastAction)
+        {
+            OpenerStep++; // Increment using the property
+            Serilog.Log.Information($"{RotationConfigs.v} OpenerStep incremented to {OpenerStep} (Called by: {caller}).");
+            return false;
+        }
 
+        return nextAction;
+    }
     private static void SetWithLogging<T>(ref T field, T value, string propertyName, [CallerMemberName] string caller = null)
     {
         if (!EqualityComparer<T>.Default.Equals(field, value))
@@ -143,21 +150,14 @@ internal static class OpenerHelpers
         }
     }
 
-    internal static bool OpenerController(bool lastAction, bool nextAction, [CallerMemberName] string caller = null)
-    {
-        if (lastAction)
-        {
-            OpenerStep++; // Increment using the property
-            Serilog.Log.Information($"{v} OpenerStep incremented to {OpenerStep} (Called by: {caller}).");
-            return false;
-        }
-
-        return nextAction;
-    }
-
     private static void LogPropertyChange<T>(string propertyName, T value, string caller)
     {
-        Serilog.Log.Information($"{v} Property {propertyName} changed to: {value} (Called by: {caller})");
+        Serilog.Log.Information($"{RotationConfigs.v} Property {propertyName} changed to: {value} (Called by: {caller})");
+    }
+    public static void DisplayCurrentOpenerState()
+    {
+        string stateAsString = CurrentOpenerState.ToString();
+        Serilog.Log.Information($"Current Opener State: {stateAsString}");
     }
 
     #endregion Methods

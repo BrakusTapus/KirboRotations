@@ -4,10 +4,10 @@ using RotationSolver.Basic.Configuration.RotationConfig;
 using RotationSolver.Basic.Data;
 using RotationSolver.Basic.Helpers;
 using RotationSolver.Basic.Rotations.Basic;
-using static KirboRotations.JobHelpers.GeneralHelpers;
 using static ImGuiNET.ImGui;
-using KirboRotations.JobHelpers;
 using KirboRotations.UI;
+using KirboRotations.Configurations;
+using KirboRotations.Extensions;
 
 namespace KirboRotations.PvP.Tank;
 
@@ -161,46 +161,7 @@ internal class PvP_PLD_Kirbo : PLD_Base
 
     public override void DisplayStatus()
     {
-        try
-        {
-            Text("GCD Speed: " + WeaponTotal);
-            Text("GCD remain: " + WeaponRemain);
-            Separator();
-            Spacing();
-
-            if (Player != null)
-            {
-                ImGuiExtra.ImGuiColoredText("Job: ", ClassJob.Abbreviation, EColor.LightBlue); // Light blue for the abbreviation
-                Text($"Player.HealthRatio: {Player.GetHealthRatio() * 100:F2}%%");
-                Text($"Player.CurrentHp: {Player.CurrentHp}");
-                Separator();
-                Spacing();
-            }
-            if (InPvP())
-            {
-                Text("HasInvulnv: " + HasInvulnv);
-                Text("PvP_SwordOathStacks: " + PvP_SwordOathStacks);
-                Text("PvP_Intervene CurrentCharges: " + PvP_Intervene.CurrentCharges);
-                Separator();
-                Spacing();
-            }
-            // Calculate the remaining vertical space in the window
-            float remainingSpace = GetContentRegionAvail().Y - GetFrameHeightWithSpacing(); // Subtracting button height with spacing
-            if (remainingSpace > 0)
-            {
-                SetCursorPosY(GetCursorPosY() + remainingSpace);
-            }
-
-            // Add a button for resetting rotation properties
-            if (Button("Reset Rotation"))
-            {
-                //ResetRotationProperties();
-            }
-        }
-        catch
-        {
-            Serilog.Log.Warning($"{v} Something wrong with DisplayStatus");
-        }
+        base.DisplayStatus();
     }
 
     #endregion Debug window stuff
@@ -254,7 +215,7 @@ internal class PvP_PLD_Kirbo : PLD_Base
         bool lowHPNoAttacks = Configs.GetBool("LowHPNoAttacks");
         int lowHPThreshold = Configs.GetInt("LowHPThreshold");
 
-        if (GeneralHelpers.InPvP())
+        if (BattleCharaEx.InPvP())
         {
             if (guardCancel && playerHasGuard)
             {

@@ -1,4 +1,4 @@
-using KirboRotations.JobHelpers;
+using KirboRotations.Configurations;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -15,8 +15,8 @@ internal sealed class PvE_SGE_Kirbo : SGE_Base
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{GeneralHelpers.USERNAME}'s {ClassJob.Name}";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string Description => $"{RotationConfigs.USERNAME}'s {ClassJob.Name}";
 
     #endregion Rotation Info
 

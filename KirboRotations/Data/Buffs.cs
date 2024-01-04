@@ -1,18 +1,19 @@
-﻿namespace KirboRotations.Custom.Data;
+﻿namespace KirboRotations.Data;
 
-internal enum DeBuffs : ushort
+internal enum Buffs : ushort
 {
     #region General
 
-    Sleep = 3,
-    Bind = 13,
-    Heavy = 14,
+    Weakness = 43,
+    Medicated = 49,
+    Sprint = 50,
+    Transcendent = 418,
 
     #endregion General
 
     #region JobRole Tank
 
-    Reprisal = 1193,
+    Rampart = 1191,
 
     #endregion JobRole Tank
 
@@ -22,17 +23,21 @@ internal enum DeBuffs : ushort
 
     #region JobRole Melee
 
-    Feint = 1195,
+    Bloodbath = 84,
+    TrueNorth = 1250,
 
     #endregion JobRole Melee
 
     #region JobRole Ranged
-    //
+
+    Peloton = 1199,
+
     #endregion JobRole Ranged
 
     #region JobRole Magical
 
-    Addle = 1203,
+    Swiftcast = 167,
+    LucidDreaming = 1204,
 
     #endregion JobRole Magical
 }

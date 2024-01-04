@@ -1,33 +1,24 @@
-﻿using RotationSolver.Basic.Rotations;
-using static KirboRotations.JobHelpers.GeneralHelpers;
+﻿using System.Runtime.CompilerServices;
+using KirboRotations.Configurations;
+using RotationSolver.Basic.Rotations;
 
-namespace KirboRotations.JobHelpers;
+namespace KirboRotations.Helpers;
 
 internal static class BurstHelpers
 {
     #region Backing fields for properties
-    private static bool _burstActionsAvailable = false;
+    //private static bool _burstActionsAvailable = false;
     #endregion Backing fields for properties
 
     /// <summary>
     /// Flag used to indicate a state change
     /// </summary>
     private static bool _burstFlag = false;
+
     internal static bool BurstFlag
     {
-        get
-        {
-            Serilog.Log.Information($"{v} Getting BurstFlag: {_burstFlag}");
-            return _burstFlag;
-        }
-        set
-        {
-            if (_burstActionsAvailable != value)
-            {
-                Serilog.Log.Debug($"{v} Setting BurstFlag from {_burstFlag} to {value}");
-                _burstFlag = value;
-            }
-        }
+        get => _burstFlag;
+        set => SetWithLogging(ref _burstFlag, value, nameof(BurstFlag));
     }
 
     /// <summary>
@@ -86,9 +77,9 @@ internal static class BurstHelpers
         BurstStep = 0;
         BurstHasFinished = false;
         BurstHasFailed = false;
-        Serilog.Log.Debug($"{v} OpenerHasFailed = {InBurst}");
-        Serilog.Log.Debug($"{v} OpenerInProgress = {BurstInProgress} - Step: {BurstStep}");
-        Serilog.Log.Debug($"{v} OpenerHasFinished = {BurstHasFinished}");
+        Serilog.Log.Debug($"{RotationConfigs.v} OpenerHasFailed = {InBurst}");
+        Serilog.Log.Debug($"{RotationConfigs.v} OpenerInProgress = {BurstInProgress} - Step: {BurstStep}");
+        Serilog.Log.Debug($"{RotationConfigs.v} OpenerHasFinished = {BurstHasFinished}");
     }
 
     /// <summary>
@@ -115,6 +106,19 @@ internal static class BurstHelpers
             BurstInProgress = false;
         }
     }
+    private static void SetWithLogging<T>(ref T field, T value, string propertyName, [CallerMemberName] string caller = null)
+    {
+        if (!EqualityComparer<T>.Default.Equals(field, value))
+        {
+            field = value;
+            LogPropertyChange(propertyName, value, caller);
+        }
+    }
+
+    private static void LogPropertyChange<T>(string propertyName, T value, string caller)
+    {
+        Serilog.Log.Information($"{RotationConfigs.v} Property {propertyName} changed to: {value} (Called by: {caller})");
+    }
 
     /// <summary>
     /// Calls the 'ResetBoolAfterDelay' if 'Flag' is true.
@@ -123,7 +127,7 @@ internal static class BurstHelpers
     {
         if (_burstFlag)
         {
-            Serilog.Log.Debug($"{v} Burst Event");
+            Serilog.Log.Debug($"{RotationConfigs.v} Burst Event");
             _burstFlag = false;
         }
     }

@@ -1,6 +1,6 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
-using KirboRotations.JobHelpers;
+using KirboRotations.Extensions;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -139,7 +139,7 @@ internal class PVP_DRG_Kirbo : DRG_Base
         bool guardCancel = Configs.GetBool("GuardCancel");
         bool preventActionWaste = Configs.GetBool("PreventActionWaste");
         bool safetyCheck = Configs.GetBool("SafetyCheck");
-        if (GeneralHelpers.InPvP())
+        if (BattleCharaEx.InPvP())
         {
             if (guardCancel && Player.HasStatus(true, StatusID.PvP_Guard))
             {

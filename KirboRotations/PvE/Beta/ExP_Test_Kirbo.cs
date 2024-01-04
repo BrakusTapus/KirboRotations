@@ -11,14 +11,14 @@ using RotationSolver.Basic.Data;
 using RotationSolver.Basic.Helpers;
 using RotationSolver.Basic.Rotations.Basic;
 
-namespace KirboRotations.ExP;
+namespace KirboRotations.PvE.Beta;
 
 [RotationDesc(ActionID.None)]
 [SourceCode(Path = "%Branch/FilePath to your sourse code% eg. main/DefaultRotations/Melee/NIN_Default.cs%")]
 [LinkDescription("%Link to the pics or just a link%", "%Description about your rotation.%")]
 [YoutubeLink(ID = "%If you got a youtube video link, please add here, just video id!%")]
 [BetaRotation]
-internal class ExP_Test_Kirbo : MCH_Base
+internal class Test_Kirbo : MCH_Base
 {
     #region Rotation Info
 

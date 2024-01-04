@@ -1,7 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
 using ImGuiNET;
-using KirboRotations.Custom.Configurations;
-using KirboRotations.JobHelpers;
+using KirboRotations.Configurations;
+using KirboRotations.Extensions;
 using KirboRotations.UI;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
@@ -19,8 +19,8 @@ internal class PvP_MCH_Kirbo : MCH_Base
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{USERNAME}'s {ClassJob.Name}";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string Description => $"{RotationConfigs.USERNAME}'s {ClassJob.Name}";
     #endregion Rotation Info
 
     #region IBaseActions
@@ -212,12 +212,9 @@ internal class PvP_MCH_Kirbo : MCH_Base
     public override bool ShowStatus => true;
 
     public override void DisplayStatus()
-    {
-        RotationConfigs rotationConfigs = new ();
-
-        ImGui.Text($"Your character combat: {Player.IsInCombat()}");
-        
-        DebugWindow.DisplayPvPDebugWindow(RotationName, rotationConfigs.RotationVersion, rotationConfigs);
+    {        
+        ImGuiExtra.CenteredText("WIP, sorry");
+        ImGuiExtra.CenteredText($"Your character combat: {Player.IsInCombat()}");
     }
 
     #endregion Debug window

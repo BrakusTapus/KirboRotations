@@ -2,8 +2,8 @@
 using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
-using KirboRotations.Custom.JobHelpers.Openers;
-using KirboRotations.JobHelpers;
+using KirboRotations.Helpers;
+using KirboRotations.Helpers.JobHelpers;
 
 namespace KirboRotations.UI;
 
@@ -21,6 +21,13 @@ internal static class ImGuiExtra
     {
         ImGui.Spacing();
         ImGui.Spacing();
+        ImGui.Spacing();
+    }
+
+    public static void SpacingWithSeperator()
+    {
+        ImGui.Spacing();
+        ImGui.Separator();
         ImGui.Spacing();
     }
 
@@ -78,6 +85,13 @@ internal static class ImGuiExtra
     #endregion Tooltip
 
     #region Text
+
+    static string msg = "You're not logged in, debug window will not be drawn.";
+
+    public static void NotLoggedIn()
+    {
+        ImGuiExtra.CenteredText($"{msg}");
+    }
 
     public static void TextCentered(string text)
     {
@@ -274,21 +288,46 @@ internal static class ImGuiExtra
         ImGui.TableNextColumn(); ImGui.Text(value);
     }
 
+    public static void AddTableRow(string description, string value, string description2, string value2)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn(); ImGui.Text(description);
+        ImGui.TableNextColumn(); ImGui.Text(value);
+        ImGui.TableNextColumn(); ImGui.Text(description2);
+        ImGui.TableNextColumn(); ImGui.Text(value2);
+    }
+
     /// <summary>
     ///
     /// </summary>
     /// <param name="description"></param>
     /// <param name="value"></param>
-    public static void AddTableRow(string description, bool value)
+    internal static void AddTableRow(string description, bool value)
     {
         Vector4 color = value ? EColor.GreenBright : EColor.RedBright; // Green for true, red for false
         string valueText = value.ToString();
 
         ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-        ImGui.Text(description);
-        ImGui.TableNextColumn();
-        ImGui.TextColored(color, valueText);
+        ImGui.TableNextColumn(); ImGui.Text(description);
+        ImGui.TableNextColumn(); ImGui.TextColored(color, valueText);
+    }
+    internal static void AddTableRow(string description, byte value)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn(); ImGui.Text(description);
+        ImGui.TableNextColumn(); ImGui.Text(value.ToString());
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="byteValue"></param>
+    internal static void AddTableRow2(string description, byte byteValue)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn(); ImGui.Text(description);
+        ImGui.TableNextColumn(); ImGui.Text(byteValue.ToString());
     }
 
     /// <summary>
@@ -319,6 +358,50 @@ internal static class ImGuiExtra
         ImGui.Text(description);
         ImGui.TableNextColumn();
         ImGui.TextColored(textColor, value);
+    }
+    /// <summary>
+    /// First Colum text will be white and text in the second colum will be whatever color is picked
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    /// <param name="textColor"></param>
+    public static void AddTableRowColorLast2(string description, bool value, Vector4 textColor)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(textColor, value.ToString());
+    }
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    internal static void AddTableRowColorLast(string description, bool value)
+    {
+        Vector4 color = value ? EColor.GreenBright : EColor.RedBright; // Green for true, red for false
+        string valueText = value.ToString();
+
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+        ImGui.TableNextColumn();
+        ImGui.TextColored(color, valueText);
+    }
+    /// <summary>
+    /// First Colum text will be white and text in the second colum will be whatever color is picked
+    /// </summary>
+    /// <param name="description"></param>
+    /// <param name="value"></param>
+    /// <param name="textColor"></param>
+    public static void AddTableRowByte(string description, byte value)
+    {
+        ImGui.TableNextRow();
+        ImGui.TableNextColumn();
+        ImGui.Text(description);
+        ImGui.TableNextColumn();
+        ImGui.Text(value.ToString());
     }
 
     #endregion Table

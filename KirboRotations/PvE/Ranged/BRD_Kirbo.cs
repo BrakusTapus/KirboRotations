@@ -1,8 +1,7 @@
 ﻿using Dalamud.Game.ClientState.JobGauge.Enums;
-using KirboRotations.Custom.Configurations;
-using KirboRotations.Custom.Configurations.Enums;
-using KirboRotations.Custom.Data;
-using KirboRotations.JobHelpers;
+using KirboRotations.Configurations;
+using KirboRotations.Data;
+using KirboRotations.Helpers;
 using KirboRotations.UI;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
@@ -15,13 +14,13 @@ namespace KirboRotations.PvE.Ranged;
 
 [RotationDesc(ActionID.BattleVoice)]
 [SourceCode(Path = "main/KirboRotations/Ranged/BRD_Default.cs")]
-internal class PvE_BRD_KirboPvE : BRD_Base
+internal class BRD_Kirbo : BRD_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{GeneralHelpers.USERNAME}'s {ClassJob.Name}";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string Description => $"{RotationConfigs.USERNAME}'s {ClassJob.Name}";
 
     #endregion Rotation Info
 
@@ -34,10 +33,17 @@ internal class PvE_BRD_KirboPvE : BRD_Base
 
     public override void DisplayStatus()
     {
-        RotationConfigs rotationData = new ();
-        rotationData.AddContentCompatibility(ContentCompatibility.DutyRoulette);
-        rotationData.AddFeatures(Features.HasUserConfig);
-        DebugWindow.DisplayDebugWindow(RotationName, rotationData.RotationVersion, rotationData);
+        RotationConfigs CompatibilityAndFeatures = new ();
+        CompatibilityAndFeatures.AddUltimateCompatibility(UltimateCompatibility.UCoB);
+
+        CompatibilityAndFeatures.AddContentCompatibility(ContentCompatibility.DutyRoulette);
+
+        CompatibilityAndFeatures.AddFeatures(Features.HasUserConfig);
+
+        CompatibilityAndFeatures.SetRotationOpeners("Opener1", "Opener2");
+        CompatibilityAndFeatures.CurrentRotationSelection = Configs.GetCombo("RotationSelection");
+
+        DebugWindow.DisplayRotationTabs(RotationName,CompatibilityAndFeatures);
     }
 
     #endregion Debug window
@@ -45,6 +51,7 @@ internal class PvE_BRD_KirboPvE : BRD_Base
     #region Rotation Config
 
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
+            .SetCombo(CombatType.PvE, "RotationSelection", 0, "Select which Rotation will be used. (Openers will only be followed at level 90)", "Opener1", "Opener2")
             .SetBool(CombatType.PvE, "BindWAND", false, @"Use Raging Strikes on ""Wanderer's Minuet""")
             .SetCombo(CombatType.PvE, "FirstSong", 0, "First Song", "Wanderer's Minuet", "Mage's Ballad", "Army's Paeon")
             .SetFloat(RotationSolver.Basic.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "WANDTime", 43, "Wanderer's Minuet Uptime", min: 0, max: 45, speed: 1)
@@ -542,6 +549,21 @@ internal class PvE_BRD_KirboPvE : BRD_Base
         bool HasSideWinder = !Sidewinder.IsCoolingDown;
         bool Openerstep0 = OpenerHelpers.OpenerStep == 0;
         OpenerHelpers.OpenerActionsAvailable = HasWM && HasRS && HasEA && HasRF && HasBV && BLcharges == 3 && HasBar && Lvl90 && HasSideWinder && Openerstep0;
+    }
+
+    public RotationConfigs GetRotationConfigs()
+    {
+        var configs = new RotationConfigs();
+        // Populate configs with this rotation's specific data
+        configs.AddUltimateCompatibility(UltimateCompatibility.NotCompatible);
+
+        configs.AddContentCompatibility(ContentCompatibility.DutyRoulette);
+
+        configs.AddFeatures(Features.HasUserConfig);
+
+        configs.SetRotationOpeners("Sample Opener1", "Sample Opener2");
+        configs.CurrentRotationSelection = Configs.GetCombo("RotationSelection");
+        return configs;
     }
 
     #endregion Extra Helper Methods

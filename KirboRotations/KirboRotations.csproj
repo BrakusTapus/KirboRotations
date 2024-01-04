@@ -33,9 +33,8 @@
         <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
     </PropertyGroup>
     <ItemGroup>
-      <Compile Remove="JobHelpers\OpenerHelpers - Copy.cs" />
-      <Compile Remove="JobHelpers\Openers\OpenerHelpers - Copy.cs" />
-      <Compile Remove="ExP\ExP_Test_Kirbo.cs" />
+      <Compile Remove="Helpers\OpenerHelpers - Copy.cs" />
+      <Compile Remove="PvE\Beta\ExP_Test_Kirbo.cs" />
       <Compile Remove="PvP\Healer\AST_KirboPvP.cs" />
       <Compile Remove="PvP\Healer\SCH_KirboPvP.cs" />
       <Compile Remove="PvP\Healer\SGE_KirboPvP.cs" />
@@ -46,7 +45,7 @@
       <Compile Remove="PvP\Tank\GNB_KirboPvP.cs" />
     </ItemGroup>
     <ItemGroup>
-      <None Include="ExP\ExP_Test_Kirbo.cs" />
+      <None Include="PvE\Beta\ExP_Test_Kirbo.cs" />
       <None Include="PvP\Healer\AST_KirboPvP.cs" />
       <None Include="PvP\Healer\SCH_KirboPvP.cs" />
       <None Include="PvP\Healer\SGE_KirboPvP.cs" />
@@ -113,11 +112,6 @@
             <HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
             <Private>False</Private>
         </Reference>
-    </ItemGroup>
-    <ItemGroup>
-      <Using Include="KirboRotations.Custom.JobHelpers.GeneralHelpers">
-        <Static>True</Static>
-      </Using>
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.JobHelpers.Enums;
+﻿namespace KirboRotations.Helpers.JobHelpers.Enums;
 
 internal enum OpenerState
 {

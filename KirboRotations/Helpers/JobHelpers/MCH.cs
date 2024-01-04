@@ -1,16 +1,34 @@
-﻿using KirboRotations.Custom.Data;
-using KirboRotations.JobHelpers;
-using KirboRotations.JobHelpers.Enums;
+﻿using KirboRotations.Helpers;
 using KirboRotations.PvE.Ranged;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Data;
 using RotationSolver.Basic.Helpers;
-using static KirboRotations.JobHelpers.GeneralHelpers;
+using KirboRotations.Data;
+using KirboRotations.Configurations;
+using KirboRotations.Helpers.JobHelpers.Enums;
+using KirboRotations.Extensions;
+using KirboRotations.PvE.Beta;
 
-namespace KirboRotations.JobHelpers.Openers;
+namespace KirboRotations.Helpers.JobHelpers;
 
-internal class MCHOpenerLogic : PvE_MCH_Kirbo
+internal class MCHLogic : MCH_KirboBeta
 {
+    // Check if the major tools will come off cooldown soon
+    internal static bool WillhaveTool { get; set; }
+
+    // Holds the remaining amount of Heat stacks
+    internal static byte HeatStacks
+    {
+        get
+        {
+            byte stacks = Player.StatusStack(true, StatusID.Overheated);
+            return stacks == byte.MaxValue ? (byte)5 : stacks;
+        }
+    }
+
+    // Property to check if we're in a lvl 70 Ultimate
+    internal static bool InLvL70Ultimate { get; set; }
+
     #region Opener
     // Checks if the opener sequence is available to be executed.
     // It verifies if certain abilities are not on cooldown and have enough charges.
@@ -32,7 +50,7 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
     }
 
     // Checks if pre-pull Actions are ready.
-    public static bool PrePullActionsAvailable()
+    private static bool PrePullActionsAvailable()
     {
         if (Reassemble.CurrentCharges < 2) return false;
 
@@ -44,16 +62,16 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
     private static uint OpenerLevel => 90;
 
     // Tracks the current step in the pre-pull phase.
-    public uint PrePullStep = 0;
+    internal uint PrePullStep = 0;
 
     // Tracks the current step in the opener sequence.
-    public uint OpenerStep = 1;
+    internal uint OpenerStep = 1;
 
     // Checks if the player's level is high enough to execute the opener.
-    public static bool LevelChecked => Player.Level >= OpenerLevel;
+    internal static bool LevelChecked => Player.Level >= OpenerLevel;
 
     // Determines if the opener can be executed based on various conditions.
-    private static bool CanOpener => OpenerAvailable() && PrePullActionsAvailable() && LevelChecked;
+    internal static bool CanOpener => OpenerAvailable() && PrePullActionsAvailable() && LevelChecked;
 
     // Current state of the opener (e.g., PrePull, InOpener, etc.).
     private OpenerState currentState = OpenerState.PrePull;
@@ -72,13 +90,10 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
             // This prevents unnecessary state transitions and redundant actions.
             if (value != currentState)
             {
-                // Handle state transitions based on the new value.
-                // Each state represents a different phase or status of the opener sequence.
-
                 // When entering the PrePull state, log the transition for debugging.
                 if (value == OpenerState.PrePull)
                 {
-                    Serilog.Log.Debug($"{v} Entered PrePull Opener");
+                    Serilog.Log.Information($"{RotationConfigs.v} Entered PrePull Opener");
                 }
 
                 // When entering the InOpener state, reset the OpenerStep to 1.
@@ -91,14 +106,14 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
                 {
                     // Log a failure message if the opener failed.
                     if (value == OpenerState.FailedOpener)
-                        Serilog.Log.Information($"{v} Opener Failed");
+                        Serilog.Log.Information($"{RotationConfigs.v} Opener Failed");
 
                     // Reset the opener to its initial state.
                     // This is common for both Finished and Failed states.
                     ResetOpener();
                 }
                 // If the opener finished successfully, log this information.
-                if (value == OpenerState.OpenerFinished) Serilog.Log.Information($"{v} Opener Finished");
+                if (value == OpenerState.OpenerFinished) Serilog.Log.Information($"{RotationConfigs.v} Opener Finished");
 
                 // Update the current state to the new value.
                 currentState = value;
@@ -107,7 +122,7 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
     }
 
     // Executes steps before the actual opener. Returns null if the level check fails or no action is determined.
-    private bool DoPrePullSteps(out IAction act)
+    internal bool DoPrePullSteps(out IAction act)
     {
         act = null;
 
@@ -204,7 +219,7 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
                 if (IsLastAction(ActionID.Reassemble) && OpenerStep == 11) OpenerStep++;
                 else if (OpenerStep == 11) Reassemble.CanUse(out act);
 
-                if (IsLastAction(ActionID.Wildfire) && OpenerStep == 12) OpenerStep++;
+                if (IsLastAction((ActionID)ActionIDs.WildFiree) && OpenerStep == 12) OpenerStep++;
                 else if (OpenerStep == 12) Wildfire.CanUse(out act);
 
                 if (IsLastAction(ActionID.ChainSaw) && OpenerStep == 12) OpenerStep++;
@@ -216,31 +231,31 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
                 if (IsLastAction(ActionID.Hypercharge) && OpenerStep == 14) OpenerStep++;
                 else if (OpenerStep == 14) Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 4 && OpenerStep == 15) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 4 && OpenerStep == 15) OpenerStep++;
                 else if (OpenerStep == 15) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.Ricochet) && OpenerStep == 16) OpenerStep++;
                 else if (OpenerStep == 16) Ricochet.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 3 && OpenerStep == 17) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 3 && OpenerStep == 17) OpenerStep++;
                 else if (OpenerStep == 17) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.GaussRound) && OpenerStep == 18) OpenerStep++;
                 else if (OpenerStep == 18) GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 2 && OpenerStep == 19) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 2 && OpenerStep == 19) OpenerStep++;
                 else if (OpenerStep == 19) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.Ricochet) && OpenerStep == 20) OpenerStep++;
                 else if (OpenerStep == 20) Ricochet.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 1 && OpenerStep == 21) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 1 && OpenerStep == 21) OpenerStep++;
                 else if (OpenerStep == 21) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.GaussRound) && OpenerStep == 22) OpenerStep++;
                 else if (OpenerStep == 22) GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 0 && OpenerStep == 23) CurrentState = OpenerState.OpenerFinished;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 0 && OpenerStep == 23) CurrentState = OpenerState.OpenerFinished;
                 else if (OpenerStep == 23) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.Ricochet) && OpenerStep == 24) OpenerStep++;
@@ -258,11 +273,11 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
                 if (TimeSinceLastAction.TotalSeconds >= 5 && currentState == OpenerState.InOpener)
                     CurrentState = OpenerState.FailedOpener;
 
-                if (((act == Ricochet && Ricochet.CurrentCharges < 3) ||
-                        (act == ChainSaw && ChainSaw.IsCoolingDown) ||
-                        (act == Wildfire && Wildfire.IsCoolingDown) ||
-                        (act == BarrelStabilizer && BarrelStabilizer.IsCoolingDown) ||
-                        (act == GaussRound && GaussRound.CurrentCharges < 3)) && TimeSinceLastAction.TotalSeconds >= 3)
+                if ((act == Ricochet && Ricochet.CurrentCharges < 3 ||
+                        act == ChainSaw && ChainSaw.IsCoolingDown ||
+                        act == Wildfire && Wildfire.IsCoolingDown ||
+                        act == BarrelStabilizer && BarrelStabilizer.IsCoolingDown ||
+                        act == GaussRound && GaussRound.CurrentCharges < 3) && TimeSinceLastAction.TotalSeconds >= 3)
                 {
                     CurrentState = OpenerState.FailedOpener;
                     return false;
@@ -319,31 +334,31 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
                 if (IsLastAction(ActionID.Hypercharge) && OpenerStep == 16) OpenerStep++;
                 else if (OpenerStep == 16) Hypercharge.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 4 && OpenerStep == 17) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 4 && OpenerStep == 17) OpenerStep++;
                 else if (OpenerStep == 17) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.Ricochet) && OpenerStep == 18) OpenerStep++;
                 else if (OpenerStep == 18) Ricochet.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 3 && OpenerStep == 19) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 3 && OpenerStep == 19) OpenerStep++;
                 else if (OpenerStep == 19) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.GaussRound) && OpenerStep == 20) OpenerStep++;
                 else if (OpenerStep == 20) GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 2 && OpenerStep == 21) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 2 && OpenerStep == 21) OpenerStep++;
                 else if (OpenerStep == 21) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.Ricochet) && OpenerStep == 22) OpenerStep++;
                 else if (OpenerStep == 22) Ricochet.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 1 && OpenerStep == 23) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 1 && OpenerStep == 23) OpenerStep++;
                 else if (OpenerStep == 23) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.GaussRound) && OpenerStep == 24) OpenerStep++;
                 else if (OpenerStep == 24) GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
 
-                if (IsLastAction(ActionID.HeatBlast) && MCHHelper.HeatStacks == 0 && OpenerStep == 25) OpenerStep++;
+                if (IsLastAction(ActionID.HeatBlast) && HeatStacks == 0 && OpenerStep == 25) OpenerStep++;
                 else if (OpenerStep == 25) HeatBlast.CanUse(out act, CanUseOption.MustUseEmpty);
 
                 if (IsLastAction(ActionID.Ricochet) && OpenerStep == 26) OpenerStep++;
@@ -356,11 +371,11 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
             if (TimeSinceLastAction.TotalSeconds >= 5 && currentState == OpenerState.InOpener)
                 CurrentState = OpenerState.FailedOpener;
 
-            if (((act == Ricochet && Ricochet.CurrentCharges < 3) ||
-                    (act == ChainSaw && ChainSaw.IsCoolingDown) ||
-                    (act == Wildfire && Wildfire.IsCoolingDown) ||
-                    (act == BarrelStabilizer && BarrelStabilizer.IsCoolingDown) ||
-                    (act == GaussRound && GaussRound.CurrentCharges < 3)) && TimeSinceLastAction.TotalSeconds >= 3)
+            if ((act == Ricochet && Ricochet.CurrentCharges < 3 ||
+                    act == ChainSaw && ChainSaw.IsCoolingDown ||
+                    act == Wildfire && Wildfire.IsCoolingDown ||
+                    act == BarrelStabilizer && BarrelStabilizer.IsCoolingDown ||
+                    act == GaussRound && GaussRound.CurrentCharges < 3) && TimeSinceLastAction.TotalSeconds >= 3)
             {
                 CurrentState = OpenerState.FailedOpener;
                 return false;
@@ -402,6 +417,95 @@ internal class MCHOpenerLogic : PvE_MCH_Kirbo
 
         return false;
     }
+    public static void DisplayCurrentOpenerState()
+    {
+        string stateAsString = OpenerHelpers.CurrentOpenerState.ToString();
+        Serilog.Log.Information($"Current Opener State: {stateAsString}");
+    }
     #endregion
+
+    #region Special Rotation
+    internal bool UCoBRotation(IAction nextGCD, out IAction act)
+    {
+        act = null;
+        if (BattleCharaEx.SaveAction || !HostileTarget.IsTargetable)
+        {
+            return false;
+        }
+
+        if (Wildfire.CanUse(out act, (CanUseOption)16))
+        {
+            if (Heat >= 50 ||
+                IsLastAbility(ActionID.Hypercharge) && MCHLogic.HeatStacks > 4 ||
+                Heat >= 45 && !Drill.WillHaveOneCharge(5) && !HotShot.WillHaveOneCharge(7.5f))
+            {
+                return true;
+            }
+        }
+
+        if (RookAutoturret.CanUse(out act) && HostileTarget.GetHealthRatio() > 0.1 && HostileTarget.IsTargetable)
+        {
+            if (Battery == 100 || RatioOfMembersIn2minsBurst > 0.5 || BurstHelpers.InBurst)
+                return true;
+        }
+
+        if (HostileTarget.GetHealthRatio() > 0.1 && HostileTarget.IsTargetable)
+        {
+            if (Hypercharge.CanUse(out act) && (IsLastAbility(ActionID.Wildfire) || !WillhaveTool && (
+                BurstHelpers.InBurst && IsLastGCD(ActionID.Drill, ActionID.SplitShot, ActionID.SlugShot, ActionID.CleanShot, ActionID.HeatedSplitShot, ActionID.HeatedSlugShot) ||
+                Heat >= 100 && Wildfire.WillHaveOneCharge(10f) ||
+                Heat >= 100 && Wildfire.WillHaveOneCharge(40f) ||
+                Heat >= 50 && !Wildfire.WillHaveOneCharge(40f)
+            )))
+            {
+                return true;
+            }
+        }
+
+
+        if (BarrelStabilizer.CanUse(out act, CanUseOption.MustUseEmpty))
+        {
+            return true;
+        }
+
+        if (Reassemble.CanUse(out act, CanUseOption.MustUseEmpty) && nextGCD == Drill)
+        {
+            return true;
+        }
+
+        if (GaussRound.CanUse(out act, CanUseOption.MustUseEmpty) || Ricochet.CanUse(out act, CanUseOption.MustUseEmpty))
+        {
+            if (!GaussRound.HasOneCharge && !Ricochet.HasOneCharge)
+            {
+                return false;
+            }
+
+            if (!GaussRound.HasOneCharge && !Ricochet.EnoughLevel)
+            {
+                return false;
+            }
+
+            if (!Ricochet.EnoughLevel)
+            {
+                return GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
+            }
+
+            if (GaussRound.CurrentCharges >= Ricochet.CurrentCharges)
+            {
+                return GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
+            }
+
+            if (Ricochet.CurrentCharges >= GaussRound.CurrentCharges)
+            {
+                return Ricochet.HasOneCharge && Ricochet.CanUse(out act, CanUseOption.MustUseEmpty);
+            }
+
+            return GaussRound.CanUse(out act, CanUseOption.MustUseEmpty);
+        }
+
+        return false;
+    }
+    #endregion
+
 
 }

@@ -1,4 +1,4 @@
-﻿namespace KirboRotations.Custom.Data;
+﻿namespace KirboRotations.Data;
 
 internal enum ActionIDs : uint
 {
@@ -13,6 +13,11 @@ internal enum ActionIDs : uint
     ///
     /// </summary>
     AutomatonQueen = 16501,
+
+    /// <summary>
+    ///
+    /// </summary>
+    WildFiree = 16766,
 
     #endregion MCH
 }
