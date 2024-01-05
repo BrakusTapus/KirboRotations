@@ -19,7 +19,7 @@ namespace KirboRotations.PvE.Ranged;
 [RotationDesc(ActionID.Wildfire)]
 [LinkDescription("https://i.imgur.com/23r8kFK.png", "Early AA")]
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
-internal class MCH_Kirbo : MCH_Base
+internal class MCH_KirboPvE : MCH_Base
 {
     #region Rotation Info    
     public override string GameVersion => "6.51";

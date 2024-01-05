@@ -8,7 +8,7 @@ namespace KirboRotations.PvE.Tank;
 
 [SourceCode(Path = "main/KirboRotations/Tank/WAR_Default.cs")]
 [LinkDescription("https://cdn.discordapp.com/attachments/277962807813865472/963548326433796116/unknown.png")]
-internal class PvE_WAR_Default : WAR_Base
+internal class WAR_DefaultPvE : WAR_Base
 {
     public override CombatType Type => CombatType.PvE;
 

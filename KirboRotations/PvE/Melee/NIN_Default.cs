@@ -15,7 +15,7 @@ namespace KirboRotations.PvE.Melee;
 [LinkDescription("https://docs.google.com/spreadsheets/u/0/d/1BZZrqWMRrugCeiBICEgjCz2vRNXt_lRTxPnSQr24Em0/htmlview#",
     "Under the “Planner (With sample section)”")]
 [YoutubeLink(ID = "Al9KlhA3Zvw")]
-internal sealed class PvE_NIN_Default : NIN_Base
+internal sealed class NIN_KirboPvE : NIN_Base
 {
     public override CombatType Type => CombatType.PvE;
 

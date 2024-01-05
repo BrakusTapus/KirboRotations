@@ -11,7 +11,7 @@ namespace KirboRotations.PvP.Magical;
 
 [BetaRotation]
 [RotationDesc(ActionID.Wildfire)]
-internal class PvP_RDM_Kirbo : RDM_Base
+internal class RDM_KirboPvP : RDM_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;

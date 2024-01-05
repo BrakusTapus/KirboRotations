@@ -7,7 +7,7 @@ using RotationSolver.Basic.Rotations.Basic;
 namespace KirboRotations.PvE.Melee;
 
 [SourceCode(Path = "main/KirboRotations/Melee/DRG_Default.cs")]
-internal sealed class PvE_DRG_Default : DRG_Base
+internal sealed class DRG_KirboPvE : DRG_Base
 {
     public override CombatType Type => CombatType.PvE;
 

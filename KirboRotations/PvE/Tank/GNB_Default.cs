@@ -7,7 +7,7 @@ using RotationSolver.Basic.Rotations.Basic;
 namespace KirboRotations.PvE.Tank;
 
 [SourceCode(Path = "main/KirboRotations/Tank/GNB_Default.cs")]
-internal sealed class PvE_GNB_Default : GNB_Base
+internal sealed class GNB_DefaultPvE : GNB_Base
 {
     public override CombatType Type => CombatType.PvE;
 

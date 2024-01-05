@@ -10,7 +10,7 @@ namespace KirboRotations.PvE.Healer;
 
 [RotationDesc(ActionID.Divination)]
 [SourceCode(Path = "main/KirboRotations/Healer/AST_Default.cs")]
-internal sealed class PvE_AST_Default : AST_Base
+internal sealed class AST_KirboPvE : AST_Base
 {
     public override CombatType Type => CombatType.PvE;
 

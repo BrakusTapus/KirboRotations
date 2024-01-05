@@ -10,7 +10,7 @@ namespace KirboRotations.PvE.Healer;
 
 //[RotationDesc(ActionID.Pneuma)]
 [SourceCode(Path = "main/KirboRotations/Healer/SGE_Default.cs")]
-internal sealed class PvE_SGE_Kirbo : SGE_Base
+internal sealed class SGE_KirboPvE : SGE_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;

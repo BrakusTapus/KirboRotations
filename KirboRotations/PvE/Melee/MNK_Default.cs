@@ -11,7 +11,7 @@ namespace KirboRotations.PvE.Melee;
 [RotationDesc(ActionID.RiddleOfFire)]
 [SourceCode(Path = "main/KirboRotations/Melee/MNK_Default.cs")]
 [LinkDescription("https://i.imgur.com/C5lQhpe.png")]
-internal sealed class PvE_MNK_Default : MNK_Base
+internal sealed class MNK_KirboPvE : MNK_Base
 {
     public override CombatType Type => CombatType.PvE;
 

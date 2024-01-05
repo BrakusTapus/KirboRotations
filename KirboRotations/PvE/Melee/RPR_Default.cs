@@ -11,7 +11,7 @@ namespace KirboRotations.PvE.Melee;
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/rpr/double_communio.png")]
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/rpr/rpr_6.3_early_enshroud.png")]
 [SourceCode(Path = "main/KirboRotations/Melee/RPR_Default.cs")]
-internal sealed class PvE_RPR_Default : RPR_Base
+internal sealed class RPR_KirboPvE : RPR_Base
 {
     public override CombatType Type => CombatType.PvE;
 

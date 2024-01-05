@@ -12,7 +12,7 @@ namespace KirboRotations.PvP.Melee;
 
 [BetaRotation]
 [RotationDesc(ActionID.DragonSight)]
-internal class PVP_DRG_Kirbo : DRG_Base
+internal class DRG_KirboPvP : DRG_Base
 {
     #region Rotation Info
     public override string GameVersion => "6.51";

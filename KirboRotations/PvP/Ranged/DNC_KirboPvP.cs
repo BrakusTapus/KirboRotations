@@ -11,7 +11,7 @@ namespace KirboRotations.PvP.Ranged;
 
 [BetaRotation]
 [RotationDesc(ActionID.Wildfire)]
-internal class PvP_DNC_Kirbo : DNC_Base
+internal class DNC_KirboPvP : DNC_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;

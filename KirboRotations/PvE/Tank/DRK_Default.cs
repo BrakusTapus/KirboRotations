@@ -10,7 +10,7 @@ namespace KirboRotations.PvE.Tank;
 [RotationDesc(ActionID.BloodWeapon, ActionID.Delirium)]
 [SourceCode(Path = "main/KirboRotations/Tank/DRK_Balance.cs")]
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/drk/drk_standard_6.2_v1.png")]
-internal sealed class PvE_DRK_Default : DRK_Base
+internal sealed class DRK_DefaultPvE : DRK_Base
 {
     public override CombatType Type => CombatType.PvE;
 

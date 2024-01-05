@@ -9,7 +9,7 @@ namespace KirboRotations.PvE.Healer;
 
 [RotationDesc(ActionID.ChainStratagem)]
 [SourceCode(Path = "main/KirboRotations/Healer/SCH_Default.cs")]
-internal sealed class PvE_SCH_Default : SCH_Base
+internal sealed class SCH_KirboPvE : SCH_Base
 {
     public override CombatType Type => CombatType.PvE;
 

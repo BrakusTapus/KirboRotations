@@ -10,7 +10,7 @@ namespace KirboRotations.PvE.Magical;
 [RotationDesc(ActionID.Embolden)]
 [SourceCode(Path = "main/KirboRotations/Magical/RDM_Default.cs")]
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/rdm/rdm_ew_opener.png")]
-internal sealed class PvE_RDM_Default : RDM_Base
+internal sealed class RDM_KirboPvE : RDM_Base
 {
     public override CombatType Type => CombatType.PvE;
 

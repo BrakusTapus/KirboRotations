@@ -13,7 +13,7 @@ namespace KirboRotations.PvP.Tank;
 
 [BetaRotation]
 [RotationDesc(ActionID.PvP_Phalanx)]
-internal class PvP_PLD_Kirbo : PLD_Base
+internal class PLD_KirboPvP : PLD_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;

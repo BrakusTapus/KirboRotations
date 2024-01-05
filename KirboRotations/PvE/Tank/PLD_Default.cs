@@ -12,13 +12,8 @@ namespace KirboRotations.PvE.Tank;
 [RotationDesc("The whole rotation's burst\nis base on:")]
 [RotationDesc(ActionID.FightOrFlight)]
 [SourceCode(Path = "main/KirboRotations/Tank/PLD_Default.cs")]
-internal class PvE_PLD_Default : PLD_Base
+internal class PLD_DefaultPvE : PLD_Base
 {
-    /*
-     * TO-DO
-     * PLD never triggers rescue a cat
-     */
-
     public override CombatType Type => CombatType.PvE;
 
     public override string GameVersion => "6.51";

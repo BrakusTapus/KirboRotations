@@ -7,7 +7,7 @@ using RotationSolver.Basic.Rotations.Basic;
 namespace KirboRotations.PvE.Magical;
 
 [SourceCode(Path = "main/KirboRotations/Magical/BLU_Extra.cs")]
-internal sealed class PvE_BLU_Extra : BLU_Base
+internal sealed class BLU_KirboPvEextra : BLU_Base
 {
     public override CombatType Type => CombatType.PvE;
 

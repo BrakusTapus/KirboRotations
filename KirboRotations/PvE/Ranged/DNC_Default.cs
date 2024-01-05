@@ -7,7 +7,7 @@ using RotationSolver.Basic.Rotations.Basic;
 namespace KirboRotations.PvE.Ranged;
 
 [SourceCode(Path = "main/KirboRotations/Ranged/DNC_Default.cs")]
-internal sealed class PvE_DNC_Default : DNC_Base
+internal sealed class DNC_KirboPvE : DNC_Base
 {
     /*
      * PvE: Starts dancing once auto is turned on, needs a check if hostile are present

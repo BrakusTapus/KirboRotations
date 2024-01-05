@@ -11,7 +11,7 @@ namespace KirboRotations.PvP.Melee;
 
 [BetaRotation]
 [RotationDesc(ActionID.Wildfire)]
-internal class PvP_SAM_Kirbo : SAM_Base
+internal class SAM_KirboPvP : SAM_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;

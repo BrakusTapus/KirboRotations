@@ -10,7 +10,7 @@ namespace KirboRotations.PvP.Tank;
 
 [BetaRotation]
 [RotationDesc(ActionID.Wildfire)]
-internal class PvP_GNB_Kirbo : GNB_Base
+internal class GNB_KirboPvP : GNB_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;

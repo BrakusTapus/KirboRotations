@@ -17,7 +17,7 @@ namespace KirboRotations.PvE.Beta;
 [LinkDescription("https://i.imgur.com/23r8kFK.png", "Early AA")]
 [LinkDescription("https://i.imgur.com/vekKW2k.jpg", "Delayed Tools")]
 [BetaRotation]
-internal class MCH_KirboBeta : MCH_Base
+internal class MCH_KirboPvEBeta : MCH_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvE;

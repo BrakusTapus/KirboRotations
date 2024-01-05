@@ -14,7 +14,7 @@ namespace KirboRotations.PvP.Ranged;
 
 [BetaRotation]
 [RotationDesc(ActionID.Wildfire)]
-internal class PvP_MCH_Kirbo : MCH_Base
+internal class MCH_KirboPvP : MCH_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;
@@ -212,7 +212,7 @@ internal class PvP_MCH_Kirbo : MCH_Base
     public override bool ShowStatus => true;
 
     public override void DisplayStatus()
-    {        
+    {
         ImGuiExtra.CenteredText("WIP, sorry");
         ImGuiExtra.CenteredText($"Your character combat: {Player.IsInCombat()}");
     }
@@ -220,11 +220,29 @@ internal class PvP_MCH_Kirbo : MCH_Base
     #endregion Debug window
 
     #region Action Properties
-    private bool BurstActionsAvailable { get; set; }
+    private bool Frontlines { get; set; }
+
     private bool InBurst { get; set; }
     private bool BurstInProgress { get; set; }
     private bool BurstIsFinished { get; set; }
-
+    private bool BurstActionsAvailable { get; set; }
+    private bool FrontLine
+    {
+        get
+        {
+            // Check if isinPvP returns true and there are at least 8 party members.
+            return BattleCharaEx.InPvP() && PartyMembers.Count() >= 8;
+        }
+    }
+    private bool CrystalineConflict
+{
+        get
+        {
+            // Assuming you want to check if there are at least a certain number of party members (e.g., 4).
+            int minimumPartyMembersCount = 4; // Adjust this number as needed.
+            return PartyMembers.Count() >= minimumPartyMembersCount;
+        }
+    }
     private static byte PvP_HeatStacks
     {
         get

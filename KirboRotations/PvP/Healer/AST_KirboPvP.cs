@@ -11,7 +11,7 @@ namespace KirboRotations.PvP.Healer;
 
 [BetaRotation]
 [RotationDesc(ActionID.Wildfire)]
-internal class PvP_AST_Kirbo : AST_Base
+internal class AST_KirboPvP : AST_Base
 {
     #region Rotation Info
     public override CombatType Type => CombatType.PvP;

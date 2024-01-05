@@ -15,7 +15,7 @@ using RotationSolver.Basic.Rotations;
 
 namespace KirboRotations.UI;
 
-internal class DebugWindow : MCH_KirboBeta
+internal class DebugWindow : MCH_KirboPvEBeta
 {
 
     #region Debug Window for PvE Rotations

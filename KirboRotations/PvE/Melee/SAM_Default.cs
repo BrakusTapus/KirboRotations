@@ -8,7 +8,7 @@ using RotationSolver.Basic.Rotations.Basic;
 namespace KirboRotations.PvE.Melee;
 
 [SourceCode(Path = "main/KirboRotations/Melee/SAM_Default.cs")]
-internal sealed class PvE_SAM_Default : SAM_Base
+internal sealed class SAM_KirboPvE : SAM_Base
 {
     public override CombatType Type => CombatType.PvE;
 

@@ -8,7 +8,7 @@ using RotationSolver.Basic.Rotations.Basic;
 namespace KirboRotations.PvE.Healer;
 
 [SourceCode(Path = "main/KirboRotations/Healer/WHM_Default.cs")]
-internal sealed class PvE_WHM_Default : WHM_Base
+internal sealed class WHM_KirboPvE : WHM_Base
 {
     public override CombatType Type => CombatType.PvE;
 

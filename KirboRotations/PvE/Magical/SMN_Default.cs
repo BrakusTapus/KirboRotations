@@ -11,7 +11,7 @@ namespace KirboRotations.PvE.Magical;
 [RotationDesc(ActionID.SearingLight)]
 [SourceCode(Path = "main/KirboRotations/Magical/SMN_Default.cs")]
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/smn/6.png")]
-internal sealed class PvE_SMN_Default : SMN_Base
+internal sealed class SMN_KirboPvE : SMN_Base
 {
     public override CombatType Type => CombatType.PvE;
 
