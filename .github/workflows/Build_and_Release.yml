@@ -4,13 +4,15 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - closed
   workflow_dispatch:
 
 jobs:
   # Extracts version number
   Check_Version:
-    needs: Check_Commit
-    if: github.event_name == 'workflow_dispatch' || (needs.Check_Commit.outputs.commit_contains_new == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: windows-latest
     outputs:
       current_version: ${{ steps.extract_versions.outputs.current_version }}
