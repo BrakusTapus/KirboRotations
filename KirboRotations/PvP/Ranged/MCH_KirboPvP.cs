@@ -8,6 +8,7 @@ using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
 using RotationSolver.Basic.Data;
 using RotationSolver.Basic.Helpers;
+using RotationSolver.Basic.Rotations;
 using RotationSolver.Basic.Rotations.Basic;
 
 namespace KirboRotations.PvP.Ranged;
@@ -17,11 +18,9 @@ namespace KirboRotations.PvP.Ranged;
 internal class MCH_KirboPvP : MCH_Base
 {
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvP;
-
     #endregion Rotation Info
 
     #region IBaseActions
@@ -211,8 +210,13 @@ internal class MCH_KirboPvP : MCH_Base
             return bestTarget;
         }
     };
-    #endregion IBaseActions
 
+    private static IBaseAction PvP_StandardIssueElixir { get; } = new BaseAction(ActionID.PvP_StandardIssueElixir)
+    {
+        ActionCheck = (BattleChara t, bool m) => !HasHostilesInMaxRange && (t.CurrentMp <= t.MaxMp / 2 || t.CurrentHp <= t.MaxHp / 3) && !IsLastAction(ActionID.PvP_StandardIssueElixir) && !IsMoving,
+    };
+    #endregion IBaseActions
+    
     #region Debug window
     public override bool ShowStatus => true;
     public override void DisplayStatus()
@@ -235,14 +239,7 @@ internal class MCH_KirboPvP : MCH_Base
     #endregion Debug window
 
     #region Action Properties
-
-    private bool Frontlines { get; set; }
-
-    private bool InBurst { get; set; }
-    private bool BurstInProgress { get; set; }
-    private bool BurstIsFinished { get; set; }
-    private bool BurstActionsAvailable { get; set; }
-
+    private readonly double PlayerHealthPercentage = Player.GetHealthRatio() * 100;
     private static byte PvP_HeatStacks
     {
         get
@@ -251,13 +248,10 @@ internal class MCH_KirboPvP : MCH_Base
             return pvp_heatstacks == byte.MaxValue ? (byte)5 : pvp_heatstacks;
         }
     }
-
     private static bool IsPvPOverheated => Player.HasStatus(true, StatusID.PvP_Overheated);
-
     #endregion Action Properties
 
     #region Rotation Config
-
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
         .SetInt(CombatType.PvP, "Recuperate", 37500, "HP Threshold for Recuperate", 0, 52500)
         .SetInt(CombatType.PvP, "Guard", 27500, "HP Threshold for Guard", 0, 52500)
@@ -271,15 +265,12 @@ internal class MCH_KirboPvP : MCH_Base
         .SetBool(CombatType.PvP, "DrillOnGuard", true, "Try to use a Analysis buffed Drill on a Target with Guard\n(Thank you Const Mar for the suggestion!)")
         .SetBool(CombatType.PvP, "LowHPNoBlastCharge", true, "Prevents the use of Blast Charge if player is moving with low HP\n(HP Threshold set in next option)")
         .SetInt(CombatType.PvP, "LowHPThreshold", 20000, "HP Threshold for the 'LowHPNoBlastCharge' option", 0, 52500);
-
     #endregion Rotation Config
 
     #region GCD Logic
-
     protected override bool GeneralGCD(out IAction act)
     {
         act = null;
-
         // Status checks
         bool targetIsNotPlayer = Target != Player;
         bool playerHasGuard = Player.HasStatus(true, StatusID.PvP_Guard);

@@ -1,5 +1,7 @@
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using ImGuiNET;
 using KirboRotations.Configurations;
+using KirboRotations.UI;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -14,14 +16,12 @@ namespace KirboRotations.PvP.Tank;
 public class DRK_KirboPvP : DRK_Base
 {
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvP;
-
     #endregion Rotation Info
 
-    #region PvPDeclaration
+    #region PvP IBaseActions
 
     /// <summary>
     ///
@@ -87,7 +87,26 @@ public class DRK_KirboPvP : DRK_Base
 
     #endregion PvPDeclaration
 
+    #region Debug window
     public override bool ShowStatus => true;
+    public override void DisplayStatus()
+    {
+        RotationConfigs CompatibilityAndFeatures = new();
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.Frontlines);
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.CrystalineConflict);
+        CompatibilityAndFeatures.AddFeaturesForPvP(PvPFeatures.HasUserConfig);
+        try
+        {
+            PvPDebugWindow.DisplayPvPTab();
+            ImGui.SameLine();
+            PvPDebugWindow.DisplayPvPRotationTabs(RotationName, CompatibilityAndFeatures);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning($"{ex}");
+        }
+    }
+    #endregion Debug window
 
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
         .SetBool(CombatType.PvP, "LBInPvP", true, "Use the LB in PvP when Target is killable by it")

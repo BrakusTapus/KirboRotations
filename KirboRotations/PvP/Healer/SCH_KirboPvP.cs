@@ -14,11 +14,9 @@ namespace KirboRotations.PvP.Healer;
 internal class SCH_KirboPvP : SCH_Base
 {
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvP;
-
     #endregion Rotation Info
 
     #region PvP
@@ -105,14 +103,24 @@ internal class SCH_KirboPvP : SCH_Base
     #endregion PvP
 
     #region Debug window
-
     public override bool ShowStatus => true;
-
     public override void DisplayStatus()
     {
-        // WIP
+        RotationConfigs CompatibilityAndFeatures = new();
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.Frontlines);
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.CrystalineConflict);
+        CompatibilityAndFeatures.AddFeaturesForPvP(PvPFeatures.HasUserConfig);
+        try
+        {
+            PvPDebugWindow.DisplayPvPTab();
+            ImGui.SameLine();
+            PvPDebugWindow.DisplayPvPRotationTabs(RotationName, CompatibilityAndFeatures);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning($"{ex}");
+        }
     }
-
     #endregion Debug window
 
     #region Action Properties

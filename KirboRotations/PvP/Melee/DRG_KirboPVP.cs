@@ -25,40 +25,40 @@ internal class DRG_KirboPvP : DRG_Base
     #endregion Rotation Info
 
     #region IBaseActions
-/*
-    internal ActionID[] ComboIdsNot { private get; init; }
+    /*
+        internal ActionID[] ComboIdsNot { private get; init; }
 
-    internal ActionID[] ComboIds { private get; init; }
-    private bool CheckForCombo()
-    {
-        if (ComboIdsNot != null && ComboIdsNot.Contains(DataCenter.LastComboAction))
+        internal ActionID[] ComboIds { private get; init; }
+        private bool CheckForCombo()
         {
-            return false;
-        }
-
-        LazyRow<Lumina.Excel.GeneratedSheets.Action> actionCombo = _action.ActionCombo;
-        ActionID[] array = ((actionCombo != null && actionCombo.Row == 0) ? Array.Empty<ActionID>() : new ActionID[1] { (ActionID)_action.ActionCombo.Row });
-        if (ComboIds != null)
-        {
-            array = array.Union(ComboIds).ToArray();
-        }
-
-        if (array.Length != 0)
-        {
-            if (!array.Contains(DataCenter.LastComboAction))
+            if (ComboIdsNot != null && ComboIdsNot.Contains(DataCenter.LastComboAction))
             {
                 return false;
             }
 
-            if (DataCenter.ComboTime < DataCenter.WeaponRemain)
+            LazyRow<Lumina.Excel.GeneratedSheets.Action> actionCombo = _action.ActionCombo;
+            ActionID[] array = ((actionCombo != null && actionCombo.Row == 0) ? Array.Empty<ActionID>() : new ActionID[1] { (ActionID)_action.ActionCombo.Row });
+            if (ComboIds != null)
             {
-                return false;
+                array = array.Union(ComboIds).ToArray();
             }
-        }
 
-        return true;
-    }
-*/
+            if (array.Length != 0)
+            {
+                if (!array.Contains(DataCenter.LastComboAction))
+                {
+                    return false;
+                }
+
+                if (DataCenter.ComboTime < DataCenter.WeaponRemain)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    */
 
 
     /// <summary>
@@ -153,7 +153,7 @@ internal class DRG_KirboPvP : DRG_Base
     };
     #endregion PvP
 
-    #region PvP Debug window
+    #region Debug window
     public override bool ShowStatus => true;
     public override void DisplayStatus()
     {

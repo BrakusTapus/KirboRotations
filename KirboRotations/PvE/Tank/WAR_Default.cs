@@ -1,3 +1,4 @@
+using KirboRotations.Configurations;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Data;
@@ -10,11 +11,11 @@ namespace KirboRotations.PvE.Tank;
 [LinkDescription("https://cdn.discordapp.com/attachments/277962807813865472/963548326433796116/unknown.png")]
 internal class WAR_DefaultPvE : WAR_Base
 {
-    public override CombatType Type => CombatType.PvE;
-
+    #region Rotation Info
     public override string GameVersion => "6.51";
-
-    public override string RotationName => "Kirbo's Default";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override CombatType Type => CombatType.PvE;
+    #endregion Rotation Info
 
     private static bool IsBurstStatus => !Player.WillStatusEndGCD(0, 0, false, StatusID.InnerStrength);
 

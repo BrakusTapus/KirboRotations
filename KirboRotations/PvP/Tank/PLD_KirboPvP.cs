@@ -18,14 +18,12 @@ namespace KirboRotations.PvP.Tank;
 internal class PLD_KirboPvP : PLD_Base
 {
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvP;
-
     #endregion Rotation Info
 
-    #region New PvP IBaseActions
+    #region PvP IBaseActions
 
     /// <summary>
     /// Delivers an attack with a potency of 3,000.
@@ -169,7 +167,7 @@ internal class PLD_KirboPvP : PLD_Base
         ActionCheck = (t, m) => LimitBreakLevel >= 1 && Player.IsInCombat()
     };
 
-    #endregion New PvP IBaseActions
+    #endregion PvP IBaseActions
 
     #region Debug window
     public override bool ShowStatus => true;
@@ -209,7 +207,6 @@ internal class PLD_KirboPvP : PLD_Base
     #endregion Action Related Properties
 
     #region Rotation Config
-
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
         .SetInt(CombatType.PvP, "Recuperate", 45000, "HP Threshold for Recuperate", 1, 60000)
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
@@ -219,11 +216,9 @@ internal class PLD_KirboPvP : PLD_Base
         .SetBool(CombatType.PvP, "LowHPNoAttacks", true, "Prevents the use of actions if player is moving with low HP\n(HP Threshold set in next option)")
         .SetInt(CombatType.PvP, "LowHPThreshold", 20000, "HP Threshold for the 'LowHPNoAttacks' option", 1, 60000)
         .SetBool(CombatType.PvP, "UseDash", true, "Let rotation use Intervene");
-
     #endregion Rotation Config
 
     #region GCD Logic
-
     protected override bool GeneralGCD(out IAction act)
     {
         act = null;
