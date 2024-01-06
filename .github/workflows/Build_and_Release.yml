@@ -4,10 +4,15 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  # Checks if commit contains word NEW or if manual dispatch
+  # Checks if commit contains the word NEW or if manually dispatched
   Check_Commit:
     runs-on: windows-latest
     steps:
@@ -15,7 +20,7 @@ jobs:
         run: |
           $eventName = '${{ github.event_name }}'
           if ($eventName -eq 'workflow_dispatch') {
-            echo "Manual dispatch detected. Setting RUN_WORKFLOW to true."
+            echo "Manual dispatch detected. Setting commit_contains_new to true."
             echo "commit_contains_new=true" >> $GITHUB_ENV
           } else {
             $commitMessage = (Get-Content $env:GITHUB_EVENT_PATH | ConvertFrom-Json).head_commit.message
@@ -27,88 +32,76 @@ jobs:
               echo "commit_contains_new=false" >> $GITHUB_ENV
             }
           }
-        shell: pwsh
 
-  # Extracts version number
+  # Extracts the version number
   Check_Version:
     needs: Check_Commit
     if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.outputs.commit_contains_new == 'true' }}
     runs-on: windows-latest
-    outputs:
-      current_version: ${{ steps.extract_versions.outputs.current_version }}
     steps:
-      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
-        
-      # Remove this after workflow is working
+
+      # Remove this after the workflow is working
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
-        shell: pwsh
 
-      # extract the version number from '.csproj'
+      # Extract the version number from '.csproj'
       - name: Extract version numbers
-        id: extract_versions  # Add an id to this step to reference its outputs
+        id: extract_versions
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
         run: |
           $csprojPath = "./KirboRotations.csproj"
           $csprojXml = [xml](Get-Content $csprojPath)
           $version = $csprojXml.Project.PropertyGroup.Version
           echo "Project Version: $version"
-          echo "::set-output name=current_version::$version"
-  # build and release if the version number has been updated
+          echo "current_version=$version" >> $GITHUB_ENV
+
+  # Build and release if the version number has been updated
   build:
     needs: Check_Version
     runs-on: windows-latest
-    outputs:
-     current_version: ${{ steps.extract_versions.outputs.project_version }}
-    steps: 
-      # Checkout repository
+    steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      # Remove this after workflow is working
+      # Remove this after the workflow is working
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
-        shell: pwsh
 
-      # extract the version number from '.csproj'
+      # Extract the version number from '.csproj'
       - name: Extract version numbers
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
         run: |
           $KirboRotationsPath = "./KirboRotations.csproj"
-        
           $KirboRotationsXml = [xml](Get-Content $KirboRotationsPath)
-        
           $KirboRotationsVersion = $KirboRotationsXml.Project.PropertyGroup.Version
-        
           echo "Project 1 Version: $KirboRotationsVersion"
 
-      # dunno if needed  
+      # Check Version Against Latest Release
       - name: Check Version Against Latest Release
         id: check_version
         run: |
-          $latestReleaseTag = $(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
-          $versionKirboRotations = "${{ steps.get_version.outputs.version_KirboRotations }}"
-          if ($latestReleaseTag -eq $versionKirboRotations) {
-            echo "::set-output name=cancel::true"
-          } else {
-            echo "::set-output name=cancel::false"
-          }
-        shell: pwsh
+            $latestReleaseTag = $(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+            $versionKirboRotations = "${{ steps.get_version.outputs.version_KirboRotations }}"
+            if ($latestReleaseTag -eq $versionKirboRotations) {
+              echo "cancel=true" >> $GITHUB_ENV
+            } else {
+              echo "cancel=false" >> $GITHUB_ENV
+            }
 
-      # Sets up .NET
+      # Set up .NET
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
-          
+
       # Restore Dependencies
       - name: Restore Dependencies
         run: dotnet restore
@@ -119,18 +112,17 @@ jobs:
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
-      # Builds rotations     
+      # Build rotations
       - name: Build Rotations
         run: |
           invoke-expression 'dotnet build --no-restore --configuration Release KirboRotations'
 
-      # list directory contents
+      # List directory contents
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
-        shell: pwsh
 
-      # create release
+      # Create GitHub Release
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
@@ -142,14 +134,13 @@ jobs:
           draft: false
           prerelease: false
 
-      # list directory contents
+      # List directory contents
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
-        shell: pwsh
-      
-      # Upload Assets
-      - name: Upload KirboRotations Assets
+
+      # Upload KirboRotations Assets (DLL)
+      - name: Upload KirboRotations DLL
         id: upload_kirbo_rotationsdll
         uses: actions/upload-release-asset@v1
         env:
@@ -160,9 +151,9 @@ jobs:
           asset_name: KirboRotations.dll
           asset_content_type: application/octet-stream
 
-      # Upload Assets
-      - name: Upload KirboRotations Assets
-        id: upload_kirbo_rotationspdb  
+      # Upload KirboRotations Assets (PDB)
+      - name: Upload KirboRotations PDB
+        id: upload_kirbo_rotationspdb
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -172,11 +163,10 @@ jobs:
           asset_name: KirboRotations.pdb
           asset_content_type: application/octet-stream
 
-      # clean up on failure
+      # Cleanup on failure
       - name: Cleanup on failure
         if: failure()
         run: |
           gh release delete v${{ needs.Check_Version.outputs.current_version }} --yes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: bash

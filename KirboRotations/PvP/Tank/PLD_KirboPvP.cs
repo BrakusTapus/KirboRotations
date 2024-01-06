@@ -207,7 +207,6 @@ internal class PLD_KirboPvP : PLD_Base
     #endregion Action Related Properties
 
     #region Rotation Config
-
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
         .SetInt(CombatType.PvP, "Recuperate", 45000, "HP Threshold for Recuperate", 1, 60000)
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
@@ -217,11 +216,9 @@ internal class PLD_KirboPvP : PLD_Base
         .SetBool(CombatType.PvP, "LowHPNoAttacks", true, "Prevents the use of actions if player is moving with low HP\n(HP Threshold set in next option)")
         .SetInt(CombatType.PvP, "LowHPThreshold", 20000, "HP Threshold for the 'LowHPNoAttacks' option", 1, 60000)
         .SetBool(CombatType.PvP, "UseDash", true, "Let rotation use Intervene");
-
     #endregion Rotation Config
 
     #region GCD Logic
-
     protected override bool GeneralGCD(out IAction act)
     {
         act = null;
