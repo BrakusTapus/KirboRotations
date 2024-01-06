@@ -4,7 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-
   pull_request:
     branches: [main]
 
@@ -47,7 +46,7 @@ jobs:
         run: |
           Get-ChildItem -Recurse
 
-        # Extract the version number from '.csproj'
+      # Extract the version number from '.csproj'
       - name: Extract version numbers
         id: extract_versions
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
@@ -56,7 +55,8 @@ jobs:
           $csprojXml = [xml](Get-Content $csprojPath)
           $version = $csprojXml.Project.PropertyGroup.Version
           echo "Project Version: $version"
-          echo "::set-env name=PROJECT_VERSION::$version" # Set the environment variable
+          echo "PROJECT_VERSION=$version" >> $GITHUB_ENV
+          echo "PROJECT_VERSION_FILE=$version" >> $GITHUB_ENV
 
   # Build and release if the version number has been updated
   build:
@@ -81,18 +81,20 @@ jobs:
           $KirboRotationsXml = [xml](Get-Content $KirboRotationsPath)
           $KirboRotationsVersion = $KirboRotationsXml.Project.PropertyGroup.Version
           echo "Project 1 Version: $KirboRotationsVersion"
+          echo "PROJECT_VERSION_FILE=$PROJECT_VERSION_FILE" >> $GITHUB_ENV # Set the environment variable
+          echo "PROJECT_VERSION_FILE: $PROJECT_VERSION_FILE" # Output the PROJECT_VERSION_FILE value
 
       # Check Version Against Latest Release
       - name: Check Version Against Latest Release
         id: check_version
         run: |
-            $latestReleaseTag = $(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
-            $versionKirboRotations = "${{ steps.get_version.outputs.version_KirboRotations }}"
-            if ($latestReleaseTag -eq $versionKirboRotations) {
-              echo "cancel=true" >> $GITHUB_ENV
-            } else {
-              echo "cancel=false" >> $GITHUB_ENV
-            }
+          $latestReleaseTag = $(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+          $versionKirboRotations = "$PROJECT_VERSION_FILE" # Access the PROJECT_VERSION_FILE environment variable
+          if ($latestReleaseTag -eq $versionKirboRotations) {
+            echo "cancel=true" >> $GITHUB_ENV
+          } else {
+            echo "cancel=false" >> $GITHUB_ENV
+          }
 
       # Set up .NET
       - name: Set up .NET
@@ -126,7 +128,6 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PROJECT_VERSION: ${{ env.PROJECT_VERSION }} # Use the environment variable here
         with:
           tag_name: v${{ env.PROJECT_VERSION }} # Use the environment variable here
           release_name: Release v${{ env.PROJECT_VERSION }} # Use the environment variable here
