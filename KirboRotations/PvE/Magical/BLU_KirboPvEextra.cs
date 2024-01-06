@@ -11,11 +11,9 @@ namespace KirboRotations.PvE.Magical;
 internal sealed class BLU_KirboPvEextra : BLU_Base
 {
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvE;
-
     #endregion Rotation Info
 
     protected override bool AttackAbility(out IAction act)

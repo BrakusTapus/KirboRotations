@@ -14,11 +14,9 @@ namespace KirboRotations.PvE.Magical;
 internal sealed class RDM_KirboPvE : RDM_Base
 {
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvE;
-
     #endregion Rotation Info
 
     private static IBaseAction VerthunderStartUp { get; } = new BaseAction(ActionID.Verthunder);

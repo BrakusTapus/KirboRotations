@@ -18,14 +18,12 @@ namespace KirboRotations.PvP.Tank;
 internal class PLD_KirboPvP : PLD_Base
 {
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvP;
-
     #endregion Rotation Info
 
-    #region New PvP IBaseActions
+    #region PvP IBaseActions
 
     /// <summary>
     /// Delivers an attack with a potency of 3,000.
@@ -169,7 +167,7 @@ internal class PLD_KirboPvP : PLD_Base
         ActionCheck = (t, m) => LimitBreakLevel >= 1 && Player.IsInCombat()
     };
 
-    #endregion New PvP IBaseActions
+    #endregion PvP IBaseActions
 
     #region Debug window
     public override bool ShowStatus => true;

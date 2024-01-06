@@ -1,3 +1,4 @@
+using KirboRotations.Configurations;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -12,13 +13,11 @@ namespace KirboRotations.PvE.Tank;
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/drk/drk_standard_6.2_v1.png")]
 internal sealed class DRK_DefaultPvE : DRK_Base
 {
-    public override CombatType Type => CombatType.PvE;
-
+    #region Rotation Info
     public override string GameVersion => "6.51";
-
-    public override string RotationName => "Kirbo's Default";
-
-    public override string Description => "Please contact Nore#7219 on Discord for questions about this rotation.";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override CombatType Type => CombatType.PvE;
+    #endregion Rotation Info
 
     public override bool CanHealSingleAbility => false;
 

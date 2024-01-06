@@ -1,4 +1,5 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using KirboRotations.Configurations;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -14,13 +15,11 @@ namespace KirboRotations.PvE.Tank;
 [SourceCode(Path = "main/KirboRotations/Tank/PLD_Default.cs")]
 internal class PLD_DefaultPvE : PLD_Base
 {
-    public override CombatType Type => CombatType.PvE;
-
+    #region Rotation Info
     public override string GameVersion => "6.51";
-
-    public override string RotationName => "Kirbo's Default";
-
-    public override string Description => "Revived default version";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override CombatType Type => CombatType.PvE;
+    #endregion Rotation Info
 
     /// <summary>
     ///

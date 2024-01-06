@@ -15,11 +15,9 @@ internal sealed class DNC_KirboPvE : DNC_Base
      */
 
     #region Rotation Info
-
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvE;
-
     #endregion Rotation Info
 
     protected override IAction CountDownAction(float remainTime)

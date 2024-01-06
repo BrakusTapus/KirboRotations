@@ -1,3 +1,4 @@
+using KirboRotations.Configurations;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Data;
@@ -9,11 +10,11 @@ namespace KirboRotations.PvE.Tank;
 [SourceCode(Path = "main/KirboRotations/Tank/GNB_Default.cs")]
 internal sealed class GNB_DefaultPvE : GNB_Base
 {
-    public override CombatType Type => CombatType.PvE;
-
+    #region Rotation Info
     public override string GameVersion => "6.51";
-
-    public override string RotationName => "Kirbo's Default";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override CombatType Type => CombatType.PvE;
+    #endregion Rotation Info
 
     public override bool CanHealSingleSpell => false;
 
