@@ -211,7 +211,7 @@ internal class MCH_KirboPvP : MCH_Base
         }
     };
 
-    private static IBaseAction PvP_StandardIssueElixir { get; } = new BaseAction(ActionID.PvP_StandardIssueElixir)
+    private static new IBaseAction PvP_StandardIssueElixir { get; } = new BaseAction(ActionID.PvP_StandardIssueElixir)
     {
         ActionCheck = (BattleChara t, bool m) => !HasHostilesInMaxRange && (t.CurrentMp <= t.MaxMp / 2 || t.CurrentHp <= t.MaxHp / 3) && !IsLastAction(ActionID.PvP_StandardIssueElixir) && !IsMoving,
     };
