@@ -47,7 +47,7 @@ jobs:
         run: |
           Get-ChildItem -Recurse
 
-      # Extract the version number from '.csproj'
+        # Extract the version number from '.csproj'
       - name: Extract version numbers
         id: extract_versions
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
@@ -56,7 +56,7 @@ jobs:
           $csprojXml = [xml](Get-Content $csprojPath)
           $version = $csprojXml.Project.PropertyGroup.Version
           echo "Project Version: $version"
-          echo "current_version=$version" >> $GITHUB_ENV
+          echo "::set-env name=PROJECT_VERSION::$version" # Set the environment variable
 
   # Build and release if the version number has been updated
   build:
@@ -126,9 +126,10 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROJECT_VERSION: ${{ env.PROJECT_VERSION }} # Use the environment variable here
         with:
-          tag_name: v${{ needs.Check_Version.outputs.current_version }}
-          release_name: Release v${{ needs.Check_Version.outputs.current_version }}
+          tag_name: v${{ env.PROJECT_VERSION }} # Use the environment variable here
+          release_name: Release v${{ env.PROJECT_VERSION }} # Use the environment variable here
           draft: false
           prerelease: false
 
