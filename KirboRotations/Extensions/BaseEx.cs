@@ -8,7 +8,7 @@ using RotationSolver.Basic.Helpers;
 namespace KirboRotations.Extensions;
 
 internal class BaseEx : MCH_KirboPvEBeta
-{
+{ 
     public static bool LoggedIn { get; set; }
 
     public static void CheckPlayerStatus()
