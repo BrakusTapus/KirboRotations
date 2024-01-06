@@ -100,7 +100,7 @@ internal class PLD_KirboPvP : PLD_Base
             // Return the party member with the lowest health ratio below 50%, or null if no suitable target
             return bestTarget;
         },
-        ActionCheck = (b, m) => PvP_Guardian.Target.DistanceToPlayer() <= 10 && Player.IsInCombat(),
+        ActionCheck = (b, m) => PvP_Guardian.Target.DistanceToPlayer() <= 10 && Player.IsInCombat() && Player.GetHealthRatio() > 0.95,
     };
 
     /// <summary>
