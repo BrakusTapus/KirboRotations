@@ -1,20 +1,18 @@
 name: Build and Release
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types:
-      - closed
-    branches:
-      - main
   workflow_dispatch:
+  push:
+    branches: [main]
+
+  pull_request:
+    branches: [main]
 
 jobs:
   # Checks if commit contains the word NEW or if manually dispatched
   Check_Commit:
     runs-on: windows-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Check Commit Message
         run: |
@@ -36,7 +34,7 @@ jobs:
   # Extracts the version number
   Check_Version:
     needs: Check_Commit
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.outputs.commit_contains_new == 'true' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.outputs.commit_contains_new == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed') }}
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -75,8 +73,8 @@ jobs:
         run: |
           Get-ChildItem -Recurse
 
-      # Extract the version number from '.csproj'
-      - name: Extract version numbers
+      # Get version number from '.csproj'
+      - name: Get version
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
         run: |
           $KirboRotationsPath = "./KirboRotations.csproj"

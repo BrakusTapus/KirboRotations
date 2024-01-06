@@ -15,6 +15,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github Actions", "Github Actions", "{DBAFEB0E-D331-4506-9523-9AE3CBBF441D}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\Build_and_Release.yml = .github\workflows\Build_and_Release.yml
+		G:\My Drive\Projects\WorkFlows\KirboRotations Build.yml = G:\My Drive\Projects\WorkFlows\KirboRotations Build.yml
 	EndProjectSection
 EndProject
 Global
