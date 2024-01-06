@@ -9,7 +9,7 @@ internal class RotationConfigs
     private const string K = "[KirboRotations]";
 
     public const string v = K;
-
+ 
     public static string GetAssemblyVersion()
     {
         // Get the assembly the method is being called from
