@@ -1,96 +1,92 @@
 name: Build and Release
 
 on:
-  workflow_dispatch:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  # Checks if commit contains the word NEW or if manually dispatched
-  Check_Commit:
-    runs-on: windows-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
-      - name: Check Commit Message
-        run: |
-          $eventName = '${{ github.event_name }}'
-          if ($eventName -eq 'workflow_dispatch') {
-            echo "Manual dispatch detected. Setting commit_contains_new to true."
-            echo "commit_contains_new=true" >> $GITHUB_ENV
-          } else {
-            $commitMessage = (Get-Content $env:GITHUB_EVENT_PATH | ConvertFrom-Json).head_commit.message
-            if ($commitMessage -like "*NEW*") {
-              echo "Commit message contains 'NEW'."
-              echo "commit_contains_new=true" >> $GITHUB_ENV
-            } else {
-              echo "Commit message does not contain 'NEW'."
-              echo "commit_contains_new=false" >> $GITHUB_ENV
-            }
-          }
-
-  # Extracts the version number
+  # Extracts version number
   Check_Version:
     needs: Check_Commit
-    if: ${{ github.event_name == 'workflow_dispatch' || needs.Check_Commit.outputs.commit_contains_new == 'true' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed') }}
+    if: github.event_name == 'workflow_dispatch' || (needs.Check_Commit.outputs.commit_contains_new == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: windows-latest
+    outputs:
+      current_version: ${{ steps.extract_versions.outputs.current_version }}
     steps:
+      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           submodules: recursive
-
-      # Remove this after the workflow is working
+        
+      # Remove this after workflow is working
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
+        shell: pwsh
 
-      # Extract the version number from '.csproj'
+      # extract the version number from '.csproj'
       - name: Extract version numbers
-        id: extract_versions
+        id: extract_versions  # Add an id to this step to reference its outputs
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
         run: |
           $csprojPath = "./KirboRotations.csproj"
           $csprojXml = [xml](Get-Content $csprojPath)
           $version = $csprojXml.Project.PropertyGroup.Version
           echo "Project Version: $version"
-          echo "PROJECT_VERSION=$version" >> $GITHUB_ENV
-          echo "PROJECT_VERSION_FILE=$version" >> $GITHUB_ENV
-
-  # Build and release if the version number has been updated
+          echo "::set-output name=current_version::$version"
+  # build and release if the version number has been updated
   build:
     needs: Check_Version
     runs-on: windows-latest
-    steps:
+    outputs:
+     current_version: ${{ steps.extract_versions.outputs.project_version }}
+    steps: 
+      # Checkout repository
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           submodules: recursive
 
-      # Remove this after the workflow is working
+      # Remove this after workflow is working
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
+        shell: pwsh
 
-      # Extract the version number from '.csproj'
+      # extract the version number from '.csproj'
       - name: Extract version numbers
-        id: extract_versions
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
         run: |
-          $csprojPath = "./KirboRotations.csproj"
-          $csprojXml = [xml](Get-Content $csprojPath)
-          $version = $csprojXml.Project.PropertyGroup.Version
-          echo "Project Version: $version"
-          echo "PROJECT_VERSION=$version" >> $GITHUB_ENV
-          echo "PROJECT_VERSION_FILE=$version" >> $GITHUB_ENV
+          $KirboRotationsPath = "./KirboRotations.csproj"
+        
+          $KirboRotationsXml = [xml](Get-Content $KirboRotationsPath)
+        
+          $KirboRotationsVersion = $KirboRotationsXml.Project.PropertyGroup.Version
+        
+          echo "Project 1 Version: $KirboRotationsVersion"
 
-      # Set up .NET
+      # dunno if needed  
+      - name: Check Version Against Latest Release
+        id: check_version
+        run: |
+          $latestReleaseTag = $(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
+          $versionKirboRotations = "${{ steps.get_version.outputs.version_KirboRotations }}"
+          if ($latestReleaseTag -eq $versionKirboRotations) {
+            echo "::set-output name=cancel::true"
+          } else {
+            echo "::set-output name=cancel::false"
+          }
+        shell: pwsh
+
+      # Sets up .NET
       - name: Set up .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 7.0.x
-
+          
       # Restore Dependencies
       - name: Restore Dependencies
         run: dotnet restore
@@ -101,35 +97,37 @@ jobs:
           Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
           Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
-      # Build rotations
+      # Builds rotations     
       - name: Build Rotations
         run: |
           invoke-expression 'dotnet build --no-restore --configuration Release KirboRotations'
 
-      # List directory contents
+      # list directory contents
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
+        shell: pwsh
 
-      # Create GitHub Release
+      # create release
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ env.PROJECT_VERSION }} # Use the environment variable here
-          release_name: Release v${{ env.PROJECT_VERSION }} # Use the environment variable here
+          tag_name: v${{ needs.Check_Version.outputs.current_version }}
+          release_name: Release v${{ needs.Check_Version.outputs.current_version }}
           draft: false
           prerelease: false
 
-      # List directory contents
+      # list directory contents
       - name: List Directory Contents
         run: |
           Get-ChildItem -Recurse
-
-      # Upload KirboRotations Assets (DLL)
-      - name: Upload KirboRotations DLL
+        shell: pwsh
+      
+      # Upload Assets
+      - name: Upload KirboRotations Assets
         id: upload_kirbo_rotationsdll
         uses: actions/upload-release-asset@v1
         env:
@@ -140,9 +138,9 @@ jobs:
           asset_name: KirboRotations.dll
           asset_content_type: application/octet-stream
 
-      # Upload KirboRotations Assets (PDB)
-      - name: Upload KirboRotations PDB
-        id: upload_kirbo_rotationspdb
+      # Upload Assets
+      - name: Upload KirboRotations Assets
+        id: upload_kirbo_rotationspdb  
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -152,10 +150,11 @@ jobs:
           asset_name: KirboRotations.pdb
           asset_content_type: application/octet-stream
 
-      # Cleanup on failure
+      # clean up on failure
       - name: Cleanup on failure
         if: failure()
         run: |
           gh release delete v${{ needs.Check_Version.outputs.current_version }} --yes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
