@@ -4,7 +4,7 @@
     <PropertyGroup>
         <AssemblyName>KirboRotations</AssemblyName>
         <Authors>Kirbo</Authors>
-        <Version>1.0.0.21</Version>
+        <Version>1.0.0.22</Version>
         <TargetFramework>net7.0-windows</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
         <Platforms>AnyCPU</Platforms>
@@ -21,7 +21,6 @@
         <ECommonsHintPath>$(RSInstallPath)</ECommonsHintPath>
     </PropertyGroup>
 
-
     <!-- Debug Configuration Settings -->
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
         <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
@@ -33,44 +32,34 @@
         <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
         <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
     </PropertyGroup>
+    <ItemGroup>
+      <Compile Remove="Helpers\OpenerHelpers - Copy.cs" />
+      <Compile Remove="PvE\Beta\ExP_Test_Kirbo.cs" />
+      <Compile Remove="PvP\Healer\AST_KirboPvP.cs" />
+      <Compile Remove="PvP\Healer\SCH_KirboPvP.cs" />
+      <Compile Remove="PvP\Healer\SGE_KirboPvP.cs" />
+      <Compile Remove="PvP\Magical\RDM_KirboPvP.cs" />
+      <Compile Remove="PvP\Melee\RPR_KirboPvP.cs" />
+      <Compile Remove="PvP\Melee\SAM_KirboPvP.cs" />
+      <Compile Remove="PvP\Ranged\DNC_KirboPvP.cs" />
+      <Compile Remove="PvP\Tank\GNB_KirboPvP.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="PvE\Beta\ExP_Test_Kirbo.cs" />
+      <None Include="PvP\Healer\AST_KirboPvP.cs" />
+      <None Include="PvP\Healer\SCH_KirboPvP.cs" />
+      <None Include="PvP\Healer\SGE_KirboPvP.cs" />
+      <None Include="PvP\Magical\RDM_KirboPvP.cs" />
+      <None Include="PvP\Melee\RPR_KirboPvP.cs" />
+      <None Include="PvP\Melee\SAM_KirboPvP.cs" />
+      <None Include="PvP\Ranged\DNC_KirboPvP.cs" />
+      <None Include="PvP\Tank\GNB_KirboPvP.cs" />
+    </ItemGroup>
 
     <!-- Files Management -->
     <!-- Exclude from Compiler -->
-    <ItemGroup>
-        <Compile Remove="Custom\ExtraHelpers\OpenerHelpers - Copy.cs" />
-        <None Include="Custom\ExtraHelpers\OpenerHelpers - Copy.cs" />
-        <Compile Remove="Magical\BLU_Extra.cs" />
-        <None Include="Magical\BLU_Extra.cs" />
-    </ItemGroup>
 
     <!-- Unfinished PvP Rotations -->
-    <ItemGroup>
-        <!-- Healers -->
-        <Compile Remove="Healer\AST_KirboPvP.cs" />
-        <None Include="Healer\AST_KirboPvP.cs" />
-        <Compile Remove="Healer\SCH_KirboPvP.cs" />
-        <None Include="Healer\SCH_KirboPvP.cs" />
-        <Compile Remove="Healer\SGE_KirboPvP.cs" />
-        <None Include="Healer\SGE_KirboPvP.cs" />
-
-        <!-- Magical -->
-        <Compile Remove="Magical\RDM_KirboPvP.cs" />
-        <None Include="Magical\RDM_KirboPvP.cs" />
-
-        <!-- Melee -->
-        <Compile Remove="Melee\RPR_KirboPvP.cs" />
-        <None Include="Melee\RPR_KirboPvP.cs" />
-        <Compile Remove="Melee\SAM_KirboPvP.cs" />
-        <None Include="Melee\SAM_KirboPvP.cs" />
-
-        <!-- Ranged -->
-        <Compile Remove="Ranged\DNC_KirboPvP.cs" />
-        <None Include="Ranged\DNC_KirboPvP.cs" />
-
-        <!-- Tank -->
-        <Compile Remove="Tank\GNB_KirboPvP.cs" />
-        <None Include="Tank\GNB_KirboPvP.cs" />
-    </ItemGroup>
 
     <!-- Package reference -->
     <ItemGroup>
