@@ -17,7 +17,7 @@ internal class RotationConfigs
 
         // Get the version
         var version = assembly.GetName().Version;
-
+ 
         // Return the version as a string (e.g., "1.0.0.0")
         return version.ToString();
     }
