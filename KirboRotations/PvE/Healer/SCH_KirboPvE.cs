@@ -1,3 +1,4 @@
+using KirboRotations.Configurations;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -11,11 +12,13 @@ namespace KirboRotations.PvE.Healer;
 [SourceCode(Path = "main/KirboRotations/Healer/SCH_Default.cs")]
 internal sealed class SCH_KirboPvE : SCH_Base
 {
-    public override CombatType Type => CombatType.PvE;
+    #region Rotation Info
 
     public override string GameVersion => "6.51";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override CombatType Type => CombatType.PvE;
 
-    public override string RotationName => "Kirbo's Default";
+    #endregion Rotation Info
 
     public override bool CanHealSingleSpell => base.CanHealSingleSpell && (Configs.GetBool("GCDHeal") || PartyHealers.Count() < 2);
     public override bool CanHealAreaSpell => base.CanHealAreaSpell && (Configs.GetBool("GCDHeal") || PartyHealers.Count() < 2);
@@ -30,15 +33,19 @@ internal sealed class SCH_KirboPvE : SCH_Base
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
         //秘策绑定单盾群盾
-        if (nextGCD.IsTheSameTo(true, Succor, Adloquium))
+        if (nextGCD.IsTheSameTo(true, Succor, Adloquium) && Recitation.CanUse(out act))
         {
-            if (Recitation.CanUse(out act)) return true;
+            return true;
         }
 
         //Remove Aetherpact
         foreach (var item in PartyMembers)
         {
-            if (item.GetHealthRatio() < 0.9) continue;
+            if (item.GetHealthRatio() < 0.9)
+            {
+                continue;
+            }
+
             if (item.HasStatus(true, StatusID.Aetherpact))
             {
                 act = Aetherpact;
@@ -52,20 +59,39 @@ internal sealed class SCH_KirboPvE : SCH_Base
     protected override bool GeneralGCD(out IAction act)
     {
         //召唤小仙女
-        if (SummonEos.CanUse(out act)) return true;
+        if (SummonEos.CanUse(out act))
+        {
+            return true;
+        }
 
         //DoT
-        if (Bio.CanUse(out act)) return true;
+        if (Bio.CanUse(out act))
+        {
+            return true;
+        }
 
         //AOE
-        if (ArtOfWar.CanUse(out act)) return true;
+        if (ArtOfWar.CanUse(out act))
+        {
+            return true;
+        }
 
         //Single
-        if (Ruin.CanUse(out act)) return true;
-        if (Ruin2.CanUse(out act)) return true;
+        if (Ruin.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Ruin2.CanUse(out act))
+        {
+            return true;
+        }
 
         //Add dot.
-        if (Bio.CanUse(out act, CanUseOption.MustUse)) return true;
+        if (Bio.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out act);
     }
@@ -74,10 +100,16 @@ internal sealed class SCH_KirboPvE : SCH_Base
     protected override bool HealSingleGCD(out IAction act)
     {
         //鼓舞激励之策
-        if (Adloquium.CanUse(out act)) return true;
+        if (Adloquium.CanUse(out act))
+        {
+            return true;
+        }
 
         //医术
-        if (Physick.CanUse(out act)) return true;
+        if (Physick.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealSingleGCD(out act);
     }
@@ -89,22 +121,40 @@ internal sealed class SCH_KirboPvE : SCH_Base
         var haveLink = PartyMembers.Any(p => p.HasStatus(true, StatusID.Aetherpact));
 
         //以太契约
-        if (Aetherpact.CanUse(out act) && FairyGauge >= 70 && !haveLink) return true;
+        if (Aetherpact.CanUse(out act) && FairyGauge >= 70 && !haveLink)
+        {
+            return true;
+        }
 
         //生命回生法
-        if (Protraction.CanUse(out act)) return true;
+        if (Protraction.CanUse(out act))
+        {
+            return true;
+        }
 
         //野战治疗阵
-        if (SacredSoil.CanUse(out act)) return true;
+        if (SacredSoil.CanUse(out act))
+        {
+            return true;
+        }
 
         //深谋远虑之策
-        if (Excogitation.CanUse(out act)) return true;
+        if (Excogitation.CanUse(out act))
+        {
+            return true;
+        }
 
         //生命活性法
-        if (Lustrate.CanUse(out act)) return true;
+        if (Lustrate.CanUse(out act))
+        {
+            return true;
+        }
 
         //以太契约
-        if (Aetherpact.CanUse(out act) && !haveLink) return true;
+        if (Aetherpact.CanUse(out act) && !haveLink)
+        {
+            return true;
+        }
 
         return base.HealSingleAbility(out act);
     }
@@ -112,7 +162,11 @@ internal sealed class SCH_KirboPvE : SCH_Base
     [RotationDesc(ActionID.Excogitation)]
     protected override bool DefenseSingleAbility(out IAction act)
     {
-        if (Excogitation.CanUse(out act)) return true;
+        if (Excogitation.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.DefenseSingleAbility(out act);
     }
 
@@ -120,7 +174,10 @@ internal sealed class SCH_KirboPvE : SCH_Base
     protected override bool HealAreaGCD(out IAction act)
     {
         //士气高扬之策
-        if (Succor.CanUse(out act)) return true;
+        if (Succor.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealAreaGCD(out act);
     }
@@ -129,23 +186,39 @@ internal sealed class SCH_KirboPvE : SCH_Base
     protected override bool HealAreaAbility(out IAction act)
     {
         //慰藉
-        if (WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1))
+        if ((WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1)) && SummonSeraph.CanUse(out act))
         {
-            if (SummonSeraph.CanUse(out act)) return true;
+            return true;
         }
-        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo)) return true;
+
+        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        {
+            return true;
+        }
 
         //异想的祥光
-        if (FeyBlessing.CanUse(out act)) return true;
+        if (FeyBlessing.CanUse(out act))
+        {
+            return true;
+        }
 
         //仙光的低语
-        if (WhisperingDawn.CanUse(out act)) return true;
+        if (WhisperingDawn.CanUse(out act))
+        {
+            return true;
+        }
 
         //野战治疗阵
-        if (SacredSoil.CanUse(out act)) return true;
+        if (SacredSoil.CanUse(out act))
+        {
+            return true;
+        }
 
         //不屈不挠之策
-        if (Indomitability.CanUse(out act)) return true;
+        if (Indomitability.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealAreaAbility(out act);
     }
@@ -153,7 +226,11 @@ internal sealed class SCH_KirboPvE : SCH_Base
     [RotationDesc(ActionID.Succor)]
     protected override bool DefenseAreaGCD(out IAction act)
     {
-        if (Succor.CanUse(out act)) return true;
+        if (Succor.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.DefenseAreaGCD(out act);
     }
 
@@ -161,43 +238,60 @@ internal sealed class SCH_KirboPvE : SCH_Base
     protected override bool DefenseAreaAbility(out IAction act)
     {
         //异想的幻光
-        if (FeyIllumination.CanUse(out act)) return true;
+        if (FeyIllumination.CanUse(out act))
+        {
+            return true;
+        }
 
         //疾风怒涛之计
-        if (Expedient.CanUse(out act)) return true;
+        if (Expedient.CanUse(out act))
+        {
+            return true;
+        }
 
         //慰藉
-        if (WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1))
+        if (WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1) && SummonSeraph.CanUse(out act))
         {
-            if (SummonSeraph.CanUse(out act)) return true;
+            return true;
         }
-        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo)) return true;
+
+        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        {
+            return true;
+        }
 
         //野战治疗阵
-        if (SacredSoil.CanUse(out act)) return true;
+        if (SacredSoil.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.DefenseAreaAbility(out act);
     }
 
     protected override bool AttackAbility(out IAction act)
     {
-        if (IsBurst)
+        if (IsBurst && ChainStratagem.CanUse(out act))
         {
-            //连环计
-            if (ChainStratagem.CanUse(out act)) return true;
+            return true;
         }
 
-        if (Dissipation.EnoughLevel && Dissipation.WillHaveOneChargeGCD(3) && Dissipation.IsEnabled || Aetherflow.WillHaveOneChargeGCD(3))
+        if ((Dissipation.EnoughLevel && Dissipation.WillHaveOneChargeGCD(3) && Dissipation.IsEnabled || Aetherflow.WillHaveOneChargeGCD(3)) && EnergyDrain.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
         {
-            //能量吸收
-            if (EnergyDrain.CanUse(out act, CanUseOption.EmptyOrSkipCombo)) return true;
+            return true;
         }
 
         //转化
-        if (Dissipation.CanUse(out act)) return true;
+        if (Dissipation.CanUse(out act))
+        {
+            return true;
+        }
 
         //以太超流
-        if (Aetherflow.CanUse(out act)) return true;
+        if (Aetherflow.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.AttackAbility(out act);
     }
@@ -206,11 +300,18 @@ internal sealed class SCH_KirboPvE : SCH_Base
     protected override IAction CountDownAction(float remainTime)
     {
         if (remainTime < Ruin.CastTime + CountDownAhead
-            && Ruin.CanUse(out var act)) return act;
+            && Ruin.CanUse(out var act))
+        {
+            return act;
+        }
 
         if (Configs.GetBool("prevDUN") && remainTime <= 15 && !DeploymentTactics.IsCoolingDown && PartyMembers.Count() > 1)
         {
-            if (!Recitation.IsCoolingDown) return Recitation;
+            if (!Recitation.IsCoolingDown)
+            {
+                return Recitation;
+            }
+
             if (!PartyMembers.Any((n) => n.HasStatus(true, StatusID.Galvanize)))
             {
                 //如果还没上激励就给t一个激励

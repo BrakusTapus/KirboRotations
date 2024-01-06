@@ -17,14 +17,14 @@ namespace KirboRotations.PvP.Ranged;
 internal class MCH_KirboPvP : MCH_Base
 {
     #region Rotation Info
-    public override CombatType Type => CombatType.PvP;
+
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{RotationConfigs.USERNAME}'s {ClassJob.Name}";
+    public override CombatType Type => CombatType.PvP;
+
     #endregion Rotation Info
 
     #region IBaseActions
-
     // Enemies with our Wildfire Take highest priority, if none falls back to lowest HP in range
     private new static IBaseAction PvP_BlastCharge { get; } = new BaseAction(ActionID.PvP_BlastCharge)
     {
@@ -128,21 +128,27 @@ internal class MCH_KirboPvP : MCH_Base
             .OrderBy(ObjectHelper.GetHealthRatio)
             .FirstOrDefault();
             if (healerTarget != null)
+            {
                 return healerTarget;
+            }
 
             var mageTarget = Targets.GetJobCategory(JobRole.RangedMagical)
             .Where(b => b.CurrentHp < rangedMagicalHpThreshold && b.CurrentHp > tooLowHpThreshold)
             .OrderBy(ObjectHelper.GetHealthRatio)
             .FirstOrDefault();
             if (mageTarget != null)
+            {
                 return mageTarget;
+            }
 
             var rangeTarget = Targets.GetJobCategory(JobRole.RangedPhysical)
             .Where(b => b.CurrentHp < rangedPhysicalHpThreshold && b.CurrentHp > tooLowHpThreshold)
             .OrderBy(ObjectHelper.GetHealthRatio)
             .FirstOrDefault();
             if (rangeTarget != null)
+            {
                 return rangeTarget;
+            }
 
             var tankTarget = Targets.GetJobCategory(JobRole.Tank)
             .Where(b => b.CurrentHp < tankHpThreshold && b.CurrentHp > tooLowHpThreshold)
@@ -205,44 +211,38 @@ internal class MCH_KirboPvP : MCH_Base
             return bestTarget;
         }
     };
-
     #endregion IBaseActions
 
     #region Debug window
     public override bool ShowStatus => true;
-
     public override void DisplayStatus()
     {
-        ImGuiExtra.CenteredText("WIP, sorry");
-        ImGuiExtra.CenteredText($"Your character combat: {Player.IsInCombat()}");
+        RotationConfigs CompatibilityAndFeatures = new();
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.Frontlines);
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.CrystalineConflict);
+        CompatibilityAndFeatures.AddFeaturesForPvP(PvPFeatures.HasUserConfig);
+        try
+        {
+            PvPDebugWindow.DisplayPvPTab();
+            ImGui.SameLine();
+            PvPDebugWindow.DisplayPvPRotationTabs(RotationName, CompatibilityAndFeatures);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning($"{ex}");
+        }
     }
-
     #endregion Debug window
 
     #region Action Properties
+
     private bool Frontlines { get; set; }
 
     private bool InBurst { get; set; }
     private bool BurstInProgress { get; set; }
     private bool BurstIsFinished { get; set; }
     private bool BurstActionsAvailable { get; set; }
-    private bool FrontLine
-    {
-        get
-        {
-            // Check if isinPvP returns true and there are at least 8 party members.
-            return BattleCharaEx.InPvP() && PartyMembers.Count() >= 8;
-        }
-    }
-    private bool CrystalineConflict
-{
-        get
-        {
-            // Assuming you want to check if there are at least a certain number of party members (e.g., 4).
-            int minimumPartyMembersCount = 4; // Adjust this number as needed.
-            return PartyMembers.Count() >= minimumPartyMembersCount;
-        }
-    }
+
     private static byte PvP_HeatStacks
     {
         get
@@ -253,6 +253,7 @@ internal class MCH_KirboPvP : MCH_Base
     }
 
     private static bool IsPvPOverheated => Player.HasStatus(true, StatusID.PvP_Overheated);
+
     #endregion Action Properties
 
     #region Rotation Config
@@ -527,6 +528,7 @@ internal class MCH_KirboPvP : MCH_Base
     #endregion oGCD Logic
 
     #region PvP Helper Methods
+
     // Analysis Condition
     /*private bool ShouldUseAnalysis(out IAction act)
     {
@@ -545,9 +547,11 @@ internal class MCH_KirboPvP : MCH_Base
         }
         return false;
     }*/
+
     #endregion PvP Helper Methods
 
     #region Extra Helper Methods
+
     // Updates Status of other extra helper methods on every frame
     /*protected override void UpdateInfo()
     {
@@ -613,5 +617,6 @@ internal class MCH_KirboPvP : MCH_Base
 
         // Future Opener conditions for ULTS
     }*/
+
     #endregion Extra Helper Methods
 }

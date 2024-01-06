@@ -7,6 +7,7 @@ namespace KirboRotations.Helpers;
 internal static class OpenerHelpers
 {
     #region Backing fields for properties
+
     private static bool _openerHasFailed = false;
     private static bool _openerHasFinished = false;
     private static int _openerStep = 0;
@@ -15,9 +16,11 @@ internal static class OpenerHelpers
     private static bool _lvl70UltimateOpenerActionsAvailable = false;
     private static bool _lvl80UltimateOpenerActionsAvailable = false;
     private static OpenerState _openerState = OpenerState.PrePull;
+
     #endregion Backing fields for properties
 
     #region Properties with logging
+
     /// <summary>
     /// Flag used to indicate a state change
     /// </summary>
@@ -74,6 +77,7 @@ internal static class OpenerHelpers
     #endregion Properties with logging
 
     #region Methods
+
     public static OpenerState CurrentOpenerState
     {
         get => _openerState;
@@ -130,6 +134,7 @@ internal static class OpenerHelpers
     {
         return OpenerHasFinished || OpenerHasFailed;
     }
+
     internal static bool OpenerController(bool lastAction, bool nextAction, [CallerMemberName] string caller = null)
     {
         if (lastAction)
@@ -141,6 +146,7 @@ internal static class OpenerHelpers
 
         return nextAction;
     }
+
     private static void SetWithLogging<T>(ref T field, T value, string propertyName, [CallerMemberName] string caller = null)
     {
         if (!EqualityComparer<T>.Default.Equals(field, value))
@@ -154,6 +160,7 @@ internal static class OpenerHelpers
     {
         Serilog.Log.Information($"{RotationConfigs.v} Property {propertyName} changed to: {value} (Called by: {caller})");
     }
+
     public static void DisplayCurrentOpenerState()
     {
         string stateAsString = CurrentOpenerState.ToString();

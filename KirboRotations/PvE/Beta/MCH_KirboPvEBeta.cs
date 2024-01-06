@@ -1,5 +1,4 @@
-﻿using ImGuiNET;
-using KirboRotations.Configurations;
+﻿using KirboRotations.Configurations;
 using KirboRotations.Extensions;
 using KirboRotations.Helpers;
 using KirboRotations.Helpers.JobHelpers;
@@ -20,9 +19,11 @@ namespace KirboRotations.PvE.Beta;
 internal class MCH_KirboPvEBeta : MCH_Base
 {
     #region Rotation Info
+
     public override CombatType Type => CombatType.PvE;
     public override string GameVersion => "0";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s Test_MCH]";
+
     #endregion Rotation Info
 
     internal static MCHLogic MCHLogic = new();
@@ -143,20 +144,15 @@ internal class MCH_KirboPvEBeta : MCH_Base
 
     protected override IAction CountDownAction(float remainTime)
     {
-
         // Check if Pre-Pull actions are available and execute them
-        if (remainTime <= 5f && MCHLogic.CanOpener)
+        if (remainTime <= 5f && MCHLogic.CanOpener && MCHLogic.DoPrePullSteps(out IAction prePullAction))
         {
-            if (MCHLogic.DoPrePullSteps(out IAction prePullAction))
-            {
-                return prePullAction;
-            }
+            return prePullAction;
         }
         if (remainTime <= 1.5f && MCHLogic.CanOpener)
         {
             return AirAnchor;
         }
-
 
         return base.CountDownAction(remainTime);
     }
@@ -164,29 +160,37 @@ internal class MCH_KirboPvEBeta : MCH_Base
     #endregion Countdown Logic
 
     #region GCD Logic
+
     protected override bool GeneralGCD(out IAction act)
     {
         act = null;
 
         // Opener for MCH
         if (MCHLogic.DoFullOpener(out act))
+        {
             return true;
+        }
 
         return base.GeneralGCD(out act);
     }
+
     #endregion GCD Logic
 
     #region oGCD Logic
+
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
         act = null;
 
         // Opener for MCH
         if (MCHLogic.DoFullOpener(out act))
+        {
             return true;
+        }
 
         return base.EmergencyAbility(nextGCD, out act);
     }
+
     #endregion oGCD Logic
 
     #region Job Helper Methods

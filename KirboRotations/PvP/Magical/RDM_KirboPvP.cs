@@ -14,10 +14,11 @@ namespace KirboRotations.PvP.Magical;
 internal class RDM_KirboPvP : RDM_Base
 {
     #region Rotation Info
-    public override CombatType Type => CombatType.PvP;
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{GeneralHelpers.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{GeneralHelpers.USERNAME}'s {ClassJob.Name}";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override CombatType Type => CombatType.PvP;
+
     #endregion Rotation Info
 
     #region PvP
@@ -152,6 +153,7 @@ internal class RDM_KirboPvP : RDM_Base
     #endregion PvP
 
     #region Debug window
+
     public override bool ShowStatus => true;
 
     public override void DisplayStatus()
@@ -162,7 +164,9 @@ internal class RDM_KirboPvP : RDM_Base
     #endregion Debug window
 
     #region Action Properties
+
     // WIP
+
     #endregion Action Properties
 
     #region Rotation Config

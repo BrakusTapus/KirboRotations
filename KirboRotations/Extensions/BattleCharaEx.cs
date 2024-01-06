@@ -7,11 +7,12 @@ internal static class BattleCharaEx
 {
     public static bool SaveAction { get; set; } = false;
 
-    public unsafe static FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara* Struct(this BattleChara o)
+    public static unsafe FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara* Struct(this BattleChara o)
     {
         return (FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara*)o.Address;
     }
-    public unsafe static uint RawShieldValue(this BattleChara chara)
+
+    public static unsafe uint RawShieldValue(this BattleChara chara)
     {
         FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara* baseVal = (FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara*)chara.Address;
         var value = baseVal->Character.CharacterData.ShieldValue;
@@ -20,7 +21,7 @@ internal static class BattleCharaEx
         return rawValue;
     }
 
-    public unsafe static byte ShieldPercentage(this BattleChara chara)
+    public static unsafe byte ShieldPercentage(this BattleChara chara)
     {
         FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara* baseVal = (FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara*)chara.Address;
         var value = baseVal->Character.CharacterData.ShieldValue;
@@ -43,4 +44,7 @@ internal static class BattleCharaEx
     {
         return obj.Struct()->Character.InCombat;
     }
+
+
+
 }

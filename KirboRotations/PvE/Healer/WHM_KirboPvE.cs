@@ -1,3 +1,4 @@
+using KirboRotations.Configurations;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -10,11 +11,13 @@ namespace KirboRotations.PvE.Healer;
 [SourceCode(Path = "main/KirboRotations/Healer/WHM_Default.cs")]
 internal sealed class WHM_KirboPvE : WHM_Base
 {
-    public override CombatType Type => CombatType.PvE;
+    #region Rotation Info
 
     public override string GameVersion => "6.51";
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override CombatType Type => CombatType.PvE;
 
-    public override string RotationName => "Kirbo's Default";
+    #endregion Rotation Info
 
     protected override IRotationConfigSet CreateConfiguration()
         => base.CreateConfiguration()
@@ -31,9 +34,15 @@ internal sealed class WHM_KirboPvE : WHM_Base
 
     protected override bool GeneralGCD(out IAction act)
     {
-        if (NotInCombatDelay && RegenDefense.CanUse(out act)) return true;
+        if (NotInCombatDelay && RegenDefense.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (AfflatusMisery.CanUse(out act, CanUseOption.MustUse)) return true;
+        if (AfflatusMisery.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
 
         bool liliesNearlyFull = Lily == 2 && LilyAfter(17);
         bool liliesFullNoBlood = Lily == 3 && BloodLily < 3;
@@ -41,26 +50,52 @@ internal sealed class WHM_KirboPvE : WHM_Base
         {
             if (PartyMembersAverHP < 0.7)
             {
-                if (AfflatusRapture.CanUse(out act)) return true;
+                if (AfflatusRapture.CanUse(out act))
+                {
+                    return true;
+                }
             }
-            if (AfflatusSolace.CanUse(out act)) return true;
+            if (AfflatusSolace.CanUse(out act))
+            {
+                return true;
+            }
         }
 
-        if (Holy.CanUse(out act)) return true;
+        if (Holy.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (Aero.CanUse(out act)) return true;
-        if (Stone.CanUse(out act)) return true;
-        if (Aero.CanUse(out act, CanUseOption.MustUse)) return true;
+        if (Aero.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Stone.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Aero.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
 
         return base.GeneralGCD(out act);
     }
 
     protected override bool AttackAbility(out IAction act)
     {
-        if (PresenceOfMind.CanUse(out act)) return true;
+        if (PresenceOfMind.CanUse(out act))
+        {
+            return true;
+        }
 
         int AssizeTargets = Configs.GetInt("AssizeThreshold");
-        if (Assize.CanUse(out act, CanUseOption.MustUse) && NumberOfAllHostilesInRange >= AssizeTargets) return true;
+        if (Assize.CanUse(out act, CanUseOption.MustUse) && NumberOfAllHostilesInRange >= AssizeTargets)
+        {
+            return true;
+        }
 
         return base.AttackAbility(out act);
     }
@@ -68,11 +103,17 @@ internal sealed class WHM_KirboPvE : WHM_Base
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
         if (nextGCD is IBaseAction action && action.MPNeed >= 1000 &&
-            ThinAir.CanUse(out act)) return true;
+            ThinAir.CanUse(out act))
+        {
+            return true;
+        }
 
         if (nextGCD.IsTheSameTo(true, AfflatusRapture, Medica, Medica2, Cure3))
         {
-            if (PlenaryIndulgence.CanUse(out act)) return true;
+            if (PlenaryIndulgence.CanUse(out act))
+            {
+                return true;
+            }
         }
 
         return base.EmergencyAbility(nextGCD, out act);
@@ -81,14 +122,26 @@ internal sealed class WHM_KirboPvE : WHM_Base
     [RotationDesc(ActionID.AfflatusSolace, ActionID.Regen, ActionID.Cure2, ActionID.Cure)]
     protected override bool HealSingleGCD(out IAction act)
     {
-        if (AfflatusSolace.CanUse(out act)) return true;
+        if (AfflatusSolace.CanUse(out act))
+        {
+            return true;
+        }
 
         if (Regen.CanUse(out act)
-            && (IsMoving || Regen.Target.GetHealthRatio() > 0.4)) return true;
+            && (IsMoving || Regen.Target.GetHealthRatio() > 0.4))
+        {
+            return true;
+        }
 
-        if (Cure2.CanUse(out act)) return true;
+        if (Cure2.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (Cure.CanUse(out act)) return true;
+        if (Cure.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealSingleGCD(out act);
     }
@@ -97,28 +150,53 @@ internal sealed class WHM_KirboPvE : WHM_Base
     protected override bool HealSingleAbility(out IAction act)
     {
         if (Benediction.CanUse(out act) &&
-            Benediction.Target.GetHealthRatio() < 0.3) return true;
+            Benediction.Target.GetHealthRatio() < 0.3)
+        {
+            return true;
+        }
 
-        if (!IsMoving && Asylum.CanUse(out act)) return true;
+        if (!IsMoving && Asylum.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (DivineBenison.CanUse(out act)) return true;
+        if (DivineBenison.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (Tetragrammaton.CanUse(out act)) return true;
+        if (Tetragrammaton.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.HealSingleAbility(out act);
     }
 
     [RotationDesc(ActionID.AfflatusRapture, ActionID.Medica2, ActionID.Cure3, ActionID.Medica)]
     protected override bool HealAreaGCD(out IAction act)
     {
-        if (AfflatusRapture.CanUse(out act)) return true;
+        if (AfflatusRapture.CanUse(out act))
+        {
+            return true;
+        }
 
         int hasMedica2 = PartyMembers.Count((n) => n.HasStatus(true, StatusID.Medica2));
 
-        if (Medica2.CanUse(out act) && hasMedica2 < PartyMembers.Count() / 2 && !IsLastAction(true, Medica2)) return true;
+        if (Medica2.CanUse(out act) && hasMedica2 < PartyMembers.Count() / 2 && !IsLastAction(true, Medica2))
+        {
+            return true;
+        }
 
-        if (Cure3.CanUse(out act)) return true;
+        if (Cure3.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (Medica.CanUse(out act)) return true;
+        if (Medica.CanUse(out act))
+        {
+            return true;
+        }
 
         return base.HealAreaGCD(out act);
     }
@@ -126,25 +204,43 @@ internal sealed class WHM_KirboPvE : WHM_Base
     [RotationDesc(ActionID.Asylum)]
     protected override bool HealAreaAbility(out IAction act)
     {
-        if (Asylum.CanUse(out act)) return true;
+        if (Asylum.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.HealAreaAbility(out act);
     }
 
     [RotationDesc(ActionID.DivineBenison, ActionID.Aquaveil)]
     protected override bool DefenseSingleAbility(out IAction act)
     {
-        if (DivineBenison.CanUse(out act)) return true;
+        if (DivineBenison.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (Aquaveil.CanUse(out act)) return true;
+        if (Aquaveil.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.DefenseSingleAbility(out act);
     }
 
     [RotationDesc(ActionID.Temperance, ActionID.LiturgyOfTheBell)]
     protected override bool DefenseAreaAbility(out IAction act)
     {
-        if (Temperance.CanUse(out act)) return true;
+        if (Temperance.CanUse(out act))
+        {
+            return true;
+        }
 
-        if (LiturgyOfTheBell.CanUse(out act)) return true;
+        if (LiturgyOfTheBell.CanUse(out act))
+        {
+            return true;
+        }
+
         return base.DefenseAreaAbility(out act);
     }
 
@@ -164,12 +260,22 @@ internal sealed class WHM_KirboPvE : WHM_Base
     protected override IAction CountDownAction(float remainTime)
     {
         if (remainTime < Stone.CastTime + CountDownAhead
-            && Stone.CanUse(out var act)) return act;
+            && Stone.CanUse(out var act))
+        {
+            return act;
+        }
 
         if (Configs.GetBool("UsePreRegen") && remainTime <= 5 && remainTime > 3)
         {
-            if (RegenDefense.CanUse(out act, CanUseOption.IgnoreClippingCheck)) return act;
-            if (DivineBenison.CanUse(out act, CanUseOption.IgnoreClippingCheck)) return act;
+            if (RegenDefense.CanUse(out act, CanUseOption.IgnoreClippingCheck))
+            {
+                return act;
+            }
+
+            if (DivineBenison.CanUse(out act, CanUseOption.IgnoreClippingCheck))
+            {
+                return act;
+            }
         }
         return base.CountDownAction(remainTime);
     }

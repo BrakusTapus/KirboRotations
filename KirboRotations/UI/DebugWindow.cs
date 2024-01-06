@@ -1,25 +1,20 @@
 ﻿using System.Numerics;
-using Dalamud.Game.ClientState.Objects.SubKinds;
-using Dalamud.Utility;
 using ImGuiNET;
 using KirboRotations.Configurations;
 using KirboRotations.Extensions;
 using KirboRotations.Helpers;
 using KirboRotations.Helpers.JobHelpers;
 using KirboRotations.PvE.Beta;
-using KirboRotations.PvE.Ranged;
-using Lumina.Excel.GeneratedSheets;
 using RotationSolver.Basic.Data;
 using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations;
 
 namespace KirboRotations.UI;
 
 internal class DebugWindow : MCH_KirboPvEBeta
 {
-
     #region Debug Window for PvE Rotations
     private static bool _showImGuiDemoWindow = false;
+
     internal static void DisplayRotationTabs(string RotationName, RotationConfigs compatibilityAndFeatures)
     {
         BaseEx.CheckPlayerStatus();
@@ -163,15 +158,12 @@ internal class DebugWindow : MCH_KirboPvEBeta
             string stateAsString = OpenerHelpers.CurrentOpenerState.ToString();
             ImGuiExtra.SpacingWithSeperator();
 
-
             ImGuiExtra.AddTableRow("CanOpener", MCHLogic.CanOpener.ToString());
             ImGuiExtra.AddTableRow("PrePullStep", MCHLogic.PrePullStep.ToString());
             ImGuiExtra.AddTableRow("Current OpenerState", MCHLogic.CurrentState.ToString());
             ImGuiExtra.AddTableRow("OpenerStep", MCHLogic.OpenerStep.ToString());
             ImGuiExtra.AddTableRow("HasStatus Reassemble", Player.HasStatus(true, StatusID.Reassemble).ToString());
             ImGuiExtra.AddTableRow("Player IsInCombat", Player.IsInCombat().ToString());
-
-
 
             ImGui.TableNextRow();
             ImGui.TableNextColumn();
@@ -240,7 +232,7 @@ internal class DebugWindow : MCH_KirboPvEBeta
             ImGui.EndTable();
         }
     }
-    #endregion
+    #endregion Debug Window for PvE Rotations
 
     #region Job related
     internal static void DisplayMCHTab()
@@ -270,6 +262,5 @@ internal class DebugWindow : MCH_KirboPvEBeta
             Serilog.Log.Warning($"{ex}");
         }
     }
-    #endregion
-
+    #endregion Job related
 }

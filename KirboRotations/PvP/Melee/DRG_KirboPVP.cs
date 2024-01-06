@@ -1,6 +1,10 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
+using ImGuiNET;
+using KirboRotations.Configurations;
 using KirboRotations.Extensions;
+using KirboRotations.UI;
+using Lumina.Excel;
 using RotationSolver.Basic.Actions;
 using RotationSolver.Basic.Attributes;
 using RotationSolver.Basic.Configuration.RotationConfig;
@@ -16,15 +20,46 @@ internal class DRG_KirboPvP : DRG_Base
 {
     #region Rotation Info
     public override string GameVersion => "6.51";
-
-    public override string RotationName => "Kirbo's Dragoon";
-
-    public override string Description => "Quickly build Dragoon Rotation for PvP";
-
+    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvP;
     #endregion Rotation Info
 
-    #region PvP
+    #region IBaseActions
+/*
+    internal ActionID[] ComboIdsNot { private get; init; }
+
+    internal ActionID[] ComboIds { private get; init; }
+    private bool CheckForCombo()
+    {
+        if (ComboIdsNot != null && ComboIdsNot.Contains(DataCenter.LastComboAction))
+        {
+            return false;
+        }
+
+        LazyRow<Lumina.Excel.GeneratedSheets.Action> actionCombo = _action.ActionCombo;
+        ActionID[] array = ((actionCombo != null && actionCombo.Row == 0) ? Array.Empty<ActionID>() : new ActionID[1] { (ActionID)_action.ActionCombo.Row });
+        if (ComboIds != null)
+        {
+            array = array.Union(ComboIds).ToArray();
+        }
+
+        if (array.Length != 0)
+        {
+            if (!array.Contains(DataCenter.LastComboAction))
+            {
+                return false;
+            }
+
+            if (DataCenter.ComboTime < DataCenter.WeaponRemain)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+*/
+
 
     /// <summary>
     ///
@@ -35,6 +70,7 @@ internal class DRG_KirboPvP : DRG_Base
     ///
     /// </summary>
     private static IBaseAction PvP_RaidenThrust { get; } = new BaseAction(ActionID.PvP_RaidenThrust);
+
 
     /// <summary>
     ///
@@ -82,7 +118,7 @@ internal class DRG_KirboPvP : DRG_Base
     /// </summary>
     private static IBaseAction PvP_HorridRoar { get; } = new BaseAction(ActionID.PvP_HorridRoar, ActionOption.Friendly)
     {
-        FilterForHostiles = tars => tars.Where(t => t is PlayerCharacter),
+        FilterForHostiles = tars => tars.Where(t => t is PlayerCharacter && Target != Player),
     };
 
     /// <summary>
@@ -115,8 +151,28 @@ internal class DRG_KirboPvP : DRG_Base
     private static IBaseAction PvP_SkyShatter { get; } = new BaseAction(ActionID.PvP_SkyShatter)
     {
     };
-
     #endregion PvP
+
+    #region PvP Debug window
+    public override bool ShowStatus => true;
+    public override void DisplayStatus()
+    {
+        RotationConfigs CompatibilityAndFeatures = new();
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.Frontlines);
+        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.CrystalineConflict);
+        CompatibilityAndFeatures.AddFeaturesForPvP(PvPFeatures.HasUserConfig);
+        try
+        {
+            PvPDebugWindow.DisplayPvPTab();
+            ImGui.SameLine();
+            PvPDebugWindow.DisplayPvPRotationTabs(RotationName, CompatibilityAndFeatures);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Warning($"{ex}");
+        }
+    }
+    #endregion Debug window
 
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
@@ -128,7 +184,7 @@ internal class DRG_KirboPvP : DRG_Base
         act = null;
 
         // Status checks
-        bool TargetIsNotPlayer = Target != Player;
+        bool TargetIsNotPlayer = Target == Target.IsOthersPlayers();
         BattleChara target = Target;
         bool hasGuard = TargetIsNotPlayer && target.HasStatus(false, StatusID.PvP_Guard);
         bool hasChiten = TargetIsNotPlayer && target.HasStatus(false, StatusID.PvP_Chiten);
@@ -156,33 +212,38 @@ internal class DRG_KirboPvP : DRG_Base
                 return false;
             }
 
-            if (PvP_WyrmwindThrust.CanUse(out act, CanUseOption.MustUse) && HostileTarget.DistanceToPlayer() <= 5)
+            if (PvP_WyrmwindThrust.CanUse(out act, CanUseOption.MustUse) && TargetIsNotPlayer && HostileTarget.DistanceToPlayer() <= 5)
             {
                 return true;
             }
 
-            if (PvP_HeavensThrust.CanUse(out act, CanUseOption.MustUse) && HostileTarget.DistanceToPlayer() <= 5)
+            if (PvP_HeavensThrust.CanUse(out act, CanUseOption.MustUse) && TargetIsNotPlayer && HostileTarget.DistanceToPlayer() <= 5)
             {
                 return true;
             }
 
-            if (PvP_ChaoticSpring.CanUse(out act, CanUseOption.MustUse) && HostileTarget.DistanceToPlayer() <= 5)
+            if (PvP_ChaoticSpring.CanUse(out act, CanUseOption.MustUse) && TargetIsNotPlayer && HostileTarget.DistanceToPlayer() <= 5)
             {
                 return true;
             }
 
             // 3
-            if (PvP_WheelingThrust.CanUse(out act, CanUseOption.MustUse))
+            if (PvP_WheelingThrustCombo.CanUse(out act))
+            {
+                return true;
+            }
+            // 3
+            if (PvP_WheelingThrust.CanUse(out act))
             {
                 return true;
             }
             // 2
-            if (PvP_FangAndClaw.CanUse(out act, CanUseOption.MustUse))
+            if (PvP_FangAndClaw.CanUse(out act))
             {
                 return true;
             }
             // 1
-            if (PvP_RaidenThrust.CanUse(out act, CanUseOption.MustUse))
+            if (PvP_RaidenThrust.CanUse(out act))
             {
                 return true;
             }
@@ -201,7 +262,11 @@ internal class DRG_KirboPvP : DRG_Base
 
         if (PvP_HorridRoar.CanUse(out act, CanUseOption.MustUse, 1))
         {
-            return true;
+            if (IsLastAction(ActionID.HighJump) && HostileTarget.DistanceToPlayer() <= 3)
+            {
+                return true;
+            }
+            return false;
         }
 
         if (PvP_Geirskogul.CanUse(out act, CanUseOption.MustUse) && HostileTarget.DistanceToPlayer() <= 15)

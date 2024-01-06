@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		skeletons.txt = skeletons.txt
-		todo.txt = todo.txt
+		..\todo.txt = ..\todo.txt
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Github Actions", "Github Actions", "{DBAFEB0E-D331-4506-9523-9AE3CBBF441D}"

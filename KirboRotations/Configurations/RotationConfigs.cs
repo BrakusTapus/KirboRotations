@@ -9,6 +9,7 @@ internal class RotationConfigs
     private const string K = "[KirboRotations]";
 
     public const string v = K;
+
     public static string GetAssemblyVersion()
     {
         // Get the assembly the method is being called from
@@ -20,6 +21,7 @@ internal class RotationConfigs
         // Return the version as a string (e.g., "1.0.0.0")
         return version.ToString();
     }
+
     public static string RotationVersion
     {
         get
@@ -28,12 +30,12 @@ internal class RotationConfigs
             return $"v{version}";
         }
     }
+
     public List<UltimateCompatibility> UltimateCompatibilities { get; set; }
     public List<ContentCompatibility> ContentCompatibilities { get; set; }
     public List<Features> FeaturesList { get; set; }
     public List<PvPContentCompatibility> PvPContentCompatibilities { get; set; }
     public List<PvPFeatures> PvPFeaturesList { get; set; }
-
 
     public RotationConfigs()
     {
@@ -136,7 +138,7 @@ internal enum Features
 [Flags]
 internal enum ContentCompatibility
 {
-    NotCompatible = 0,
+    None = 0,
     DutyRoulette = 1,
     Dungeons = 2,
     Guildhests = 3,
@@ -162,7 +164,7 @@ internal enum ContentCompatibility
 [Flags]
 internal enum Compatibility
 {
-    NotCompatible = 0,
+    None = 0,
     Compatible = 1,
     Untested = 2,
 }
@@ -177,7 +179,7 @@ internal enum PvPFeatures
 [Flags]
 internal enum PvPContentCompatibility
 {
-    NotCompatible = 0,
+    None = 0,
     Frontlines = 1,
     CrystalineConflict = 2,
 }

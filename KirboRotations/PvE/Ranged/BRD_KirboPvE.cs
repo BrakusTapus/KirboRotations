@@ -17,18 +17,21 @@ namespace KirboRotations.PvE.Ranged;
 internal class BRD_KirboPvE : BRD_Base
 {
     #region Rotation Info
-    public override CombatType Type => CombatType.PvE;
+
     public override string GameVersion => "6.51";
     public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override string Description => $"{RotationConfigs.USERNAME}'s {ClassJob.Name}";
+    public override CombatType Type => CombatType.PvE;
 
     #endregion Rotation Info
 
     #region New PvE IBaseActions
+
     // Not yet implemented
+
     #endregion New PvE IBaseActions
 
     #region Debug window
+
     public override bool ShowStatus => true;
 
     public override void DisplayStatus()
@@ -43,7 +46,7 @@ internal class BRD_KirboPvE : BRD_Base
         CompatibilityAndFeatures.SetRotationOpeners("Opener1", "Opener2");
         CompatibilityAndFeatures.CurrentRotationSelection = Configs.GetCombo("RotationSelection");
 
-        DebugWindow.DisplayRotationTabs(RotationName,CompatibilityAndFeatures);
+        DebugWindow.DisplayRotationTabs(RotationName, CompatibilityAndFeatures);
     }
 
     #endregion Debug window
@@ -64,6 +67,7 @@ internal class BRD_KirboPvE : BRD_Base
     private float WANDRemainTime => 45 - Configs.GetFloat("WANDTime");
     private float MAGERemainTime => 45 - Configs.GetFloat("MAGETime");
     private float ARMYRemainTime => 45 - Configs.GetFloat("ARMYTime");
+
     #endregion Rotation Config
 
     #region Countdown Logic
@@ -456,7 +460,10 @@ internal class BRD_KirboPvE : BRD_Base
 
     private static bool CanUseApexArrow(out IAction act)
     {
-        if (!ApexArrow.CanUse(out act, CanUseOption.MustUse)) return false;
+        if (!ApexArrow.CanUse(out act, CanUseOption.MustUse))
+        {
+            return false;
+        }
 
         if (QuickNock.CanUse(out _) && SoulVoice == 100)
         {

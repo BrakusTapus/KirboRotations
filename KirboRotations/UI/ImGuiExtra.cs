@@ -3,7 +3,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using ImGuiNET;
 using KirboRotations.Helpers;
-using KirboRotations.Helpers.JobHelpers;
 
 namespace KirboRotations.UI;
 
@@ -34,6 +33,7 @@ internal static class ImGuiExtra
     #endregion Spacing
 
     #region Color
+
     /*/// <summary>
     /// Converts RGB color to <see cref="Vector4"/> for ImGui
     /// </summary>
@@ -86,7 +86,7 @@ internal static class ImGuiExtra
 
     #region Text
 
-    static string msg = "You're not logged in, debug window will not be drawn.";
+    private static string msg = "You're not logged in, debug window will not be drawn.";
 
     public static void NotLoggedIn()
     {
@@ -311,6 +311,7 @@ internal static class ImGuiExtra
         ImGui.TableNextColumn(); ImGui.Text(description);
         ImGui.TableNextColumn(); ImGui.TextColored(color, valueText);
     }
+
     internal static void AddTableRow(string description, byte value)
     {
         ImGui.TableNextRow();
@@ -319,7 +320,7 @@ internal static class ImGuiExtra
     }
 
     /// <summary>
-    /// 
+    ///
     /// </summary>
     /// <param name="description"></param>
     /// <param name="byteValue"></param>
@@ -359,6 +360,7 @@ internal static class ImGuiExtra
         ImGui.TableNextColumn();
         ImGui.TextColored(textColor, value);
     }
+
     /// <summary>
     /// First Colum text will be white and text in the second colum will be whatever color is picked
     /// </summary>
@@ -373,6 +375,7 @@ internal static class ImGuiExtra
         ImGui.TableNextColumn();
         ImGui.TextColored(textColor, value.ToString());
     }
+
     /// <summary>
     ///
     /// </summary>
@@ -389,6 +392,7 @@ internal static class ImGuiExtra
         ImGui.TableNextColumn();
         ImGui.TextColored(color, valueText);
     }
+
     /// <summary>
     /// First Colum text will be white and text in the second colum will be whatever color is picked
     /// </summary>

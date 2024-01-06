@@ -17,7 +17,9 @@ internal enum DeBuffs : ushort
     #endregion JobRole Tank
 
     #region JobRole Healer
+
     //
+
     #endregion JobRole Healer
 
     #region JobRole Melee
@@ -27,7 +29,9 @@ internal enum DeBuffs : ushort
     #endregion JobRole Melee
 
     #region JobRole Ranged
+
     //
+
     #endregion JobRole Ranged
 
     #region JobRole Magical

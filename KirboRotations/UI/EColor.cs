@@ -10,6 +10,7 @@ internal static class EColor
 {
     // Color Collection
     public static Vector4 White = ImGuiExtra.Vector4FromRGB(0xFFFFFF);
+
     public static Vector4 Black = ImGuiExtra.Vector4FromRGB(0x000000);
     public static Vector4 RedBright = ImGuiExtra.Vector4FromRGB(0xFF0000);
     public static Vector4 Red = ImGuiExtra.Vector4FromRGB(0xAA0000);
@@ -36,6 +37,7 @@ internal static class EColor
 
     // Dalamud UI Colors
     public static Vector4 DalamudRed = ImGuiColors.DalamudRed;
+
     public static Vector4 DalamudGrey = ImGuiColors.DalamudGrey;
     public static Vector4 DalamudGrey2 = ImGuiColors.DalamudGrey2;
     public static Vector4 DalamudGrey3 = ImGuiColors.DalamudGrey3;
@@ -47,11 +49,13 @@ internal static class EColor
 
     // Job Role Colors
     public static Vector4 TankBlue = ImGuiColors.TankBlue;
+
     public static Vector4 HealerGreen = ImGuiColors.HealerGreen;
     public static Vector4 DPSRed = ImGuiColors.DPSRed;
 
     // FFLogs Parse Colors
     public static Vector4 ParsedGrey = ImGuiColors.ParsedGrey;
+
     public static Vector4 ParsedGreen = ImGuiColors.ParsedGreen;
     public static Vector4 ParsedBlue = ImGuiColors.ParsedBlue;
     public static Vector4 ParsedPurple = ImGuiColors.ParsedPurple;

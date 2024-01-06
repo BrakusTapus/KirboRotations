@@ -7,7 +7,9 @@ namespace KirboRotations.Helpers;
 internal static class BurstHelpers
 {
     #region Backing fields for properties
+
     //private static bool _burstActionsAvailable = false;
+
     #endregion Backing fields for properties
 
     /// <summary>
@@ -106,6 +108,7 @@ internal static class BurstHelpers
             BurstInProgress = false;
         }
     }
+
     private static void SetWithLogging<T>(ref T field, T value, string propertyName, [CallerMemberName] string caller = null)
     {
         if (!EqualityComparer<T>.Default.Equals(field, value))
