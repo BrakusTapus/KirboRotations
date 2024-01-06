@@ -73,28 +73,17 @@ jobs:
         run: |
           Get-ChildItem -Recurse
 
-      # Get version number from '.csproj'
-      - name: Get version
+      # Extract the version number from '.csproj'
+      - name: Extract version numbers
+        id: extract_versions
         working-directory: D:\a\KirboRotations\KirboRotations\KirboRotations
         run: |
-          $KirboRotationsPath = "./KirboRotations.csproj"
-          $KirboRotationsXml = [xml](Get-Content $KirboRotationsPath)
-          $KirboRotationsVersion = $KirboRotationsXml.Project.PropertyGroup.Version
-          echo "Project 1 Version: $KirboRotationsVersion"
-          echo "PROJECT_VERSION_FILE=$PROJECT_VERSION_FILE" >> $GITHUB_ENV # Set the environment variable
-          echo "PROJECT_VERSION_FILE: $PROJECT_VERSION_FILE" # Output the PROJECT_VERSION_FILE value
-
-      # Check Version Against Latest Release
-      - name: Check Version Against Latest Release
-        id: check_version
-        run: |
-          $latestReleaseTag = $(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | jq -r .tag_name)
-          $versionKirboRotations = "$PROJECT_VERSION_FILE" # Access the PROJECT_VERSION_FILE environment variable
-          if ($latestReleaseTag -eq $versionKirboRotations) {
-            echo "cancel=true" >> $GITHUB_ENV
-          } else {
-            echo "cancel=false" >> $GITHUB_ENV
-          }
+          $csprojPath = "./KirboRotations.csproj"
+          $csprojXml = [xml](Get-Content $csprojPath)
+          $version = $csprojXml.Project.PropertyGroup.Version
+          echo "Project Version: $version"
+          echo "PROJECT_VERSION=$version" >> $GITHUB_ENV
+          echo "PROJECT_VERSION_FILE=$version" >> $GITHUB_ENV
 
       # Set up .NET
       - name: Set up .NET
