@@ -1,4 +1,4 @@
-﻿using RotationSolver.Basic.Actions;
+﻿using RotationSolver.RotationBasics.Actions;
 
 namespace KirboRotations.Helpers;
 
@@ -9,7 +9,5 @@ internal interface ICustomRotation
     bool EmergencyAbility(IAction nextGCD, out IAction act);
 
     bool GeneralGCD(out IAction act);
-
-
 
 }

@@ -1,10 +1,10 @@
 ﻿using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using RotationSolver.RotationBasics.Actions;
+using RotationSolver.RotationBasics.Attributes;
+using RotationSolver.RotationBasics.Configuration.RotationConfig;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Helpers;
+using RotationSolver.RotationBasics.Rotations.Basic;
 
 namespace KirboRotations.PvE.Magical;
 
@@ -27,7 +27,7 @@ internal sealed class BLU_KirboPvE : BLU_Base
             .SetBool(CombatType.PvE, "SingleAOE", true, "Use high-damage AoE skills on single target")
             .SetBool(CombatType.PvE, "GamblerKill", false, "Use skills with a chance to fail")
             .SetBool(CombatType.PvE, "UseFinalSting", false, "Use Final Sting")
-            .SetFloat(RotationSolver.Basic.Configuration.ConfigUnitType.Percent, CombatType.PvE, "FinalStingHP", 0, "Target HPP for Final Sting");
+            .SetFloat(RotationSolver.RotationBasics.Configuration.ConfigUnitType.Percent, CombatType.PvE, "FinalStingHP", 0, "Target HPP for Final Sting");
     }
 
     private bool MoonFluteBreak => Configs.GetBool("MoonFluteBreak");

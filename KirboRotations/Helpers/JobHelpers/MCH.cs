@@ -3,9 +3,9 @@ using KirboRotations.Data;
 using KirboRotations.Extensions;
 using KirboRotations.Helpers.JobHelpers.Enums;
 using KirboRotations.PvE.Beta;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
+using RotationSolver.RotationBasics.Actions;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Helpers;
 
 namespace KirboRotations.Helpers.JobHelpers;
 

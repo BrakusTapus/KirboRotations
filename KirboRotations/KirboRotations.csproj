@@ -4,7 +4,7 @@
     <PropertyGroup>
         <AssemblyName>KirboRotations</AssemblyName>
         <Authors>Kirbo</Authors>
-        <Version>1.0.0.29</Version>
+        <Version>1.0.0.30</Version>
         <TargetFramework>net7.0-windows</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
         <Platforms>AnyCPU</Platforms>
@@ -55,6 +55,9 @@
       <None Include="PvP\Ranged\DNC_KirboPvP.cs" />
       <None Include="PvP\Tank\GNB_KirboPvP.cs" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="RotationSolver.RotationBasics" Version="1.0.1" />
+    </ItemGroup>
 
     <!-- Files Management -->
     <!-- Exclude from Compiler -->
@@ -62,9 +65,6 @@
     <!-- Unfinished PvP Rotations -->
 
     <!-- Package reference -->
-    <ItemGroup>
-        <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
-    </ItemGroup>
 
     <!-- Default Dalamud Reference Libraries -->
     <ItemGroup>

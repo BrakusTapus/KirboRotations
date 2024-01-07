@@ -1,9 +1,9 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Utility;
 using KirboRotations.PvE.Beta;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
+using RotationSolver.RotationBasics.Actions;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Helpers;
 
 namespace KirboRotations.Extensions;
 

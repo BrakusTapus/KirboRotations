@@ -1,11 +1,11 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
 using KirboRotations.Custom.JobHelpers;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Rotations;
-using RotationSolver.Basic.Rotations.Basic;
+using RotationSolver.RotationBasics.Actions;
+using RotationSolver.RotationBasics.Attributes;
+using RotationSolver.RotationBasics.Configuration.RotationConfig;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Rotations;
+using RotationSolver.RotationBasics.Rotations.Basic;
 
 namespace KirboRotations.PvP.Ranged;
 

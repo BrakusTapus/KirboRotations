@@ -1,11 +1,11 @@
 ﻿using KirboRotations.Custom.JobHelpers;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations;
-using RotationSolver.Basic.Rotations.Basic;
+using RotationSolver.RotationBasics.Actions;
+using RotationSolver.RotationBasics.Attributes;
+using RotationSolver.RotationBasics.Configuration.RotationConfig;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Helpers;
+using RotationSolver.RotationBasics.Rotations;
+using RotationSolver.RotationBasics.Rotations.Basic;
 
 namespace KirboRotations.PvP.Healer;
 
@@ -77,7 +77,7 @@ internal class SCH_KirboPvP : SCH_Base
     /// </summary>
     private static IBaseAction PvP_SummonSeraph { get; } = new BaseAction(ActionID.PvP_SummonSeraph, ActionOption.Heal)
     {
-        //ActionCheck = (b, m) => RotationSolver.Basic.DataCenter.HasPet && LimitBreakLevel >= 1,
+        //ActionCheck = (b, m) => RotationSolver.RotationBasics.DataCenter.HasPet && LimitBreakLevel >= 1,
     };
 
     /// <summary>

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using KirboRotations.Configurations;
-using RotationSolver.Basic.Rotations;
+using RotationSolver.RotationBasics.Rotations;
 
 namespace KirboRotations.Helpers;
 

@@ -5,8 +5,8 @@ using KirboRotations.Extensions;
 using KirboRotations.Helpers;
 using KirboRotations.Helpers.JobHelpers;
 using KirboRotations.PvE.Beta;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Helpers;
 
 namespace KirboRotations.UI;
 

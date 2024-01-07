@@ -3,12 +3,12 @@ using KirboRotations.Configurations;
 using KirboRotations.Data;
 using KirboRotations.Helpers;
 using KirboRotations.UI;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using RotationSolver.RotationBasics.Actions;
+using RotationSolver.RotationBasics.Attributes;
+using RotationSolver.RotationBasics.Configuration.RotationConfig;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Helpers;
+using RotationSolver.RotationBasics.Rotations.Basic;
 
 namespace KirboRotations.PvE.Ranged;
 
@@ -55,9 +55,9 @@ internal class BRD_KirboPvE : BRD_Base
             .SetCombo(CombatType.PvE, "RotationSelection", 0, "Select which Rotation will be used. (Openers will only be followed at level 90)", "Opener1", "Opener2")
             .SetBool(CombatType.PvE, "BindWAND", false, @"Use Raging Strikes on ""Wanderer's Minuet""")
             .SetCombo(CombatType.PvE, "FirstSong", 0, "First Song", "Wanderer's Minuet", "Mage's Ballad", "Army's Paeon")
-            .SetFloat(RotationSolver.Basic.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "WANDTime", 43, "Wanderer's Minuet Uptime", min: 0, max: 45, speed: 1)
-            .SetFloat(RotationSolver.Basic.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "MAGETime", 34, "Mage's Ballad Uptime", min: 0, max: 45, speed: 1)
-            .SetFloat(RotationSolver.Basic.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "ARMYTime", 43, "Army's Paeon Uptime", min: 0, max: 45, speed: 1)
+            .SetFloat(RotationSolver.RotationBasics.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "WANDTime", 43, "Wanderer's Minuet Uptime", min: 0, max: 45, speed: 1)
+            .SetFloat(RotationSolver.RotationBasics.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "MAGETime", 34, "Mage's Ballad Uptime", min: 0, max: 45, speed: 1)
+            .SetFloat(RotationSolver.RotationBasics.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "ARMYTime", 43, "Army's Paeon Uptime", min: 0, max: 45, speed: 1)
             .SetBool(CombatType.PvE, "2and8minTincture", false, "Use Tincture for the 2min and 8min burst\n(only use if fight actually takes more then 8min and 30seconds)");
 
     private bool BindWAND => Configs.GetBool("BindWAND") && WanderersMinuet.EnoughLevel;

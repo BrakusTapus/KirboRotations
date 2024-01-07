@@ -3,12 +3,12 @@ using KirboRotations.Extensions;
 using KirboRotations.Helpers;
 using KirboRotations.Helpers.JobHelpers;
 using KirboRotations.UI;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using RotationSolver.RotationBasics.Actions;
+using RotationSolver.RotationBasics.Attributes;
+using RotationSolver.RotationBasics.Configuration.RotationConfig;
+using RotationSolver.RotationBasics.Data;
+using RotationSolver.RotationBasics.Helpers;
+using RotationSolver.RotationBasics.Rotations.Basic;
 
 namespace KirboRotations.PvE.Beta;
 
