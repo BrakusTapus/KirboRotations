@@ -56,6 +56,7 @@
       <None Include="PvP\Tank\GNB_KirboPvP.cs" />
     </ItemGroup>
     <ItemGroup>
+      <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
       <PackageReference Include="RotationSolver.RotationBasics" Version="1.0.1" />
     </ItemGroup>
 
