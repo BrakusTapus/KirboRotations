@@ -1,74 +1,70 @@
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Magical;
 
+[BetaRotation]
 [RotationDesc(ActionID.Embolden)]
 [SourceCode(Path = "main/KirboRotations/Magical/RDM_Default.cs")]
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/rdm/rdm_ew_opener.png")]
 internal sealed class RDM_KirboPvE : RDM_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    private static IBaseAction VerthunderStartUp { get; } = new BaseAction(ActionID.Verthunder);
-
-    private static bool CanStartMeleeCombo
+    protected override bool AttackAbility(out IAction act)
     {
-        get
+        //Swift
+        if (ManaStacks == 0 && (BlackMana < 50 || WhiteMana < 50)
+            && (CombatElapsedLess(4) || !Manafication.EnoughLevel || !Manafication.WillHaveOneChargeGCD(0, 1)))
         {
-            if (Player.HasStatus(true, StatusID.Manafication, StatusID.Embolden) ||
-                             BlackMana == 100 || WhiteMana == 100)
+            if (!Player.HasStatus(true, StatusID.VerfireReady, StatusID.VerstoneReady))
             {
-                return true;
-            }
-
-            if (BlackMana == WhiteMana)
-            {
-                return false;
-            }
-            else if (WhiteMana < BlackMana)
-            {
-                if (Player.HasStatus(true, StatusID.VerstoneReady))
+                if (Swiftcast.CanUse(out act))
                 {
-                    return false;
+                    return true;
+                }
+
+                if (InCombat && Acceleration.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+                {
+                    return true;
                 }
             }
-            else
-            {
-                if (Player.HasStatus(true, StatusID.VerfireReady))
-                {
-                    return false;
-                }
-            }
+        }
 
-            if (Player.HasStatus(true, Vercure.StatusProvide))
-            {
-                return false;
-            }
-
-            //Waiting for embolden.
-            if (Embolden.EnoughLevel && Embolden.WillHaveOneChargeGCD(5))
-            {
-                return false;
-            }
-
+        if (IsBurst && UseBurstMedicine(out act))
+        {
             return true;
         }
-    }
 
-    protected override IRotationConfigSet CreateConfiguration()
-    {
-        return base.CreateConfiguration()
-            .SetBool(CombatType.PvE, "UseVercure", false, "Use Vercure for Dualcast when out of combat.");
+        //Attack abilities.
+        if (ContreSixte.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        if (Fleche.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Engagement.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        {
+            return true;
+        }
+
+        if (CorpsACorps.CanUse(out act, CanUseOption.MustUse) && !IsMoving)
+        {
+            return true;
+        }
+
+        return base.AttackAbility(out act);
     }
 
     protected override IAction CountDownAction(float remainTime)
@@ -87,65 +83,33 @@ internal sealed class RDM_KirboPvE : RDM_Base
         return base.CountDownAction(remainTime);
     }
 
-    protected override bool GeneralGCD(out IAction act)
+    protected override IRotationConfigSet CreateConfiguration()
+    {
+        return base.CreateConfiguration()
+            .SetBool(CombatType.PvE, "UseVercure", false, "Use Vercure for Dualcast when out of combat.");
+    }
+
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
         act = null;
-        if (ManaStacks == 3)
+        if (CombatElapsedLess(4))
         {
             return false;
         }
 
-        if (!Verthunder2.CanUse(out _))
-        {
-            if (Verfire.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (Verstone.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        if (Scatter.CanUse(out act))
+        if (IsBurst && HasHostilesInRange && Embolden.CanUse(out act, CanUseOption.MustUse))
         {
             return true;
         }
 
-        if (WhiteMana < BlackMana)
-        {
-            if (Veraero2.CanUse(out act) && BlackMana - WhiteMana != 5)
-            {
-                return true;
-            }
-
-            if (Veraero.CanUse(out act) && BlackMana - WhiteMana != 6)
-            {
-                return true;
-            }
-        }
-        if (Verthunder2.CanUse(out act))
+        //Use Manafication after embolden.
+        if ((Player.HasStatus(true, StatusID.Embolden) || IsLastAbility(ActionID.Embolden))
+            && Manafication.CanUse(out act))
         {
             return true;
         }
 
-        if (Verthunder.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Jolt.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Configs.GetBool("UseVercure") && NotInCombatDelay && Vercure.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.GeneralGCD(out act);
+        return base.EmergencyAbility(nextGCD, out act);
     }
 
     protected override bool EmergencyGCD(out IAction act)
@@ -217,75 +181,110 @@ internal sealed class RDM_KirboPvE : RDM_Base
         return base.EmergencyGCD(out act);
     }
 
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
+    protected override bool GeneralGCD(out IAction act)
     {
         act = null;
-        if (CombatElapsedLess(4))
+        if (ManaStacks == 3)
         {
             return false;
         }
 
-        if (IsBurst && HasHostilesInRange && Embolden.CanUse(out act, CanUseOption.MustUse))
+        if (!Verthunder2.CanUse(out _))
         {
-            return true;
-        }
-
-        //Use Manafication after embolden.
-        if ((Player.HasStatus(true, StatusID.Embolden) || IsLastAbility(ActionID.Embolden))
-            && Manafication.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.EmergencyAbility(nextGCD, out act);
-    }
-
-    protected override bool AttackAbility(out IAction act)
-    {
-        //Swift
-        if (ManaStacks == 0 && (BlackMana < 50 || WhiteMana < 50)
-            && (CombatElapsedLess(4) || !Manafication.EnoughLevel || !Manafication.WillHaveOneChargeGCD(0, 1)))
-        {
-            if (!Player.HasStatus(true, StatusID.VerfireReady, StatusID.VerstoneReady))
+            if (Verfire.CanUse(out act))
             {
-                if (Swiftcast.CanUse(out act))
-                {
-                    return true;
-                }
+                return true;
+            }
 
-                if (InCombat && Acceleration.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-                {
-                    return true;
-                }
+            if (Verstone.CanUse(out act))
+            {
+                return true;
             }
         }
 
-        if (IsBurst && UseBurstMedicine(out act))
+        if (Scatter.CanUse(out act))
         {
             return true;
         }
 
-        //Attack abilities.
-        if (ContreSixte.CanUse(out act, CanUseOption.MustUse))
+        if (WhiteMana < BlackMana)
+        {
+            if (Veraero2.CanUse(out act) && BlackMana - WhiteMana != 5)
+            {
+                return true;
+            }
+
+            if (Veraero.CanUse(out act) && BlackMana - WhiteMana != 6)
+            {
+                return true;
+            }
+        }
+        if (Verthunder2.CanUse(out act))
         {
             return true;
         }
 
-        if (Fleche.CanUse(out act))
+        if (Verthunder.CanUse(out act))
         {
             return true;
         }
 
-        if (Engagement.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        if (Jolt.CanUse(out act))
         {
             return true;
         }
 
-        if (CorpsACorps.CanUse(out act, CanUseOption.MustUse) && !IsMoving)
+        if (Configs.GetBool("UseVercure") && NotInCombatDelay && Vercure.CanUse(out act))
         {
             return true;
         }
 
-        return base.AttackAbility(out act);
+        return base.GeneralGCD(out act);
     }
+
+    private static bool CanStartMeleeCombo
+    {
+        get
+        {
+            if (Player.HasStatus(true, StatusID.Manafication, StatusID.Embolden) ||
+                             BlackMana == 100 || WhiteMana == 100)
+            {
+                return true;
+            }
+
+            if (BlackMana == WhiteMana)
+            {
+                return false;
+            }
+            else if (WhiteMana < BlackMana)
+            {
+                if (Player.HasStatus(true, StatusID.VerstoneReady))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (Player.HasStatus(true, StatusID.VerfireReady))
+                {
+                    return false;
+                }
+            }
+
+            if (Player.HasStatus(true, Vercure.StatusProvide))
+            {
+                return false;
+            }
+
+            //Waiting for embolden.
+            if (Embolden.EnoughLevel && Embolden.WillHaveOneChargeGCD(5))
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    private static IBaseAction VerthunderStartUp { get; } = new BaseAction(ActionID.Verthunder);
 }

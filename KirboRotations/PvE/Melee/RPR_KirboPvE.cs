@@ -1,9 +1,4 @@
-﻿using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+﻿using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Melee;
 
@@ -15,10 +10,97 @@ namespace KirboRotations.PvE.Melee;
 internal sealed class RPR_KirboPvE : RPR_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
+
+    protected override bool AttackAbility(out IAction act)
+    {
+        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var IsTargetDying = HostileTarget?.IsDying() ?? false;
+
+        if (IsBurst)
+        {
+            if (UseBurstMedicine(out act))
+            {
+                if (CombatElapsedLess(10))
+                {
+                    if (!CombatElapsedLess(5))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (ArcaneCircle.WillHaveOneCharge(5))
+                    {
+                        return true;
+                    }
+                }
+            }
+            if ((HostileTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false)
+                && ArcaneCircle.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        if (IsTargetBoss && IsTargetDying ||
+           !Configs.GetBool("EnshroudPooling") && Shroud >= 50 ||
+           Configs.GetBool("EnshroudPooling") && Shroud >= 50 &&
+           (!PlentifulHarvest.EnoughLevel ||
+           Player.HasStatus(true, StatusID.ArcaneCircle) ||
+           ArcaneCircle.WillHaveOneCharge(8) ||
+           !Player.HasStatus(true, StatusID.ArcaneCircle) && ArcaneCircle.WillHaveOneCharge(65) && !ArcaneCircle.WillHaveOneCharge(50) ||
+           !Player.HasStatus(true, StatusID.ArcaneCircle) && Shroud >= 90))
+        {
+            if (Enshroud.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        if (HasEnshrouded && (Player.HasStatus(true, StatusID.ArcaneCircle) || LemureShroud < 3))
+        {
+            if (LemuresScythe.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+            {
+                return true;
+            }
+
+            if (LemuresSlice.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+            {
+                return true;
+            }
+        }
+
+        if (PlentifulHarvest.EnoughLevel && !Player.HasStatus(true, StatusID.ImmortalSacrifice) && !Player.HasStatus(true, StatusID.BloodSownCircle) || !PlentifulHarvest.EnoughLevel)
+        {
+            if (Gluttony.CanUse(out act, CanUseOption.MustUse))
+            {
+                return true;
+            }
+        }
+
+        if (!Player.HasStatus(true, StatusID.BloodSownCircle) && !Player.HasStatus(true, StatusID.ImmortalSacrifice) && (Gluttony.EnoughLevel && !Gluttony.WillHaveOneChargeGCD(4) || !Gluttony.EnoughLevel || Soul == 100))
+        {
+            if (GrimSwathe.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (BloodStalk.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        return base.AttackAbility(out act);
+    }
 
     protected override IAction CountDownAction(float remainTime)
     {
@@ -34,30 +116,6 @@ internal sealed class RPR_KirboPvE : RPR_Base
         }
 
         return base.CountDownAction(remainTime);
-    }
-
-    private static bool Reaping(out IAction act)
-    {
-        if (GrimReaping.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Player.HasStatus(true, StatusID.EnhancedCrossReaping) || !Player.HasStatus(true, StatusID.EnhancedVoidReaping))
-        {
-            if (CrossReaping.CanUse(out act))
-            {
-                return true;
-            }
-        }
-        else
-        {
-            if (VoidReaping.CanUse(out act))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     protected override bool GeneralGCD(out IAction act)
@@ -202,86 +260,27 @@ internal sealed class RPR_KirboPvE : RPR_Base
         return base.GeneralGCD(out act);
     }
 
-    protected override bool AttackAbility(out IAction act)
+    private static bool Reaping(out IAction act)
     {
-        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var IsTargetDying = HostileTarget?.IsDying() ?? false;
-
-        if (IsBurst)
+        if (GrimReaping.CanUse(out act))
         {
-            if (UseBurstMedicine(out act))
-            {
-                if (CombatElapsedLess(10))
-                {
-                    if (!CombatElapsedLess(5))
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    if (ArcaneCircle.WillHaveOneCharge(5))
-                    {
-                        return true;
-                    }
-                }
-            }
-            if ((HostileTarget?.HasStatus(true, StatusID.DeathsDesign) ?? false)
-                && ArcaneCircle.CanUse(out act))
+            return true;
+        }
+
+        if (Player.HasStatus(true, StatusID.EnhancedCrossReaping) || !Player.HasStatus(true, StatusID.EnhancedVoidReaping))
+        {
+            if (CrossReaping.CanUse(out act))
             {
                 return true;
             }
         }
-
-        if (IsTargetBoss && IsTargetDying ||
-           !Configs.GetBool("EnshroudPooling") && Shroud >= 50 ||
-           Configs.GetBool("EnshroudPooling") && Shroud >= 50 &&
-           (!PlentifulHarvest.EnoughLevel ||
-           Player.HasStatus(true, StatusID.ArcaneCircle) ||
-           ArcaneCircle.WillHaveOneCharge(8) ||
-           !Player.HasStatus(true, StatusID.ArcaneCircle) && ArcaneCircle.WillHaveOneCharge(65) && !ArcaneCircle.WillHaveOneCharge(50) ||
-           !Player.HasStatus(true, StatusID.ArcaneCircle) && Shroud >= 90))
+        else
         {
-            if (Enshroud.CanUse(out act))
+            if (VoidReaping.CanUse(out act))
             {
                 return true;
             }
         }
-
-        if (HasEnshrouded && (Player.HasStatus(true, StatusID.ArcaneCircle) || LemureShroud < 3))
-        {
-            if (LemuresScythe.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-            {
-                return true;
-            }
-
-            if (LemuresSlice.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-            {
-                return true;
-            }
-        }
-
-        if (PlentifulHarvest.EnoughLevel && !Player.HasStatus(true, StatusID.ImmortalSacrifice) && !Player.HasStatus(true, StatusID.BloodSownCircle) || !PlentifulHarvest.EnoughLevel)
-        {
-            if (Gluttony.CanUse(out act, CanUseOption.MustUse))
-            {
-                return true;
-            }
-        }
-
-        if (!Player.HasStatus(true, StatusID.BloodSownCircle) && !Player.HasStatus(true, StatusID.ImmortalSacrifice) && (Gluttony.EnoughLevel && !Gluttony.WillHaveOneChargeGCD(4) || !Gluttony.EnoughLevel || Soul == 100))
-        {
-            if (GrimSwathe.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (BloodStalk.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        return base.AttackAbility(out act);
+        return false;
     }
 }

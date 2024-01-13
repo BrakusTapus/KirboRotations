@@ -1,61 +1,20 @@
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Ranged;
 
+[BetaRotation]
 [SourceCode(Path = "main/KirboRotations/Ranged/DNC_Default.cs")]
 internal sealed class DNC_KirboPvE : DNC_Base
 {
-    /*
-     * PvE: Starts dancing once auto is turned on, needs a check if hostile are present
-     */
-
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
-
-    protected override IAction CountDownAction(float remainTime)
-    {
-        //if(remainTime <= CountDownAhead)
-        //{
-        //    if(DanceFinishGCD(out))
-        //}
-        if (remainTime <= 15)
-        {
-            if (StandardStep.CanUse(out var act, CanUseOption.MustUse))
-            {
-                return act;
-            }
-
-            if (ExecuteStepGCD(out act))
-            {
-                return act;
-            }
-        }
-        return base.CountDownAction(remainTime);
-    }
-
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
-    {
-        if (IsDancing)
-        {
-            return base.EmergencyAbility(nextGCD, out act);
-        }
-
-        if (TechnicalStep.ElapsedAfter(115)
-            && UseBurstMedicine(out act))
-        {
-            return true;
-        }
-
-        return base.EmergencyAbility(nextGCD, out act);
-    }
 
     protected override bool AttackAbility(out IAction act)
     {
@@ -117,6 +76,39 @@ internal sealed class DNC_KirboPvE : DNC_Base
         }
 
         return base.AttackAbility(out act);
+    }
+
+    protected override IAction CountDownAction(float remainTime)
+    {
+        if (remainTime <= 15)
+        {
+            if (StandardStep.CanUse(out var act, CanUseOption.MustUse))
+            {
+                return act;
+            }
+
+            if (ExecuteStepGCD(out act))
+            {
+                return act;
+            }
+        }
+        return base.CountDownAction(remainTime);
+    }
+
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
+    {
+        if (IsDancing)
+        {
+            return base.EmergencyAbility(nextGCD, out act);
+        }
+
+        if (TechnicalStep.ElapsedAfter(115)
+            && UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
+        return base.EmergencyAbility(nextGCD, out act);
     }
 
     protected override bool GeneralGCD(out IAction act)
@@ -220,6 +212,31 @@ internal sealed class DNC_KirboPvE : DNC_Base
         return false;
     }
 
+    private static bool UseClosedPosition(out IAction act)
+    {
+        if (!ClosedPosition.CanUse(out act))
+        {
+            return false;
+        }
+
+        if (InCombat && Player.HasStatus(true, StatusID.ClosedPosition1))
+        {
+            foreach (var friend in PartyMembers)
+            {
+                if (friend.HasStatus(true, StatusID.ClosedPosition2))
+                {
+                    if (ClosedPosition.Target != friend)
+                    {
+                        return true;
+                    }
+
+                    break;
+                }
+            }
+        }
+        return false;
+    }
+
     private static bool UseStandardStep(out IAction act)
     {
         TerritoryContentType Content = TerritoryContentType;
@@ -253,30 +270,5 @@ internal sealed class DNC_KirboPvE : DNC_Base
         }
 
         return true;
-    }
-
-    private static bool UseClosedPosition(out IAction act)
-    {
-        if (!ClosedPosition.CanUse(out act))
-        {
-            return false;
-        }
-
-        if (InCombat && Player.HasStatus(true, StatusID.ClosedPosition1))
-        {
-            foreach (var friend in PartyMembers)
-            {
-                if (friend.HasStatus(true, StatusID.ClosedPosition2))
-                {
-                    if (ClosedPosition.Target != friend)
-                    {
-                        return true;
-                    }
-
-                    break;
-                }
-            }
-        }
-        return false;
     }
 }

@@ -1,10 +1,4 @@
-﻿using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+﻿using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Magical;
 
@@ -15,167 +9,16 @@ namespace KirboRotations.PvE.Magical;
 internal sealed class SMN_KirboPvE : SMN_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    protected override IRotationConfigSet CreateConfiguration()
-    {
-        return base.CreateConfiguration()
-            .SetCombo(CombatType.PvE, "addSwiftcast", 0, "Use Swiftcast", "No", "Emerald", "Ruby", "All")
-            .SetCombo(CombatType.PvE, "SummonOrder", 0, "Order", "Topaz-Emerald-Ruby", "Topaz-Ruby-Emerald", "Emerald-Topaz-Ruby")
-            .SetBool(CombatType.PvE, "addCrimsonCyclone", true, "Use Crimson Cyclone");
-    }
-
     public override bool CanHealSingleSpell => false;
-
-    [RotationDesc(ActionID.CrimsonCyclone)]
-    protected override bool MoveForwardGCD(out IAction act)
-    {
-        //火神突进
-        if (CrimsonCyclone.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        return base.MoveForwardGCD(out act);
-    }
-
-    protected override bool GeneralGCD(out IAction act)
-    {
-        //宝石兽召唤
-        if (SummonCarbuncle.CanUse(out act))
-        {
-            return true;
-        }
-
-        //风神读条
-        if (Slipstream.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-        //火神冲锋
-        if (CrimsonStrike.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        //AOE
-        if (PreciousBrilliance.CanUse(out act))
-        {
-            return true;
-        }
-        //单体
-        if (Gemshine.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!IsMoving && Configs.GetBool("addCrimsonCyclone") && CrimsonCyclone.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        //龙神不死鸟
-        if ((Player.HasStatus(false, StatusID.SearingLight) || SearingLight.IsCoolingDown) && SummonBahamut.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!SummonBahamut.EnoughLevel && HasHostilesInRange && AetherCharge.CanUse(out act))
-        {
-            return true;
-        }
-
-        //毁4
-        if (IsMoving && (Player.HasStatus(true, StatusID.GarudasFavor) || InIfrit)
-            && !Player.HasStatus(true, StatusID.SwiftCast) && !InBahamut && !InPhoenix
-            && RuinIV.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        //召唤蛮神
-        switch (Configs.GetCombo("SummonOrder"))
-        {
-            default:
-                //土
-                if (SummonTopaz.CanUse(out act))
-                {
-                    return true;
-                }
-                //风
-                if (SummonEmerald.CanUse(out act))
-                {
-                    return true;
-                }
-                //火
-                if (SummonRuby.CanUse(out act))
-                {
-                    return true;
-                }
-
-                break;
-
-            case 1:
-                //土
-                if (SummonTopaz.CanUse(out act))
-                {
-                    return true;
-                }
-                //火
-                if (SummonRuby.CanUse(out act))
-                {
-                    return true;
-                }
-                //风
-                if (SummonEmerald.CanUse(out act))
-                {
-                    return true;
-                }
-
-                break;
-
-            case 2:
-                //风
-                if (SummonEmerald.CanUse(out act))
-                {
-                    return true;
-                }
-                //土
-                if (SummonTopaz.CanUse(out act))
-                {
-                    return true;
-                }
-                //火
-                if (SummonRuby.CanUse(out act))
-                {
-                    return true;
-                }
-
-                break;
-        }
-        if (SummonTimeEndAfterGCD() && AttunmentTimeEndAfterGCD() &&
-            !Player.HasStatus(true, StatusID.SwiftCast) && !InBahamut && !InPhoenix &&
-            RuinIV.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-        //迸裂三灾
-        if (Outburst.CanUse(out act))
-        {
-            return true;
-        }
-
-        //毁123
-        if (Ruin.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.GeneralGCD(out act);
-    }
 
     protected override bool AttackAbility(out IAction act)
     {
@@ -196,16 +39,19 @@ internal sealed class SMN_KirboPvE : SMN_Base
         {
             return true;
         }
+
         //死星核爆
         if ((SummonBahamut.ElapsedOneChargeAfterGCD(3) || IsTargetBoss && IsTargetDying) && DeathFlare.CanUse(out act, CanUseOption.MustUse))
         {
             return true;
         }
+
         //苏生之炎
         if (Rekindle.CanUse(out act, CanUseOption.MustUse))
         {
             return true;
         }
+
         //山崩
         if (MountainBuster.CanUse(out act, CanUseOption.MustUse))
         {
@@ -218,6 +64,7 @@ internal sealed class SMN_KirboPvE : SMN_Base
         {
             return true;
         }
+
         //溃烂爆发
         if ((Player.HasStatus(false, StatusID.SearingLight) && InBahamut && (SummonBahamut.ElapsedOneChargeAfterGCD(3) || !EnergyDrain.IsCoolingDown) ||
             !SearingLight.EnoughLevel || IsTargetBoss && IsTargetDying) && Fester.CanUse(out act))
@@ -230,6 +77,7 @@ internal sealed class SMN_KirboPvE : SMN_Base
         {
             return true;
         }
+
         //能量吸收
         if (EnergyDrain.CanUse(out act))
         {
@@ -237,6 +85,31 @@ internal sealed class SMN_KirboPvE : SMN_Base
         }
 
         return base.AttackAbility(out act);
+    }
+
+    protected override IAction CountDownAction(float remainTime)
+    {
+        if (SummonCarbuncle.CanUse(out _))
+        {
+            return SummonCarbuncle;
+        }
+
+        //1.5s预读毁3
+        if (remainTime <= Ruin.CastTime + CountDownAhead
+            && Ruin.CanUse(out _))
+        {
+            return Ruin;
+        }
+
+        return base.CountDownAction(remainTime);
+    }
+
+    protected override IRotationConfigSet CreateConfiguration()
+    {
+        return base.CreateConfiguration()
+            .SetCombo(CombatType.PvE, "addSwiftcast", 0, "Use Swiftcast", "No", "Emerald", "Ruby", "All")
+            .SetCombo(CombatType.PvE, "SummonOrder", 0, "Order", "Topaz-Emerald-Ruby", "Topaz-Ruby-Emerald", "Emerald-Topaz-Ruby")
+            .SetBool(CombatType.PvE, "addCrimsonCyclone", true, "Use Crimson Cyclone");
     }
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
@@ -281,19 +154,162 @@ internal sealed class SMN_KirboPvE : SMN_Base
         return base.EmergencyAbility(nextGCD, out act);
     }
 
-    protected override IAction CountDownAction(float remainTime)
+    protected override bool GeneralGCD(out IAction act)
     {
-        if (SummonCarbuncle.CanUse(out _))
+        //宝石兽召唤
+        if (SummonCarbuncle.CanUse(out act))
         {
-            return SummonCarbuncle;
-        }
-        //1.5s预读毁3
-        if (remainTime <= Ruin.CastTime + CountDownAhead
-            && Ruin.CanUse(out _))
-        {
-            return Ruin;
+            return true;
         }
 
-        return base.CountDownAction(remainTime);
+        //风神读条
+        if (Slipstream.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        //火神冲锋
+        if (CrimsonStrike.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        //AOE
+        if (PreciousBrilliance.CanUse(out act))
+        {
+            return true;
+        }
+
+        //单体
+        if (Gemshine.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!IsMoving && Configs.GetBool("addCrimsonCyclone") && CrimsonCyclone.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        //龙神不死鸟
+        if ((Player.HasStatus(false, StatusID.SearingLight) || SearingLight.IsCoolingDown) && SummonBahamut.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!SummonBahamut.EnoughLevel && HasHostilesInRange && AetherCharge.CanUse(out act))
+        {
+            return true;
+        }
+
+        //毁4
+        if (IsMoving && (Player.HasStatus(true, StatusID.GarudasFavor) || InIfrit)
+            && !Player.HasStatus(true, StatusID.SwiftCast) && !InBahamut && !InPhoenix
+            && RuinIV.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        //召唤蛮神
+        switch (Configs.GetCombo("SummonOrder"))
+        {
+            default:
+
+                //土
+                if (SummonTopaz.CanUse(out act))
+                {
+                    return true;
+                }
+
+                //风
+                if (SummonEmerald.CanUse(out act))
+                {
+                    return true;
+                }
+
+                //火
+                if (SummonRuby.CanUse(out act))
+                {
+                    return true;
+                }
+
+                break;
+
+            case 1:
+
+                //土
+                if (SummonTopaz.CanUse(out act))
+                {
+                    return true;
+                }
+
+                //火
+                if (SummonRuby.CanUse(out act))
+                {
+                    return true;
+                }
+
+                //风
+                if (SummonEmerald.CanUse(out act))
+                {
+                    return true;
+                }
+
+                break;
+
+            case 2:
+
+                //风
+                if (SummonEmerald.CanUse(out act))
+                {
+                    return true;
+                }
+
+                //土
+                if (SummonTopaz.CanUse(out act))
+                {
+                    return true;
+                }
+
+                //火
+                if (SummonRuby.CanUse(out act))
+                {
+                    return true;
+                }
+
+                break;
+        }
+        if (SummonTimeEndAfterGCD() && AttunmentTimeEndAfterGCD() &&
+            !Player.HasStatus(true, StatusID.SwiftCast) && !InBahamut && !InPhoenix &&
+            RuinIV.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        //迸裂三灾
+        if (Outburst.CanUse(out act))
+        {
+            return true;
+        }
+
+        //毁123
+        if (Ruin.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out act);
+    }
+
+    [RotationDesc(ActionID.CrimsonCyclone)]
+    protected override bool MoveForwardGCD(out IAction act)
+    {
+        //火神突进
+        if (CrimsonCyclone.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        return base.MoveForwardGCD(out act);
     }
 }

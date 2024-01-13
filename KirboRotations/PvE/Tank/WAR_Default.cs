@@ -1,23 +1,85 @@
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Tank;
 
+[BetaRotation]
 [SourceCode(Path = "main/KirboRotations/Tank/WAR_Default.cs")]
 [LinkDescription("https://cdn.discordapp.com/attachments/277962807813865472/963548326433796116/unknown.png")]
 internal class WAR_DefaultPvE : WAR_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    private static bool IsBurstStatus => !Player.WillStatusEndGCD(0, 0, false, StatusID.InnerStrength);
+    protected override bool AttackAbility(out IAction act)
+    {
+        if (Infuriate.CanUse(out act, gcdCountForAbility: 3))
+        {
+            return true;
+        }
+
+        if (CombatElapsedLessGCD(1))
+        {
+            return false;
+        }
+
+        if (UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
+        if (Player.HasStatus(false, StatusID.SurgingTempest)
+            && !Player.WillStatusEndGCD(6, 0, true, StatusID.SurgingTempest)
+            || !MythrilTempest.EnoughLevel)
+        {
+            if (Berserk.CanUse(out act, CanUseOption.OnLastAbility))
+            {
+                return true;
+            }
+        }
+
+        if (IsBurstStatus)
+        {
+            if (Infuriate.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+            {
+                return true;
+            }
+        }
+
+        if (CombatElapsedLessGCD(4))
+        {
+            return false;
+        }
+
+        if (Orogeny.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Upheaval.CanUse(out act))
+        {
+            return true;
+        }
+
+        var option = CanUseOption.MustUse;
+        if (IsBurstStatus)
+        {
+            option |= CanUseOption.EmptyOrSkipCombo;
+        }
+
+        if (Onslaught.CanUse(out act, option) && !IsMoving)
+        {
+            return true;
+        }
+
+        return base.AttackAbility(out act);
+    }
 
     protected override IAction CountDownAction(float remainTime)
     {
@@ -39,6 +101,75 @@ internal class WAR_DefaultPvE : WAR_Base
             }
         }
         return base.CountDownAction(remainTime);
+    }
+
+    [RotationDesc(ActionID.ShakeItOff, ActionID.Reprisal)]
+    protected override bool DefenseAreaAbility(out IAction act)
+    {
+        if (ShakeItOff.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        if (Reprisal.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaAbility(out act);
+    }
+
+    [RotationDesc(ActionID.RawIntuition, ActionID.Vengeance, ActionID.Rampart, ActionID.RawIntuition, ActionID.Reprisal)]
+    protected override bool DefenseSingleAbility(out IAction act)
+    {
+        //10
+        if (RawIntuition.CanUse(out act, CanUseOption.OnLastAbility))
+        {
+            return true;
+        }
+
+        //30
+        if ((!Rampart.IsCoolingDown || Rampart.ElapsedAfter(60)) && Vengeance.CanUse(out act))
+        {
+            return true;
+        }
+
+        //20
+        if (Vengeance.IsCoolingDown && Vengeance.ElapsedAfter(60) && Rampart.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Reprisal.CanUse(out act))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected override bool GeneralAbility(out IAction act)
+    {
+        //Auto healing
+        if (Player.GetHealthRatio() < 0.6f)
+        {
+            if (ThrillOfBattle.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (Equilibrium.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        if (!HasTankStance && NascentFlash.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.GeneralAbility(out act);
     }
 
     protected override bool GeneralGCD(out IAction act)
@@ -109,136 +240,5 @@ internal class WAR_DefaultPvE : WAR_Base
         return base.GeneralGCD(out act);
     }
 
-    protected override bool AttackAbility(out IAction act)
-    {
-        if (Infuriate.CanUse(out act, gcdCountForAbility: 3))
-        {
-            return true;
-        }
-
-        if (CombatElapsedLessGCD(1))
-        {
-            return false;
-        }
-
-        if (UseBurstMedicine(out act))
-        {
-            return true;
-        }
-
-        if (Player.HasStatus(false, StatusID.SurgingTempest)
-            && !Player.WillStatusEndGCD(6, 0, true, StatusID.SurgingTempest)
-            || !MythrilTempest.EnoughLevel)
-        {
-            if (Berserk.CanUse(out act, CanUseOption.OnLastAbility))
-            {
-                return true;
-            }
-        }
-
-        if (IsBurstStatus)
-        {
-            if (Infuriate.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-            {
-                return true;
-            }
-        }
-
-        if (CombatElapsedLessGCD(4))
-        {
-            return false;
-        }
-
-        if (Orogeny.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Upheaval.CanUse(out act))
-        {
-            return true;
-        }
-
-        var option = CanUseOption.MustUse;
-        if (IsBurstStatus)
-        {
-            option |= CanUseOption.EmptyOrSkipCombo;
-        }
-
-        if (Onslaught.CanUse(out act, option) && !IsMoving)
-        {
-            return true;
-        }
-
-        return base.AttackAbility(out act);
-    }
-
-    protected override bool GeneralAbility(out IAction act)
-    {
-        //Auto healing
-        if (Player.GetHealthRatio() < 0.6f)
-        {
-            if (ThrillOfBattle.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (Equilibrium.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        if (!HasTankStance && NascentFlash.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.GeneralAbility(out act);
-    }
-
-    [RotationDesc(ActionID.RawIntuition, ActionID.Vengeance, ActionID.Rampart, ActionID.RawIntuition, ActionID.Reprisal)]
-    protected override bool DefenseSingleAbility(out IAction act)
-    {
-        //10
-        if (RawIntuition.CanUse(out act, CanUseOption.OnLastAbility))
-        {
-            return true;
-        }
-
-        //30
-        if ((!Rampart.IsCoolingDown || Rampart.ElapsedAfter(60)) && Vengeance.CanUse(out act))
-        {
-            return true;
-        }
-
-        //20
-        if (Vengeance.IsCoolingDown && Vengeance.ElapsedAfter(60) && Rampart.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Reprisal.CanUse(out act))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    [RotationDesc(ActionID.ShakeItOff, ActionID.Reprisal)]
-    protected override bool DefenseAreaAbility(out IAction act)
-    {
-        if (ShakeItOff.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        if (Reprisal.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaAbility(out act);
-    }
+    private static bool IsBurstStatus => !Player.WillStatusEndGCD(0, 0, false, StatusID.InnerStrength);
 }

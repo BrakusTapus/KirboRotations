@@ -1,34 +1,123 @@
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Healer;
 
+[BetaRotation]
 [SourceCode(Path = "main/KirboRotations/Healer/WHM_Default.cs")]
 internal sealed class WHM_KirboPvE : WHM_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    protected override IRotationConfigSet CreateConfiguration()
-        => base.CreateConfiguration()
-            .SetBool(CombatType.PvE, "UseLilyWhenFull", true, "Use Lily at max stacks.")
-            .SetBool(CombatType.PvE, "UsePreRegen", false, "Regen on Tank at 5 seconds remaining on Countdown.")
-            .SetInt(CombatType.PvE, "AssizeThreshold", 1, "At how many targets should Assize be used", 1, 20);
-
-    public static IBaseAction RegenDefense { get; } = new BaseAction(ActionID.Regen, ActionOption.Hot)
+    internal static IBaseAction RegenDefense { get; } = new BaseAction(ActionID.Regen, ActionOption.Hot)
     {
         ChoiceTarget = TargetFilter.FindAttackedTarget,
         ActionCheck = (b, m) => b.IsJobCategory(JobRole.Tank),
         TargetStatus = Regen.TargetStatus,
     };
+
+    protected override bool AttackAbility(out IAction act)
+    {
+        if (PresenceOfMind.CanUse(out act))
+        {
+            return true;
+        }
+
+        int AssizeTargets = Configs.GetInt("AssizeThreshold");
+        if (Assize.CanUse(out act, CanUseOption.MustUse) && NumberOfAllHostilesInRange >= AssizeTargets)
+        {
+            return true;
+        }
+
+        return base.AttackAbility(out act);
+    }
+
+    protected override IAction CountDownAction(float remainTime)
+    {
+        if (remainTime < Stone.CastTime + CountDownAhead
+            && Stone.CanUse(out var act))
+        {
+            return act;
+        }
+
+        if (Configs.GetBool("UsePreRegen") && remainTime <= 5 && remainTime > 3)
+        {
+            if (RegenDefense.CanUse(out act, CanUseOption.IgnoreClippingCheck))
+            {
+                return act;
+            }
+
+            if (DivineBenison.CanUse(out act, CanUseOption.IgnoreClippingCheck))
+            {
+                return act;
+            }
+        }
+        return base.CountDownAction(remainTime);
+    }
+
+    protected override IRotationConfigSet CreateConfiguration()
+                    => base.CreateConfiguration()
+            .SetBool(CombatType.PvE, "UseLilyWhenFull", true, "Use Lily at max stacks.")
+            .SetBool(CombatType.PvE, "UsePreRegen", false, "Regen on Tank at 5 seconds remaining on Countdown.")
+            .SetInt(CombatType.PvE, "AssizeThreshold", 1, "At how many targets should Assize be used", 1, 20);
+
+    [RotationDesc(ActionID.Temperance, ActionID.LiturgyOfTheBell)]
+    protected override bool DefenseAreaAbility(out IAction act)
+    {
+        if (Temperance.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (LiturgyOfTheBell.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaAbility(out act);
+    }
+
+    [RotationDesc(ActionID.DivineBenison, ActionID.Aquaveil)]
+    protected override bool DefenseSingleAbility(out IAction act)
+    {
+        if (DivineBenison.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Aquaveil.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(out act);
+    }
+
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
+    {
+        if (nextGCD is IBaseAction action && action.MPNeed >= 1000 &&
+            ThinAir.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (nextGCD.IsTheSameTo(true, AfflatusRapture, Medica, Medica2, Cure3))
+        {
+            if (PlenaryIndulgence.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        return base.EmergencyAbility(nextGCD, out act);
+    }
 
     protected override bool GeneralGCD(out IAction act)
     {
@@ -82,93 +171,15 @@ internal sealed class WHM_KirboPvE : WHM_Base
         return base.GeneralGCD(out act);
     }
 
-    protected override bool AttackAbility(out IAction act)
+    [RotationDesc(ActionID.Asylum)]
+    protected override bool HealAreaAbility(out IAction act)
     {
-        if (PresenceOfMind.CanUse(out act))
+        if (Asylum.CanUse(out act))
         {
             return true;
         }
 
-        int AssizeTargets = Configs.GetInt("AssizeThreshold");
-        if (Assize.CanUse(out act, CanUseOption.MustUse) && NumberOfAllHostilesInRange >= AssizeTargets)
-        {
-            return true;
-        }
-
-        return base.AttackAbility(out act);
-    }
-
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
-    {
-        if (nextGCD is IBaseAction action && action.MPNeed >= 1000 &&
-            ThinAir.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (nextGCD.IsTheSameTo(true, AfflatusRapture, Medica, Medica2, Cure3))
-        {
-            if (PlenaryIndulgence.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        return base.EmergencyAbility(nextGCD, out act);
-    }
-
-    [RotationDesc(ActionID.AfflatusSolace, ActionID.Regen, ActionID.Cure2, ActionID.Cure)]
-    protected override bool HealSingleGCD(out IAction act)
-    {
-        if (AfflatusSolace.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Regen.CanUse(out act)
-            && (IsMoving || Regen.Target.GetHealthRatio() > 0.4))
-        {
-            return true;
-        }
-
-        if (Cure2.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Cure.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.HealSingleGCD(out act);
-    }
-
-    [RotationDesc(ActionID.Benediction, ActionID.Asylum, ActionID.DivineBenison, ActionID.Tetragrammaton)]
-    protected override bool HealSingleAbility(out IAction act)
-    {
-        if (Benediction.CanUse(out act) &&
-            Benediction.Target.GetHealthRatio() < 0.3)
-        {
-            return true;
-        }
-
-        if (!IsMoving && Asylum.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (DivineBenison.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Tetragrammaton.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.HealSingleAbility(out act);
+        return base.HealAreaAbility(out act);
     }
 
     [RotationDesc(ActionID.AfflatusRapture, ActionID.Medica2, ActionID.Cure3, ActionID.Medica)]
@@ -199,47 +210,58 @@ internal sealed class WHM_KirboPvE : WHM_Base
         return base.HealAreaGCD(out act);
     }
 
-    [RotationDesc(ActionID.Asylum)]
-    protected override bool HealAreaAbility(out IAction act)
+    [RotationDesc(ActionID.Benediction, ActionID.Asylum, ActionID.DivineBenison, ActionID.Tetragrammaton)]
+    protected override bool HealSingleAbility(out IAction act)
     {
-        if (Asylum.CanUse(out act))
+        if (Benediction.CanUse(out act) &&
+            Benediction.Target.GetHealthRatio() < 0.3)
         {
             return true;
         }
 
-        return base.HealAreaAbility(out act);
-    }
+        if (!IsMoving && Asylum.CanUse(out act))
+        {
+            return true;
+        }
 
-    [RotationDesc(ActionID.DivineBenison, ActionID.Aquaveil)]
-    protected override bool DefenseSingleAbility(out IAction act)
-    {
         if (DivineBenison.CanUse(out act))
         {
             return true;
         }
 
-        if (Aquaveil.CanUse(out act))
+        if (Tetragrammaton.CanUse(out act))
         {
             return true;
         }
 
-        return base.DefenseSingleAbility(out act);
+        return base.HealSingleAbility(out act);
     }
 
-    [RotationDesc(ActionID.Temperance, ActionID.LiturgyOfTheBell)]
-    protected override bool DefenseAreaAbility(out IAction act)
+    [RotationDesc(ActionID.AfflatusSolace, ActionID.Regen, ActionID.Cure2, ActionID.Cure)]
+    protected override bool HealSingleGCD(out IAction act)
     {
-        if (Temperance.CanUse(out act))
+        if (AfflatusSolace.CanUse(out act))
         {
             return true;
         }
 
-        if (LiturgyOfTheBell.CanUse(out act))
+        if (Regen.CanUse(out act)
+            && (IsMoving || Regen.Target.GetHealthRatio() > 0.4))
         {
             return true;
         }
 
-        return base.DefenseAreaAbility(out act);
+        if (Cure2.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Cure.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out act);
     }
 
     //[RotationDesc(ActionID.Regen)]
@@ -254,27 +276,4 @@ internal sealed class WHM_KirboPvE : WHM_Base
     //    if (Medica2.CanUse(out act) && PartyMembers.Count((n) => n.HasStatus(true, StatusID.Medica2)) < PartyMembers.Count() / 2) return true;
     //    return base.DefenseAreaGCD(out act);
     //}
-
-    protected override IAction CountDownAction(float remainTime)
-    {
-        if (remainTime < Stone.CastTime + CountDownAhead
-            && Stone.CanUse(out var act))
-        {
-            return act;
-        }
-
-        if (Configs.GetBool("UsePreRegen") && remainTime <= 5 && remainTime > 3)
-        {
-            if (RegenDefense.CanUse(out act, CanUseOption.IgnoreClippingCheck))
-            {
-                return act;
-            }
-
-            if (DivineBenison.CanUse(out act, CanUseOption.IgnoreClippingCheck))
-            {
-                return act;
-            }
-        }
-        return base.CountDownAction(remainTime);
-    }
 }

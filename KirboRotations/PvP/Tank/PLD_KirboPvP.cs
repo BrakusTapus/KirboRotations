@@ -1,15 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
-using ImGuiNET;
-using KirboRotations.Configurations;
 using KirboRotations.Extensions;
-using KirboRotations.UI;
 using Lumina.Excel.GeneratedSheets2;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvP.Tank;
 
@@ -18,39 +10,51 @@ namespace KirboRotations.PvP.Tank;
 internal class PLD_KirboPvP : PLD_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvP;
+
     #endregion Rotation Info
 
     #region PvP IBaseActions
 
-    /// <summary>
-    /// Delivers an attack with a potency of 3,000.
-    /// </summary>
-    private static IBaseAction PvP_Fastblade { get; } = new BaseAction(ActionID.PvP_Fastblade)
+    /// <summary> Delivers an attack with a potency of 8,000. Additional Effect: Restores own HP Cure Potency: 4,000 </summary>
+    private static IBaseAction PvP_Atonement { get; } = new BaseAction(ActionID.PvP_Atonement)
     {
+        // Sword Oath ID = 1991
+        StatusNeed = new StatusID[1] { (StatusID)1991 },
+    };
+
+    /// <summary> Deals unaspected damage with a potency of 6,000 </summary>
+    private static IBaseAction PvP_BladeOfFaith { get; } = new BaseAction(ActionID.PvP_BladeOfFaith)
+    {
+        // Blade of Faith Ready ID = 3250
+        StatusNeed = new StatusID[1] { (StatusID)3250 },
+
+        // Sacred Claim ID = 3025
+        TargetStatus = new StatusID[1] { (StatusID)3025 },
+    };
+
+    /// <summary> Deals unaspected damage with a potency of 7,000 </summary>
+    private static IBaseAction PvP_BladeOfTruth { get; } = new BaseAction(ActionID.PvP_BladeOfTruth)
+    {
+        // Sacred Claim ID = 3025
+        TargetStatus = new StatusID[1] { (StatusID)3025 },
+    };
+
+    /// <summary> Deals unaspected damage with a potency of 8,000 </summary>
+    private static IBaseAction PvP_BladeOfValor { get; } = new BaseAction(ActionID.PvP_BladeOfValor)
+    {
+        // Sacred Claim ID = 3025
+        TargetStatus = new StatusID[1] { (StatusID)3025 },
     };
 
     /// <summary>
-    /// Delivers an attack with a potency of 4,000.
-    /// </summary>
-    private static IBaseAction PvP_Riotblade { get; } = new BaseAction(ActionID.PvP_Riotblade)
-    {
-    };
-
-    /// <summary>
-    /// Delivers an attack with a potency of 5,000.
-    /// Additional Effect: Grants a stack of Sword Oath, up to a maximum of 3
-    /// </summary>
-    private static IBaseAction PvP_Royalauthority { get; } = new BaseAction(ActionID.PvP_Royalauthority)
-    {
-    };
-
-    /// <summary>
-    /// Deals unaspected damage with a potency of 8,000 to target and all enemies nearby it.
-    /// Additional Effect: Afflicts target with Sacred Claim
-    /// Sacred Claim Effect: Restores HP when successfully landing an attack on targets under this effect
+    ///     Deals unaspected damage with a potency of 8,000 to target and all enemies nearby it. Additional Effect: Afflicts target with Sacred Claim
+    ///     Sacred Claim Effect: Restores HP when successfully landing an attack on targets under this effect
     /// </summary>
     private static IBaseAction PvP_Confiteor { get; } = new BaseAction(ActionID.PvP_Confiteor)
     {
@@ -58,33 +62,12 @@ internal class PLD_KirboPvP : PLD_Base
         TargetStatus = new StatusID[1] { (StatusID)3025 },
     };
 
-    /// <summary>
-    /// Delivers an attack with a potency of 4,000.
-    /// Additional Effect: Stun
-    /// Additional Effect: Grants a stack of Sword Oath, up to a maximum of 3
-    /// </summary>
-    private static IBaseAction PvP_Shieldbash { get; } = new BaseAction(ActionID.PvP_Shieldbash)
+    /// <summary> Delivers an attack with a potency of 3,000. </summary>
+    private static IBaseAction PvP_Fastblade { get; } = new BaseAction(ActionID.PvP_Fastblade)
     {
-        TargetStatus = new StatusID[1] { StatusID.PvP_Stun },
-        // Sword Oath ID = 1991
-        StatusProvide = new StatusID[1] { (StatusID)1991 },
-        ActionCheck = (b, m) => !Target.HasStatus(false, StatusID.PvP_Stun),
     };
 
-    /// <summary>
-    /// Rushes target and delivers an attack with a potency of 2,000.
-    /// Additional Effect: Grants a stack of Sword Oath, up to a maximum of 3
-    /// </summary>
-    private static IBaseAction PvP_Intervene { get; } = new BaseAction(ActionID.PvP_Intervene)
-    {
-        // Sword Oath ID = 1991
-        StatusProvide = new StatusID[1] { (StatusID)1991 },
-    };
-
-    /// <summary>
-    /// Rush to a target party member's side.
-    /// Additional Effect: Take all damage intended for the targeted party member
-    /// </summary>
+    /// <summary> Rush to a target party member's side. Additional Effect: Take all damage intended for the targeted party member </summary>
     private static IBaseAction PvP_Guardian { get; } = new BaseAction(ActionID.PvP_Guardian, ActionOption.Friendly)
     {
         ChoiceTarget = (Targets, mustUse) =>
@@ -102,93 +85,58 @@ internal class PLD_KirboPvP : PLD_Base
     };
 
     /// <summary>
-    /// Grants Holy Sheltron and Knight's Resolve.
-    /// Holy Sheltron Effect: Creates a barrier around self that absorbs damage equivalent to a heal of 12,000 potency
-    /// Knight's Resolve Effect: Reduces damage taken by 15%
+    ///     Grants Holy Sheltron and Knight's Resolve. Holy Sheltron Effect: Creates a barrier around self that absorbs damage equivalent to a heal of
+    ///     12,000 potency Knight's Resolve Effect: Reduces damage taken by 15%
     /// </summary>
     private static IBaseAction PvP_HolySheltron { get; } = new BaseAction(ActionID.PvP_HolySheltron, ActionOption.Buff)
     {
-        // Holy Sheltron ID = 3026
-        // Knight's Resolve ID = 3188 (Also inflicts Heavy on target?)
+        // Holy Sheltron ID = 3026 Knight's Resolve ID = 3188 (Also inflicts Heavy on target?)
         StatusProvide = new StatusID[2] { (StatusID)3026, (StatusID)3188 },
     };
 
     /// <summary>
-    /// Delivers an attack with a potency of 8,000.
-    /// Additional Effect: Restores own HP
-    /// Cure Potency: 4,000
+    ///     Rushes target and delivers an attack with a potency of 2,000. Additional Effect: Grants a stack of Sword Oath, up to a maximum of 3
     /// </summary>
-    private static IBaseAction PvP_Atonement { get; } = new BaseAction(ActionID.PvP_Atonement)
+    private static IBaseAction PvP_Intervene { get; } = new BaseAction(ActionID.PvP_Intervene)
     {
         // Sword Oath ID = 1991
-        StatusNeed = new StatusID[1] { (StatusID)1991 },
+        StatusProvide = new StatusID[1] { (StatusID)1991 },
     };
 
     /// <summary>
-    /// Deals unaspected damage with a potency of 6,000
-    /// </summary>
-    private static IBaseAction PvP_BladeOfFaith { get; } = new BaseAction(ActionID.PvP_BladeOfFaith)
-    {
-        // Blade of Faith Ready ID = 3250
-        StatusNeed = new StatusID[1] { (StatusID)3250 },
-        // Sacred Claim ID = 3025
-        TargetStatus = new StatusID[1] { (StatusID)3025 },
-    };
-
-    /// <summary>
-    /// Deals unaspected damage with a potency of 7,000
-    /// </summary>
-    private static IBaseAction PvP_BladeOfTruth { get; } = new BaseAction(ActionID.PvP_BladeOfTruth)
-    {
-        // Sacred Claim ID = 3025
-        TargetStatus = new StatusID[1] { (StatusID)3025 },
-    };
-
-    /// <summary>
-    /// Deals unaspected damage with a potency of 8,000
-    /// </summary>
-    private static IBaseAction PvP_BladeOfValor { get; } = new BaseAction(ActionID.PvP_BladeOfValor)
-    {
-        // Sacred Claim ID = 3025
-        TargetStatus = new StatusID[1] { (StatusID)3025 },
-    };
-
-    /// <summary>
-    /// Grants the effect of Hallowed Ground to self and Phalanx to nearby party members.
-    /// Hallowed Ground Effect: Renders you impervious to most attacks
-    /// Phalanx Effect: Reduces damage taken by 33%
-    /// Additional Effect: Grants Blade of Faith Ready
+    ///     Grants the effect of Hallowed Ground to self and Phalanx to nearby party members. Hallowed Ground Effect: Renders you impervious to most
+    ///     attacks Phalanx Effect: Reduces damage taken by 33% Additional Effect: Grants Blade of Faith Ready
     /// </summary>
     private static IBaseAction PvP_Phalanx { get; } = new BaseAction(ActionID.PvP_Phalanx, ActionOption.Friendly)
     {
-        // HallowedGround ID = 1302
-        // Blade Of Faith Ready ID = 3205
+        // HallowedGround ID = 1302 Blade Of Faith Ready ID = 3205
         StatusProvide = new StatusID[2] { (StatusID)1302, (StatusID)3250 },
         ActionCheck = (t, m) => LimitBreakLevel >= 1 && Player.IsInCombat()
     };
 
-    #endregion PvP IBaseActions
-
-    #region Debug window
-    public override bool ShowStatus => true;
-    public override void DisplayStatus()
+    /// <summary> Delivers an attack with a potency of 4,000. </summary>
+    private static IBaseAction PvP_Riotblade { get; } = new BaseAction(ActionID.PvP_Riotblade)
     {
-        RotationConfigs CompatibilityAndFeatures = new();
-        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.Frontlines);
-        CompatibilityAndFeatures.AddContentCompatibilityForPvP(PvPContentCompatibility.CrystalineConflict);
-        CompatibilityAndFeatures.AddFeaturesForPvP(PvPFeatures.HasUserConfig);
-        try
-        {
-            PvPDebugWindow.DisplayPvPTab();
-            ImGui.SameLine();
-            PvPDebugWindow.DisplayPvPRotationTabs(RotationName, CompatibilityAndFeatures);
-        }
-        catch (Exception ex)
-        {
-            Serilog.Log.Warning($"{ex}");
-        }
-    }
-    #endregion Debug window
+    };
+
+    /// <summary> Delivers an attack with a potency of 5,000. Additional Effect: Grants a stack of Sword Oath, up to a maximum of 3 </summary>
+    private static IBaseAction PvP_Royalauthority { get; } = new BaseAction(ActionID.PvP_Royalauthority)
+    {
+    };
+
+    /// <summary>
+    ///     Delivers an attack with a potency of 4,000. Additional Effect: Stun Additional Effect: Grants a stack of Sword Oath, up to a maximum of 3
+    /// </summary>
+    private static IBaseAction PvP_Shieldbash { get; } = new BaseAction(ActionID.PvP_Shieldbash)
+    {
+        TargetStatus = new StatusID[1] { StatusID.PvP_Stun },
+
+        // Sword Oath ID = 1991
+        StatusProvide = new StatusID[1] { (StatusID)1991 },
+        ActionCheck = (b, m) => !Target.HasStatus(false, StatusID.PvP_Stun),
+    };
+
+    #endregion PvP IBaseActions
 
     #region Action Related Properties
 
@@ -207,6 +155,7 @@ internal class PLD_KirboPvP : PLD_Base
     #endregion Action Related Properties
 
     #region Rotation Config
+
     protected override IRotationConfigSet CreateConfiguration() => base.CreateConfiguration()
         .SetInt(CombatType.PvP, "Recuperate", 45000, "HP Threshold for Recuperate", 1, 60000)
         .SetBool(CombatType.PvP, "GuardCancel", true, "Turn on if you want to FORCE RS to use nothing while in guard in PvP")
@@ -216,9 +165,11 @@ internal class PLD_KirboPvP : PLD_Base
         .SetBool(CombatType.PvP, "LowHPNoAttacks", true, "Prevents the use of actions if player is moving with low HP\n(HP Threshold set in next option)")
         .SetInt(CombatType.PvP, "LowHPThreshold", 20000, "HP Threshold for the 'LowHPNoAttacks' option", 1, 60000)
         .SetBool(CombatType.PvP, "UseDash", true, "Let rotation use Intervene");
+
     #endregion Rotation Config
 
     #region GCD Logic
+
     protected override bool GeneralGCD(out IAction act)
     {
         act = null;
@@ -319,9 +270,11 @@ internal class PLD_KirboPvP : PLD_Base
         // If none of the combo skills can be used, return false
         return false;
     }
+
     #endregion GCD Logic
 
     #region oGCD Logic
+
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
         act = null;
@@ -354,8 +307,7 @@ internal class PLD_KirboPvP : PLD_Base
             return false;
         }
 
-        // provides dmg reduction and shield
-        // should be use pre-emptively
+        // provides dmg reduction and shield should be use pre-emptively
         if (PvP_HolySheltron.CanUse(out act, CanUseOption.MustUse))
         {
             int numberOfPartyMembers = PartyMembers.Count();
@@ -420,6 +372,7 @@ internal class PLD_KirboPvP : PLD_Base
 
         return base.EmergencyAbility(nextGCD, out act);
     }
+
     #endregion oGCD Logic
 
     #region Extra Helper Methods

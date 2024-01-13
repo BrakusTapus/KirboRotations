@@ -4,66 +4,38 @@
     <PropertyGroup>
         <AssemblyName>KirboRotations</AssemblyName>
         <Authors>Kirbo</Authors>
-        <Version>1.0.0.29</Version>
+        <Version>1.0.0.30</Version>
         <TargetFramework>net7.0-windows</TargetFramework>
         <PlatformTarget>x64</PlatformTarget>
-        <Platforms>AnyCPU</Platforms>
+        <Platforms>x64</Platforms>
         <DalamudLibPath>$(AppData)\XIVLauncher\addon\Hooks\dev\</DalamudLibPath>
         <ImplicitUsings>enable</ImplicitUsings>
         <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
         <LangVersion>latest</LangVersion>
         <UseWindowsForms>true</UseWindowsForms>
-    </PropertyGroup>
-
-    <!-- Rotation Solver's ECommons Path -->
-    <PropertyGroup>
-        <RSInstallPath>$(AppData)\XIVLauncher\installedPlugins\RotationSolver\3.5.6.9\</RSInstallPath>
-        <ECommonsHintPath>$(RSInstallPath)</ECommonsHintPath>
+        <RootNamespace>KirboRotations</RootNamespace>
     </PropertyGroup>
 
     <!-- Debug Configuration Settings -->
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
         <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
         <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
     </PropertyGroup>
 
     <!-- Release Configuration Settings -->
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
         <NoWarn>1701;1702;S3358;S1871;S1144;S125;S108;S1751;S1481;S101;CS0618;</NoWarn>
         <WarningsAsErrors>$(WarningsAsErrors);NU1605;</WarningsAsErrors>
     </PropertyGroup>
+
     <ItemGroup>
-      <Compile Remove="Helpers\OpenerHelpers - Copy.cs" />
-      <Compile Remove="PvE\Beta\ExP_Test_Kirbo.cs" />
-      <Compile Remove="PvP\Healer\AST_KirboPvP.cs" />
-      <Compile Remove="PvP\Healer\SCH_KirboPvP.cs" />
-      <Compile Remove="PvP\Healer\SGE_KirboPvP.cs" />
-      <Compile Remove="PvP\Magical\RDM_KirboPvP.cs" />
-      <Compile Remove="PvP\Melee\RPR_KirboPvP.cs" />
-      <Compile Remove="PvP\Melee\SAM_KirboPvP.cs" />
-      <Compile Remove="PvP\Ranged\DNC_KirboPvP.cs" />
-      <Compile Remove="PvP\Tank\GNB_KirboPvP.cs" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Include="PvE\Beta\ExP_Test_Kirbo.cs" />
-      <None Include="PvP\Healer\AST_KirboPvP.cs" />
-      <None Include="PvP\Healer\SCH_KirboPvP.cs" />
-      <None Include="PvP\Healer\SGE_KirboPvP.cs" />
-      <None Include="PvP\Magical\RDM_KirboPvP.cs" />
-      <None Include="PvP\Melee\RPR_KirboPvP.cs" />
-      <None Include="PvP\Melee\SAM_KirboPvP.cs" />
-      <None Include="PvP\Ranged\DNC_KirboPvP.cs" />
-      <None Include="PvP\Tank\GNB_KirboPvP.cs" />
+        <None Include="..\.editorconfig" Link=".editorconfig">
+            <Visible>false</Visible>
+        </None>
     </ItemGroup>
 
-    <!-- Files Management -->
-    <!-- Exclude from Compiler -->
-
-    <!-- Unfinished PvP Rotations -->
-
-    <!-- Package reference -->
     <ItemGroup>
-        <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
+      <PackageReference Include="RotationSolver.Basic" Version="3.5.4" />
     </ItemGroup>
 
     <!-- Default Dalamud Reference Libraries -->
@@ -112,6 +84,18 @@
             <HintPath>$(DalamudLibPath)Serilog.dll</HintPath>
             <Private>False</Private>
         </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <Using Include="Dalamud.Game.ClientState.JobGauge.Enums" />
+      <Using Include="KirboRotations.Extensions.BattleCharaEx">
+        <Static>True</Static>
+      </Using>
+      <Using Include="RotationSolver.Basic.Actions" />
+      <Using Include="RotationSolver.Basic.Attributes" />
+      <Using Include="RotationSolver.Basic.Configuration.RotationConfig" />
+      <Using Include="RotationSolver.Basic.Data" />
+      <Using Include="RotationSolver.Basic.Helpers" />
+      <Using Include="RotationSolver.Basic.Rotations.Basic" />
     </ItemGroup>
 
 </Project>

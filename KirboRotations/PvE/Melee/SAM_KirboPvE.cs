@@ -1,21 +1,99 @@
-﻿using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+﻿using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Melee;
 
+[BetaRotation]
 [SourceCode(Path = "main/KirboRotations/Melee/SAM_Default.cs")]
 internal sealed class SAM_KirboPvE : SAM_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
+
+    protected override bool AttackAbility(out IAction act)
+    {
+        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var IsTargetDying = HostileTarget?.IsDying() ?? false;
+
+        //意气冲天
+        if (Kenki <= 50 && Ikishoten.CanUse(out act))
+        {
+            return true;
+        }
+
+        //叶隐
+        if ((HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && (HostileTarget?.WillStatusEnd(32, true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(28, true, StatusID.Higanbana) ?? false) && SenCount == 1 && IsLastAction(true, Yukikaze) && !HaveMeikyoShisui)
+        {
+            if (Hagakure.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        //闪影、红莲
+        if (HasMoon && HasFlower)
+        {
+            if (HissatsuGuren.CanUse(out act, !HissatsuSenei.EnoughLevel ? CanUseOption.MustUse : CanUseOption.None))
+            {
+                return true;
+            }
+
+            if (HissatsuSenei.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        //照破、无明照破
+        if (Shoha2.CanUse(out act) && NumberOfHostilesInRange >= Configs.GetInt("Shoha2Threshold"))
+        {
+            return true;
+        }
+
+        if (Shoha.CanUse(out act))
+        {
+            return true;
+        }
+
+        //震天、九天
+        if (Kenki >= 50 && Ikishoten.WillHaveOneCharge(10) || Kenki >= Configs.GetInt("addKenki") || IsTargetBoss && IsTargetDying)
+        {
+            if (HissatsuKyuten.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (HissatsuShinten.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        return base.AttackAbility(out act);
+    }
+
+    protected override IAction CountDownAction(float remainTime)
+    {
+        //开局使用明镜
+        if (remainTime <= 5 && MeikyoShisui.CanUse(out _, CanUseOption.IgnoreClippingCheck))
+        {
+            return MeikyoShisui;
+        }
+
+        //真北防止boss面向没到位
+        if (remainTime <= 2 && TrueNorth.CanUse(out _, CanUseOption.IgnoreClippingCheck))
+        {
+            return TrueNorth;
+        }
+
+        return base.CountDownAction(remainTime);
+    }
 
     protected override IRotationConfigSet CreateConfiguration()
     {
@@ -24,10 +102,22 @@ internal sealed class SAM_KirboPvE : SAM_Base
             .SetInt(CombatType.PvE, "Shoha2Threshold", 3, "Use 'Shoha2' if there are x targets or more", 1, 20);
     }
 
-    /// <summary>
-    /// 明镜止水
-    /// </summary>
-    private static bool HaveMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
+    {
+        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
+        var IsTargetDying = HostileTarget?.IsDying() ?? false;
+
+        //明镜止水
+        if (HasHostilesInRange && IsLastGCD(true, Yukikaze, Mangetsu, Oka) &&
+            (!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(40, true, StatusID.Higanbana) ?? false) || !HasMoon && !HasFlower || IsTargetBoss && IsTargetDying))
+        {
+            if (MeikyoShisui.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+            {
+                return true;
+            }
+        }
+        return base.EmergencyAbility(nextGCD, out act);
+    }
 
     protected override bool GeneralGCD(out IAction act)
     {
@@ -147,98 +237,6 @@ internal sealed class SAM_KirboPvE : SAM_Base
         return base.GeneralGCD(out act);
     }
 
-    protected override bool AttackAbility(out IAction act)
-    {
-        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var IsTargetDying = HostileTarget?.IsDying() ?? false;
-
-        //意气冲天
-        if (Kenki <= 50 && Ikishoten.CanUse(out act))
-        {
-            return true;
-        }
-
-        //叶隐
-        if ((HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && (HostileTarget?.WillStatusEnd(32, true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(28, true, StatusID.Higanbana) ?? false) && SenCount == 1 && IsLastAction(true, Yukikaze) && !HaveMeikyoShisui)
-        {
-            if (Hagakure.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        //闪影、红莲
-        if (HasMoon && HasFlower)
-        {
-            if (HissatsuGuren.CanUse(out act, !HissatsuSenei.EnoughLevel ? CanUseOption.MustUse : CanUseOption.None))
-            {
-                return true;
-            }
-
-            if (HissatsuSenei.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        //照破、无明照破
-        if (Shoha2.CanUse(out act) && NumberOfHostilesInRange >= Configs.GetInt("Shoha2Threshold"))
-        {
-            return true;
-        }
-
-        if (Shoha.CanUse(out act))
-        {
-            return true;
-        }
-
-        //震天、九天
-        if (Kenki >= 50 && Ikishoten.WillHaveOneCharge(10) || Kenki >= Configs.GetInt("addKenki") || IsTargetBoss && IsTargetDying)
-        {
-            if (HissatsuKyuten.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (HissatsuShinten.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        return base.AttackAbility(out act);
-    }
-
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
-    {
-        var IsTargetBoss = HostileTarget?.IsBossFromTTK() ?? false;
-        var IsTargetDying = HostileTarget?.IsDying() ?? false;
-
-        //明镜止水
-        if (HasHostilesInRange && IsLastGCD(true, Yukikaze, Mangetsu, Oka) &&
-            (!IsTargetBoss || (HostileTarget?.HasStatus(true, StatusID.Higanbana) ?? false) && !(HostileTarget?.WillStatusEnd(40, true, StatusID.Higanbana) ?? false) || !HasMoon && !HasFlower || IsTargetBoss && IsTargetDying))
-        {
-            if (MeikyoShisui.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-            {
-                return true;
-            }
-        }
-        return base.EmergencyAbility(nextGCD, out act);
-    }
-
-    protected override IAction CountDownAction(float remainTime)
-    {
-        //开局使用明镜
-        if (remainTime <= 5 && MeikyoShisui.CanUse(out _, CanUseOption.IgnoreClippingCheck))
-        {
-            return MeikyoShisui;
-        }
-        //真北防止boss面向没到位
-        if (remainTime <= 2 && TrueNorth.CanUse(out _, CanUseOption.IgnoreClippingCheck))
-        {
-            return TrueNorth;
-        }
-
-        return base.CountDownAction(remainTime);
-    }
+    /// <summary> 明镜止水 </summary>
+    private static bool HaveMeikyoShisui => Player.HasStatus(true, StatusID.MeikyoShisui);
 }

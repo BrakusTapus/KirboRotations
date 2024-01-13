@@ -1,28 +1,68 @@
-using Dalamud.Game.ClientState.JobGauge.Enums;
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Melee;
 
+[BetaRotation]
 [RotationDesc(ActionID.RiddleOfFire)]
 [SourceCode(Path = "main/KirboRotations/Melee/MNK_Default.cs")]
 [LinkDescription("https://i.imgur.com/C5lQhpe.png")]
 internal sealed class MNK_KirboPvE : MNK_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    protected override IRotationConfigSet CreateConfiguration()
+    protected override bool AttackAbility(out IAction act)
     {
-        return base.CreateConfiguration().SetBool(CombatType.PvE, "AutoFormShift", true, "Use Form Shift");
+        act = null;
+
+        if (CombatElapsedLessGCD(3))
+        {
+            return false;
+        }
+
+        if (BeastChakras.Contains(BeastChakra.NONE) && Player.HasStatus(true, StatusID.RaptorForm)
+            && (!RiddleOfFire.EnoughLevel || Player.HasStatus(false, StatusID.RiddleOfFire) && !Player.WillStatusEndGCD(3, 0, false, StatusID.RiddleOfFire)
+            || RiddleOfFire.WillHaveOneChargeGCD(1) && (PerfectBalance.ElapsedAfter(60) || !PerfectBalance.IsCoolingDown)))
+        {
+            if (PerfectBalance.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+            {
+                return true;
+            }
+        }
+
+        if (Brotherhood.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HowlingFist.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SteelPeak.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (HowlingFist.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        if (RiddleOfWind.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(out act);
     }
 
     protected override IAction CountDownAction(float remainTime)
@@ -50,75 +90,26 @@ internal sealed class MNK_KirboPvE : MNK_Base
         return base.CountDownAction(remainTime);
     }
 
-    private static bool OpoOpoForm(out IAction act)
+    protected override IRotationConfigSet CreateConfiguration()
     {
-        if (ArmOfTheDestroyer.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (DragonKick.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (BootShine.CanUse(out act))
-        {
-            return true;
-        }
-
-        return false;
+        return base.CreateConfiguration().SetBool(CombatType.PvE, "AutoFormShift", true, "Use Form Shift");
     }
 
-    private static bool UseLunarPerfectBalance => (HasSolar || Player.HasStatus(false, StatusID.PerfectBalance))
-        && (!Player.WillStatusEndGCD(0, 0, false, StatusID.RiddleOfFire) || Player.HasStatus(false, StatusID.RiddleOfFire) || RiddleOfFire.WillHaveOneChargeGCD(2)) && PerfectBalance.WillHaveOneChargeGCD(3);
-
-    private static bool RaptorForm(out IAction act)
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
-        if (FourPointFury.CanUse(out act))
+        if (InCombat)
         {
-            return true;
+            if (UseBurstMedicine(out act))
+            {
+                return true;
+            }
+
+            if (IsBurst && !CombatElapsedLessGCD(2) && RiddleOfFire.CanUse(out act, CanUseOption.OnLastAbility))
+            {
+                return true;
+            }
         }
-
-        if ((Player.WillStatusEndGCD(3, 0, true, StatusID.DisciplinedFist)
-            || Player.WillStatusEndGCD(7, 0, true, StatusID.DisciplinedFist)
-            && UseLunarPerfectBalance) && TwinSnakes.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (TrueStrike.CanUse(out act))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private static bool CoerlForm(out IAction act)
-    {
-        if (RockBreaker.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (UseLunarPerfectBalance && Demolish.CanUse(out act, CanUseOption.MustUse)
-            && (Demolish.Target?.WillStatusEndGCD(7, 0, true, StatusID.Demolish) ?? false))
-        {
-            return true;
-        }
-
-        if (Demolish.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (SnapPunch.CanUse(out act))
-        {
-            return true;
-        }
-
-        return false;
+        return base.EmergencyAbility(nextGCD, out act);
     }
 
     protected override bool GeneralGCD(out IAction act)
@@ -171,6 +162,65 @@ internal sealed class MNK_KirboPvE : MNK_Base
         }
 
         return base.GeneralGCD(out act);
+    }
+
+    private static bool UseLunarPerfectBalance => (HasSolar || Player.HasStatus(false, StatusID.PerfectBalance))
+        && (!Player.WillStatusEndGCD(0, 0, false, StatusID.RiddleOfFire) || Player.HasStatus(false, StatusID.RiddleOfFire) || RiddleOfFire.WillHaveOneChargeGCD(2)) && PerfectBalance.WillHaveOneChargeGCD(3);
+
+    private static bool CoerlForm(out IAction act)
+    {
+        if (RockBreaker.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UseLunarPerfectBalance && Demolish.CanUse(out act, CanUseOption.MustUse)
+            && (Demolish.Target?.WillStatusEndGCD(7, 0, true, StatusID.Demolish) ?? false))
+        {
+            return true;
+        }
+
+        if (Demolish.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (SnapPunch.CanUse(out act))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool LunarNadi(out IAction act)
+    {
+        if (OpoOpoForm(out act))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool OpoOpoForm(out IAction act)
+    {
+        if (ArmOfTheDestroyer.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (DragonKick.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (BootShine.CanUse(out act))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private static bool PerfectBalanceActions(out IAction act)
@@ -246,9 +296,21 @@ internal sealed class MNK_KirboPvE : MNK_Base
         return false;
     }
 
-    private static bool LunarNadi(out IAction act)
+    private static bool RaptorForm(out IAction act)
     {
-        if (OpoOpoForm(out act))
+        if (FourPointFury.CanUse(out act))
+        {
+            return true;
+        }
+
+        if ((Player.WillStatusEndGCD(3, 0, true, StatusID.DisciplinedFist)
+            || Player.WillStatusEndGCD(7, 0, true, StatusID.DisciplinedFist)
+            && UseLunarPerfectBalance) && TwinSnakes.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (TrueStrike.CanUse(out act))
         {
             return true;
         }
@@ -307,69 +369,5 @@ internal sealed class MNK_KirboPvE : MNK_Base
         }
 
         return CoerlForm(out act);
-    }
-
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
-    {
-        if (InCombat)
-        {
-            if (UseBurstMedicine(out act))
-            {
-                return true;
-            }
-
-            if (IsBurst && !CombatElapsedLessGCD(2) && RiddleOfFire.CanUse(out act, CanUseOption.OnLastAbility))
-            {
-                return true;
-            }
-        }
-        return base.EmergencyAbility(nextGCD, out act);
-    }
-
-    protected override bool AttackAbility(out IAction act)
-    {
-        act = null;
-
-        if (CombatElapsedLessGCD(3))
-        {
-            return false;
-        }
-
-        if (BeastChakras.Contains(BeastChakra.NONE) && Player.HasStatus(true, StatusID.RaptorForm)
-            && (!RiddleOfFire.EnoughLevel || Player.HasStatus(false, StatusID.RiddleOfFire) && !Player.WillStatusEndGCD(3, 0, false, StatusID.RiddleOfFire)
-            || RiddleOfFire.WillHaveOneChargeGCD(1) && (PerfectBalance.ElapsedAfter(60) || !PerfectBalance.IsCoolingDown)))
-        {
-            if (PerfectBalance.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-            {
-                return true;
-            }
-        }
-
-        if (Brotherhood.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (HowlingFist.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (SteelPeak.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (HowlingFist.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        if (RiddleOfWind.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.AttackAbility(out act);
     }
 }

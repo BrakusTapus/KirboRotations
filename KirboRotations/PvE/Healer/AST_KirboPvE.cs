@@ -1,35 +1,32 @@
-using Dalamud.Game.ClientState.JobGauge.Enums;
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
-
 namespace KirboRotations.PvE.Healer;
 
+[BetaRotation]
 [RotationDesc(ActionID.Divination)]
 [SourceCode(Path = "main/KirboRotations/Healer/AST_Default.cs")]
 internal sealed class AST_KirboPvE : AST_Base
 {
-    #region Rotation Info
+    #region General rotation Info
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
     public override CombatType Type => CombatType.PvE;
     #endregion Rotation Info
 
-    protected override IRotationConfigSet CreateConfiguration()
-        => base.CreateConfiguration()
-            .SetFloat(RotationSolver.Basic.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "UseEarthlyStarTime", 15, "Use Earthly Star during countdown timer.", 4, 20);
-
+    #region IBaseActions
     private static IBaseAction AspectedBeneficDefense { get; } = new BaseAction(ActionID.AspectedBenefic, ActionOption.Hot)
     {
         ChoiceTarget = TargetFilter.FindAttackedTarget,
         ActionCheck = (b, m) => b.IsJobCategory(JobRole.Tank),
         TargetStatus = new StatusID[] { StatusID.AspectedBenefic },
     };
+    #endregion
 
+    #region Rotation Configs
+    protected override IRotationConfigSet CreateConfiguration()
+                => base.CreateConfiguration()
+            .SetFloat(RotationSolver.Basic.Configuration.ConfigUnitType.Seconds, CombatType.PvE, "UseEarthlyStarTime", 15, "Use Earthly Star during countdown timer.", 4, 20);
+    #endregion
+
+    #region Countdown logic
     protected override IAction CountDownAction(float remainTime)
     {
         if (remainTime < Malefic.CastTime + CountDownAhead
@@ -61,98 +58,9 @@ internal sealed class AST_KirboPvE : AST_Base
 
         return base.CountDownAction(remainTime);
     }
+    #endregion
 
-    [RotationDesc(ActionID.CelestialIntersection, ActionID.Exaltation)]
-    protected override bool DefenseSingleAbility(out IAction act)
-    {
-        //天星交错
-        if (CelestialIntersection.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-        {
-            return true;
-        }
-
-        //给T减伤，这个很重要。
-        if (Exaltation.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseSingleAbility(out act);
-    }
-
-    [RotationDesc(ActionID.Macrocosmos)]
-    protected override bool DefenseAreaGCD(out IAction act)
-    {
-        if (Macrocosmos.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaGCD(out act);
-    }
-
-    [RotationDesc(ActionID.CollectiveUnconscious)]
-    protected override bool DefenseAreaAbility(out IAction act)
-    {
-        if (CollectiveUnconscious.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaAbility(out act);
-    }
-
-    protected override bool GeneralGCD(out IAction act)
-    {
-        //Add AspectedBeneficwhen not in combat.
-        if (NotInCombatDelay && AspectedBeneficDefense.CanUse(out act))
-        {
-            return true;
-        }
-
-        //群体输出
-        if (Gravity.CanUse(out act))
-        {
-            return true;
-        }
-
-        //单体输出
-        if (Combust.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Malefic.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Combust.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        return base.GeneralGCD(out act);
-    }
-
-    [RotationDesc(ActionID.AspectedHelios, ActionID.Helios)]
-    protected override bool HealAreaGCD(out IAction act)
-    {
-        //阳星相位
-        if (AspectedHelios.CanUse(out act))
-        {
-            return true;
-        }
-
-        //阳星
-        if (Helios.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.HealAreaGCD(out act);
-    }
-
+    #region oGCD logic
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
     {
         if (base.EmergencyAbility(nextGCD, out act))
@@ -171,7 +79,6 @@ internal sealed class AST_KirboPvE : AST_Base
             return false;
         }
 
-        //如果要群奶了，先上个天宫图！
         if (nextGCD.IsTheSameTo(true, AspectedHelios, Helios))
         {
             if (Horoscope.CanUse(out act))
@@ -179,14 +86,12 @@ internal sealed class AST_KirboPvE : AST_Base
                 return true;
             }
 
-            //中间学派
             if (NeutralSect.CanUse(out act))
             {
                 return true;
             }
         }
 
-        //如果要单奶了，先上星位合图！
         if (nextGCD.IsTheSameTo(true, Benefic, Benefic2, AspectedBenefic) && Synastry.CanUse(out act))
         {
             return true;
@@ -194,49 +99,7 @@ internal sealed class AST_KirboPvE : AST_Base
 
         return base.EmergencyAbility(nextGCD, out act);
     }
-
-    protected override bool GeneralAbility(out IAction act)
-    {
-        //如果当前还没有卡牌，那就抽一张
-        if (Draw.CanUse(out act))
-        {
-            return true;
-        }
-
-        //如果当前卡牌已经拥有了，就重抽
-        if (Redraw.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.GeneralAbility(out act);
-    }
-
-    [RotationDesc(ActionID.AspectedBenefic, ActionID.Benefic2, ActionID.Benefic)]
-    protected override bool HealSingleGCD(out IAction act)
-    {
-        //吉星相位
-        if (AspectedBenefic.CanUse(out act)
-            && (IsMoving || AspectedBenefic.Target.GetHealthRatio() > 0.4))
-        {
-            return true;
-        }
-
-        //福星
-        if (Benefic2.CanUse(out act))
-        {
-            return true;
-        }
-
-        //吉星
-        if (Benefic.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.HealSingleGCD(out act);
-    }
-
+  
     protected override bool AttackAbility(out IAction act)
     {
         if (IsBurst && !IsMoving && Divination.CanUse(out act))
@@ -244,19 +107,16 @@ internal sealed class AST_KirboPvE : AST_Base
             return true;
         }
 
-        //如果当前还没有皇冠卡牌，那就抽一张
         if (MinorArcana.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
         {
             return true;
         }
 
-        //如果当前还没有卡牌，那就抽一张
         if (Draw.CanUse(out act, IsBurst ? CanUseOption.EmptyOrSkipCombo : CanUseOption.None))
         {
             return true;
         }
 
-        //光速，创造更多的内插能力技的机会。
         if (IsMoving && Lightspeed.CanUse(out act))
         {
             return true;
@@ -264,12 +124,11 @@ internal sealed class AST_KirboPvE : AST_Base
 
         if (!IsMoving)
         {
-            //如果没有地星也没有巨星，那就试试看能不能放个。
             if (!Player.HasStatus(true, StatusID.EarthlyDominance, StatusID.GiantDominance) && EarthlyStar.CanUse(out act, CanUseOption.MustUse))
             {
                 return true;
             }
-            //加星星的进攻Buff
+
             if (Astrodyne.CanUse(out act))
             {
                 return true;
@@ -281,7 +140,6 @@ internal sealed class AST_KirboPvE : AST_Base
             return true;
         }
 
-        //发牌
         if (Redraw.CanUse(out act))
         {
             return true;
@@ -295,22 +153,34 @@ internal sealed class AST_KirboPvE : AST_Base
         return base.AttackAbility(out act);
     }
 
-    [RotationDesc(ActionID.EssentialDignity, ActionID.CelestialIntersection, ActionID.CelestialOpposition,
-        ActionID.EarthlyStar, ActionID.Horoscope)]
+    protected override bool GeneralAbility(out IAction act)
+    {
+        if (Draw.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Redraw.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.GeneralAbility(out act);
+    }
+
+    [RotationDesc(ActionID.EssentialDignity, ActionID.CelestialIntersection, ActionID.CelestialOpposition, ActionID.EarthlyStar, ActionID.Horoscope)]
     protected override bool HealSingleAbility(out IAction act)
     {
-        //常规奶
         if (EssentialDignity.CanUse(out act))
         {
             return true;
         }
-        //带盾奶
+
         if (CelestialIntersection.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
         {
             return true;
         }
 
-        //奶量牌，要看情况。
         if (DrawnCrownCard == CardType.LADY && MinorArcana.CanUse(out act, CanUseOption.MustUse))
         {
             return true;
@@ -320,31 +190,27 @@ internal sealed class AST_KirboPvE : AST_Base
         var isBoss = Malefic.Target.IsBossFromTTK();
         if (EssentialDignity.IsCoolingDown && tank.Count() == 1 && tank.Any(t => t.GetHealthRatio() < 0.5) && !isBoss)
         {
-            //群Hot
             if (CelestialOpposition.CanUse(out act))
             {
                 return true;
             }
 
-            //如果有巨星主宰
             if (Player.HasStatus(true, StatusID.GiantDominance))
             {
-                //需要回血的时候炸了。
                 act = EarthlyStar;
                 return true;
             }
 
-            //天宫图
             if (!Player.HasStatus(true, StatusID.HoroscopeHelios, StatusID.Horoscope) && Horoscope.CanUse(out act))
             {
                 return true;
             }
-            //阳星天宫图
+
             if (Player.HasStatus(true, StatusID.HoroscopeHelios) && Horoscope.CanUse(out act))
             {
                 return true;
             }
-            //超紧急情况天宫图
+
             if (tank.Any(t => t.GetHealthRatio() < 0.3) && Horoscope.CanUse(out act))
             {
                 return true;
@@ -357,27 +223,22 @@ internal sealed class AST_KirboPvE : AST_Base
     [RotationDesc(ActionID.CelestialOpposition, ActionID.EarthlyStar, ActionID.Horoscope)]
     protected override bool HealAreaAbility(out IAction act)
     {
-        //群Hot
         if (CelestialOpposition.CanUse(out act))
         {
             return true;
         }
 
-        //如果有巨星主宰
         if (Player.HasStatus(true, StatusID.GiantDominance))
         {
-            //需要回血的时候炸了。
             act = EarthlyStar;
             return true;
         }
 
-        //天宫图
         if (Player.HasStatus(true, StatusID.HoroscopeHelios) && Horoscope.CanUse(out act))
         {
             return true;
         }
 
-        //奶量牌，要看情况。
         if (DrawnCrownCard == CardType.LADY && MinorArcana.CanUse(out act, CanUseOption.MustUse))
         {
             return true;
@@ -385,4 +246,113 @@ internal sealed class AST_KirboPvE : AST_Base
 
         return base.HealAreaAbility(out act);
     }
+
+    [RotationDesc(ActionID.CollectiveUnconscious)]
+    protected override bool DefenseAreaAbility(out IAction act)
+    {
+        if (CollectiveUnconscious.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaAbility(out act);
+    }
+
+    [RotationDesc(ActionID.CelestialIntersection, ActionID.Exaltation)]
+    protected override bool DefenseSingleAbility(out IAction act)
+    {
+        if (CelestialIntersection.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        {
+            return true;
+        }
+
+        if (Exaltation.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(out act);
+    }
+    #endregion
+
+    #region GCD Logic
+    [RotationDesc(ActionID.Macrocosmos)]
+    protected override bool GeneralGCD(out IAction act)
+    {
+        if (NotInCombatDelay && AspectedBeneficDefense.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Gravity.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Combust.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Malefic.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Combust.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out act);
+    }
+
+    [RotationDesc(ActionID.AspectedBenefic, ActionID.Benefic2, ActionID.Benefic)]
+    protected override bool HealSingleGCD(out IAction act)
+    {
+        if (AspectedBenefic.CanUse(out act)
+            && (IsMoving || AspectedBenefic.Target.GetHealthRatio() > 0.4))
+        {
+            return true;
+        }
+
+        if (Benefic2.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Benefic.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.HealSingleGCD(out act);
+    }
+
+    [RotationDesc(ActionID.AspectedHelios, ActionID.Helios)]
+    protected override bool HealAreaGCD(out IAction act)
+    {
+        if (AspectedHelios.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Helios.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.HealAreaGCD(out act);
+    }
+
+    protected override bool DefenseAreaGCD(out IAction act)
+    {
+        if (Macrocosmos.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaGCD(out act);
+    }
+    #endregion
 }

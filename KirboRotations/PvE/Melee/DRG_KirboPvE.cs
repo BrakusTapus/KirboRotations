@@ -1,50 +1,20 @@
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Melee;
 
+[BetaRotation]
 [SourceCode(Path = "main/KirboRotations/Melee/DRG_Default.cs")]
 internal sealed class DRG_KirboPvE : DRG_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
-
-    [RotationDesc(ActionID.SpineShatterDive, ActionID.DragonFireDive)]
-    protected override bool MoveForwardAbility(out IAction act)
-    {
-        if (SpineShatterDive.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (DragonFireDive.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
-    {
-        if (nextGCD.IsTheSameTo(true, FullThrust, CoerthanTorment)
-            || Player.HasStatus(true, StatusID.LanceCharge) && nextGCD.IsTheSameTo(false, FangandClaw))
-        {
-            if (LifeSurge.CanUse(out act, CanUseOption.EmptyOrSkipCombo | CanUseOption.OnLastAbility))
-            {
-                return true;
-            }
-        }
-
-        return base.EmergencyAbility(nextGCD, out act);
-    }
 
     protected override bool AttackAbility(out IAction act)
     {
@@ -134,6 +104,20 @@ internal sealed class DRG_KirboPvE : DRG_Base
         return base.AttackAbility(out act);
     }
 
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
+    {
+        if (nextGCD.IsTheSameTo(true, FullThrust, CoerthanTorment)
+            || Player.HasStatus(true, StatusID.LanceCharge) && nextGCD.IsTheSameTo(false, FangandClaw))
+        {
+            if (LifeSurge.CanUse(out act, CanUseOption.EmptyOrSkipCombo | CanUseOption.OnLastAbility))
+            {
+                return true;
+            }
+        }
+
+        return base.EmergencyAbility(nextGCD, out act);
+    }
+
     protected override bool GeneralGCD(out IAction act)
     {
         if (CoerthanTorment.CanUse(out act))
@@ -200,5 +184,21 @@ internal sealed class DRG_KirboPvE : DRG_Base
         }
 
         return base.GeneralGCD(out act);
+    }
+
+    [RotationDesc(ActionID.SpineShatterDive, ActionID.DragonFireDive)]
+    protected override bool MoveForwardAbility(out IAction act)
+    {
+        if (SpineShatterDive.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (DragonFireDive.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        return false;
     }
 }

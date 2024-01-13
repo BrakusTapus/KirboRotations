@@ -1,14 +1,9 @@
 using ImGuiNET;
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Melee;
 
+[BetaRotation]
 [RotationDesc(ActionID.Mug)]
 [SourceCode(Path = "main/KirboRotations/Melee/NIN_Default.cs")]
 [LinkDescription("https://www.thebalanceffxiv.com/img/jobs/nin/earlymug3.png")]
@@ -19,21 +14,71 @@ namespace KirboRotations.PvE.Melee;
 internal sealed class NIN_KirboPvE : NIN_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    private static INinAction _ninActionAim = null;
-    private static bool InTrickAttack => TrickAttack.IsCoolingDown && !TrickAttack.ElapsedAfter(17);
-    private static bool InMug => Mug.IsCoolingDown && !Mug.ElapsedAfter(19);
-    private static bool NoNinjutsu => AdjustId(ActionID.Ninjutsu) is ActionID.Ninjutsu or ActionID.RabbitMedium;
-
-    protected override IRotationConfigSet CreateConfiguration()
+    public override void DisplayStatus()
     {
-        return base.CreateConfiguration()
-            .SetBool(CombatType.PvE, "UseHide", true, "Use Hide")
-            .SetBool(CombatType.PvE, "AutoUnhide", true, "Use Unhide");
+        ImGui.Text(_ninActionAim?.ToString() ?? "No Aimed Ninjustus.");
+        base.DisplayStatus();
+    }
+
+    protected override bool AttackAbility(out IAction act)
+    {
+        act = null;
+        if (!NoNinjutsu || !InCombat)
+        {
+            return false;
+        }
+
+        if (!IsMoving && InTrickAttack && !Ten.ElapsedAfter(30) && TenChiJin.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (!CombatElapsedLess(5) && Bunshin.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (InTrickAttack)
+        {
+            if (!DreamWithinADream.EnoughLevel)
+            {
+                if (Assassinate.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (DreamWithinADream.CanUse(out act))
+                {
+                    return true;
+                }
+            }
+        }
+
+        if ((!InMug || InTrickAttack)
+            && (!Bunshin.WillHaveOneCharge(10) || Player.HasStatus(false, StatusID.PhantomKamaitachiReady) || Mug.WillHaveOneCharge(2)))
+        {
+            if (HellfrogMedium.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (Bhavacakra.CanUse(out act))
+            {
+                return true;
+            }
+        }
+        return base.AttackAbility(out act);
     }
 
     protected override IAction CountDownAction(float remainTime)
@@ -77,33 +122,168 @@ internal sealed class NIN_KirboPvE : NIN_Base
         return base.CountDownAction(remainTime);
     }
 
+    protected override IRotationConfigSet CreateConfiguration()
+    {
+        return base.CreateConfiguration()
+            .SetBool(CombatType.PvE, "UseHide", true, "Use Hide")
+            .SetBool(CombatType.PvE, "AutoUnhide", true, "Use Unhide");
+    }
+
+    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
+    {
+        if (!NoNinjutsu || !InCombat)
+        {
+            return base.EmergencyAbility(nextGCD, out act);
+        }
+
+        if (Kassatsu.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (UseBurstMedicine(out act))
+        {
+            return true;
+        }
+
+        if (IsBurst && !CombatElapsedLess(5) && Mug.CanUse(out act))
+        {
+            return true;
+        }
+
+        //Use Suiton
+        if (!CombatElapsedLess(6))
+        {
+            if (TrickAttack.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (TrickAttack.IsCoolingDown && !TrickAttack.WillHaveOneCharge(19)
+                && Meisui.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        return base.EmergencyAbility(nextGCD, out act);
+    }
+
+    protected override bool GeneralGCD(out IAction act)
+    {
+        var hasRaijuReady = Player.HasStatus(true, StatusID.RaijuReady);
+
+        if ((InTrickAttack || InMug) && NoNinjutsu && !hasRaijuReady
+            && PhantomKamaitachi.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (ChoiceNinjutsu(out act))
+        {
+            return true;
+        }
+
+        if ((!InCombat || !CombatElapsedLess(9)) && DoNinjutsu(out act))
+        {
+            return true;
+        }
+
+        //No Ninjutsu
+        if (NoNinjutsu)
+        {
+            if (!CombatElapsedLess(10) && FleetingRaiju.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (hasRaijuReady)
+            {
+                return false;
+            }
+
+            if (Huraijin.CanUse(out act))
+            {
+                return true;
+            }
+
+            //AOE
+            if (HakkeMujinsatsu.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (DeathBlossom.CanUse(out act))
+            {
+                return true;
+            }
+
+            //Single
+            if (ArmorCrush.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (AeolianEdge.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (GustSlash.CanUse(out act))
+            {
+                return true;
+            }
+
+            if (SpinningEdge.CanUse(out act))
+            {
+                return true;
+            }
+
+            //Range
+            if (IsMoveForward && MoveForwardAbility(out act))
+            {
+                return true;
+            }
+
+            if (ThrowingDagger.CanUse(out act))
+            {
+                return true;
+            }
+        }
+
+        if (Configs.GetBool("AutoUnhide"))
+        {
+            StatusHelper.StatusOff(StatusID.Hidden);
+        }
+        if (!InCombat && _ninActionAim == null && Configs.GetBool("UseHide")
+            && Ten.IsCoolingDown && Hide.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.GeneralGCD(out act);
+    }
+
+    [RotationDesc(ActionID.ForkedRaiju)]
+    protected override bool MoveForwardGCD(out IAction act)
+    {
+        if (ForkedRaiju.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.MoveForwardGCD(out act);
+    }
+
+    private static INinAction _ninActionAim = null;
+
+    private static bool InMug => Mug.IsCoolingDown && !Mug.ElapsedAfter(19);
+
+    private static bool InTrickAttack => TrickAttack.IsCoolingDown && !TrickAttack.ElapsedAfter(17);
+
+    private static bool NoNinjutsu => AdjustId(ActionID.Ninjutsu) is ActionID.Ninjutsu or ActionID.RabbitMedium;
+
     #region Ninjutsu
-
-    private static void SetNinjutsu(INinAction act)
-    {
-        if (act == null || AdjustId(ActionID.Ninjutsu) == ActionID.RabbitMedium)
-        {
-            return;
-        }
-
-        if (_ninActionAim != null && IsLastAction(false, Ten, Jin, Chi, FumaShurikenTen, FumaShurikenJin))
-        {
-            return;
-        }
-
-        if (_ninActionAim != act)
-        {
-            _ninActionAim = act;
-        }
-    }
-
-    private static void ClearNinjutsu()
-    {
-        if (_ninActionAim != null)
-        {
-            _ninActionAim = null;
-        }
-    }
 
     private static bool ChoiceNinjutsu(out IAction act)
     {
@@ -218,6 +398,14 @@ internal sealed class NIN_KirboPvE : NIN_Base
         return false;
     }
 
+    private static void ClearNinjutsu()
+    {
+        if (_ninActionAim != null)
+        {
+            _ninActionAim = null;
+        }
+    }
+
     private static bool DoNinjutsu(out IAction act)
     {
         act = null;
@@ -241,6 +429,7 @@ internal sealed class NIN_KirboPvE : NIN_Base
                         return true;
                     }
                 }
+
                 //Single
                 if (FumaShurikenTen.CanUse(out act))
                 {
@@ -256,6 +445,7 @@ internal sealed class NIN_KirboPvE : NIN_Base
                     return true;
                 }
             }
+
             //Others
             else if (chiId == RaitonChi.ID && !IsLastAction(false, RaitonChi))
             {
@@ -301,6 +491,7 @@ internal sealed class NIN_KirboPvE : NIN_Base
             act = null;
             return false;
         }
+
         //First
         else if (id == ActionID.Ninjutsu)
         {
@@ -314,6 +505,7 @@ internal sealed class NIN_KirboPvE : NIN_Base
             act = _ninActionAim.Ninjutsu[0];
             return true;
         }
+
         //Finished
         else if ((uint)id == _ninActionAim.ID)
         {
@@ -328,6 +520,7 @@ internal sealed class NIN_KirboPvE : NIN_Base
                 return true;
             }
         }
+
         //Second
         else if ((uint)id == FumaShuriken.ID)
         {
@@ -338,6 +531,7 @@ internal sealed class NIN_KirboPvE : NIN_Base
                 return true;
             }
         }
+
         //Third
         else if ((uint)id == Katon.ID || (uint)id == Raiton.ID || (uint)id == Hyoton.ID)
         {
@@ -351,209 +545,23 @@ internal sealed class NIN_KirboPvE : NIN_Base
         return false;
     }
 
+    private static void SetNinjutsu(INinAction act)
+    {
+        if (act == null || AdjustId(ActionID.Ninjutsu) == ActionID.RabbitMedium)
+        {
+            return;
+        }
+
+        if (_ninActionAim != null && IsLastAction(false, Ten, Jin, Chi, FumaShurikenTen, FumaShurikenJin))
+        {
+            return;
+        }
+
+        if (_ninActionAim != act)
+        {
+            _ninActionAim = act;
+        }
+    }
+
     #endregion Ninjutsu
-
-    protected override bool GeneralGCD(out IAction act)
-    {
-        var hasRaijuReady = Player.HasStatus(true, StatusID.RaijuReady);
-
-        if ((InTrickAttack || InMug) && NoNinjutsu && !hasRaijuReady
-            && PhantomKamaitachi.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (ChoiceNinjutsu(out act))
-        {
-            return true;
-        }
-
-        if ((!InCombat || !CombatElapsedLess(9)) && DoNinjutsu(out act))
-        {
-            return true;
-        }
-
-        //No Ninjutsu
-        if (NoNinjutsu)
-        {
-            if (!CombatElapsedLess(10) && FleetingRaiju.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (hasRaijuReady)
-            {
-                return false;
-            }
-
-            if (Huraijin.CanUse(out act))
-            {
-                return true;
-            }
-
-            //AOE
-            if (HakkeMujinsatsu.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (DeathBlossom.CanUse(out act))
-            {
-                return true;
-            }
-
-            //Single
-            if (ArmorCrush.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (AeolianEdge.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (GustSlash.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (SpinningEdge.CanUse(out act))
-            {
-                return true;
-            }
-
-            //Range
-            if (IsMoveForward && MoveForwardAbility(out act))
-            {
-                return true;
-            }
-
-            if (ThrowingDagger.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        if (Configs.GetBool("AutoUnhide"))
-        {
-            StatusHelper.StatusOff(StatusID.Hidden);
-        }
-        if (!InCombat && _ninActionAim == null && Configs.GetBool("UseHide")
-            && Ten.IsCoolingDown && Hide.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.GeneralGCD(out act);
-    }
-
-    [RotationDesc(ActionID.ForkedRaiju)]
-    protected override bool MoveForwardGCD(out IAction act)
-    {
-        if (ForkedRaiju.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.MoveForwardGCD(out act);
-    }
-
-    protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
-    {
-        if (!NoNinjutsu || !InCombat)
-        {
-            return base.EmergencyAbility(nextGCD, out act);
-        }
-
-        if (Kassatsu.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (UseBurstMedicine(out act))
-        {
-            return true;
-        }
-
-        if (IsBurst && !CombatElapsedLess(5) && Mug.CanUse(out act))
-        {
-            return true;
-        }
-
-        //Use Suiton
-        if (!CombatElapsedLess(6))
-        {
-            if (TrickAttack.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (TrickAttack.IsCoolingDown && !TrickAttack.WillHaveOneCharge(19)
-                && Meisui.CanUse(out act))
-            {
-                return true;
-            }
-        }
-
-        return base.EmergencyAbility(nextGCD, out act);
-    }
-
-    protected override bool AttackAbility(out IAction act)
-    {
-        act = null;
-        if (!NoNinjutsu || !InCombat)
-        {
-            return false;
-        }
-
-        if (!IsMoving && InTrickAttack && !Ten.ElapsedAfter(30) && TenChiJin.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (!CombatElapsedLess(5) && Bunshin.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (InTrickAttack)
-        {
-            if (!DreamWithinADream.EnoughLevel)
-            {
-                if (Assassinate.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-            else
-            {
-                if (DreamWithinADream.CanUse(out act))
-                {
-                    return true;
-                }
-            }
-        }
-
-        if ((!InMug || InTrickAttack)
-            && (!Bunshin.WillHaveOneCharge(10) || Player.HasStatus(false, StatusID.PhantomKamaitachiReady) || Mug.WillHaveOneCharge(2)))
-        {
-            if (HellfrogMedium.CanUse(out act))
-            {
-                return true;
-            }
-
-            if (Bhavacakra.CanUse(out act))
-            {
-                return true;
-            }
-        }
-        return base.AttackAbility(out act);
-    }
-
-    public override void DisplayStatus()
-    {
-        ImGui.Text(_ninActionAim?.ToString() ?? "No Aimed Ninjustus.");
-        base.DisplayStatus();
-    }
 }

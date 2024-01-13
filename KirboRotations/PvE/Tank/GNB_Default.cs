@@ -1,29 +1,102 @@
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Tank;
 
+[BetaRotation]
 [SourceCode(Path = "main/KirboRotations/Tank/GNB_Default.cs")]
 internal sealed class GNB_DefaultPvE : GNB_Base
 {
     #region Rotation Info
-    public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
-    public override CombatType Type => CombatType.PvE;
-    #endregion Rotation Info
 
-    public override bool CanHealSingleSpell => false;
+    public override string GameVersion => "6.51";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override CombatType Type => CombatType.PvE;
+
+    #endregion Rotation Info
 
     public override bool CanHealAreaSpell => false;
 
-    private new static IBaseAction BloodFest { get; } = new BaseAction(ActionID.BloodFest, ActionOption.None)
+    public override bool CanHealSingleSpell => false;
+
+    protected override bool AttackAbility(out IAction act)
     {
-        ActionCheck = (b, m) => MaxAmmo - Ammo > 1
-    };
+        //if (IsBurst && CanUseNoMercy(out act)) return true;
+
+        if (!CombatElapsedLessGCD(5) && NoMercy.CanUse(out act, CanUseOption.MustUse | CanUseOption.IgnoreClippingCheck))
+        {
+            return true;
+        }
+
+        if (JugularRip.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (DangerZone.CanUse(out act))
+        {
+            if (!IsFullParty && !(DangerZone.Target?.IsBossFromTTK() ?? false))
+            {
+                return true;
+            }
+
+            if (!GnashingFang.EnoughLevel && (Player.HasStatus(true, StatusID.NoMercy) || !NoMercy.WillHaveOneCharge(15)))
+            {
+                return true;
+            }
+
+            if (Player.HasStatus(true, StatusID.NoMercy) && GnashingFang.IsCoolingDown)
+            {
+                return true;
+            }
+
+            if (!Player.HasStatus(true, StatusID.NoMercy) && !GnashingFang.WillHaveOneCharge(20))
+            {
+                return true;
+            }
+        }
+
+        if (Player.HasStatus(true, StatusID.NoMercy) && CanUseBowShock(out act))
+        {
+            return true;
+        }
+
+        if (RoughDivide.CanUse(out act, CanUseOption.MustUse) && !IsMoving)
+        {
+            return true;
+        }
+
+        if (GnashingFang.IsCoolingDown && DoubleDown.IsCoolingDown && Ammo == 0 && BloodFest.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (AbdomenTear.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Player.HasStatus(true, StatusID.NoMercy))
+        {
+            if (RoughDivide.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo) && !IsMoving)
+            {
+                return true;
+            }
+        }
+
+        if (EyeGouge.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Hypervelocity.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(out act);
+    }
 
     protected override IAction CountDownAction(float remainTime)
     {
@@ -38,6 +111,57 @@ internal sealed class GNB_DefaultPvE : GNB_Base
         }
 
         return base.CountDownAction(remainTime);
+    }
+
+    [RotationDesc(ActionID.HeartOfLight, ActionID.Reprisal)]
+    protected override bool DefenseAreaAbility(out IAction act)
+    {
+        if (!Player.HasStatus(true, StatusID.NoMercy) && HeartOfLight.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        {
+            return true;
+        }
+
+        if (!Player.HasStatus(true, StatusID.NoMercy) && Reprisal.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaAbility(out act);
+    }
+
+    [RotationDesc(ActionID.HeartOfStone, ActionID.Nebula, ActionID.Rampart, ActionID.Camouflage, ActionID.Reprisal)]
+    protected override bool DefenseSingleAbility(out IAction act)
+    {
+        //10
+        if (Camouflage.CanUse(out act, CanUseOption.OnLastAbility))
+        {
+            return true;
+        }
+
+        //10
+        if (HeartOfStone.CanUse(out act, CanUseOption.OnLastAbility))
+        {
+            return true;
+        }
+
+        //30
+        if ((!Rampart.IsCoolingDown || Rampart.ElapsedAfter(60)) && Nebula.CanUse(out act))
+        {
+            return true;
+        }
+
+        //20
+        if (Nebula.IsCoolingDown && Nebula.ElapsedAfter(60) && Rampart.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Reprisal.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(out act);
     }
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
@@ -143,133 +267,6 @@ internal sealed class GNB_DefaultPvE : GNB_Base
         return base.GeneralGCD(out act);
     }
 
-    protected override bool AttackAbility(out IAction act)
-    {
-        //if (IsBurst && CanUseNoMercy(out act)) return true;
-
-        if (!CombatElapsedLessGCD(5) && NoMercy.CanUse(out act, CanUseOption.MustUse | CanUseOption.IgnoreClippingCheck))
-        {
-            return true;
-        }
-
-        if (JugularRip.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (DangerZone.CanUse(out act))
-        {
-            if (!IsFullParty && !(DangerZone.Target?.IsBossFromTTK() ?? false))
-            {
-                return true;
-            }
-
-            if (!GnashingFang.EnoughLevel && (Player.HasStatus(true, StatusID.NoMercy) || !NoMercy.WillHaveOneCharge(15)))
-            {
-                return true;
-            }
-
-            if (Player.HasStatus(true, StatusID.NoMercy) && GnashingFang.IsCoolingDown)
-            {
-                return true;
-            }
-
-            if (!Player.HasStatus(true, StatusID.NoMercy) && !GnashingFang.WillHaveOneCharge(20))
-            {
-                return true;
-            }
-        }
-
-        if (Player.HasStatus(true, StatusID.NoMercy) && CanUseBowShock(out act))
-        {
-            return true;
-        }
-
-        if (RoughDivide.CanUse(out act, CanUseOption.MustUse) && !IsMoving)
-        {
-            return true;
-        }
-
-        if (GnashingFang.IsCoolingDown && DoubleDown.IsCoolingDown && Ammo == 0 && BloodFest.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (AbdomenTear.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Player.HasStatus(true, StatusID.NoMercy))
-        {
-            if (RoughDivide.CanUse(out act, CanUseOption.MustUse | CanUseOption.EmptyOrSkipCombo) && !IsMoving)
-            {
-                return true;
-            }
-        }
-
-        if (EyeGouge.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Hypervelocity.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.AttackAbility(out act);
-    }
-
-    [RotationDesc(ActionID.HeartOfLight, ActionID.Reprisal)]
-    protected override bool DefenseAreaAbility(out IAction act)
-    {
-        if (!Player.HasStatus(true, StatusID.NoMercy) && HeartOfLight.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-        {
-            return true;
-        }
-
-        if (!Player.HasStatus(true, StatusID.NoMercy) && Reprisal.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaAbility(out act);
-    }
-
-    [RotationDesc(ActionID.HeartOfStone, ActionID.Nebula, ActionID.Rampart, ActionID.Camouflage, ActionID.Reprisal)]
-    protected override bool DefenseSingleAbility(out IAction act)
-    {
-        //10
-        if (Camouflage.CanUse(out act, CanUseOption.OnLastAbility))
-        {
-            return true;
-        }
-        //10
-        if (HeartOfStone.CanUse(out act, CanUseOption.OnLastAbility))
-        {
-            return true;
-        }
-
-        //30
-        if ((!Rampart.IsCoolingDown || Rampart.ElapsedAfter(60)) && Nebula.CanUse(out act))
-        {
-            return true;
-        }
-        //20
-        if (Nebula.IsCoolingDown && Nebula.ElapsedAfter(60) && Rampart.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Reprisal.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseSingleAbility(out act);
-    }
-
     [RotationDesc(ActionID.Aurora)]
     protected override bool HealSingleAbility(out IAction act)
     {
@@ -281,24 +278,105 @@ internal sealed class GNB_DefaultPvE : GNB_Base
         return base.HealSingleAbility(out act);
     }
 
+    private new static IBaseAction BloodFest { get; } = new BaseAction(ActionID.BloodFest, ActionOption.None)
+    {
+        ActionCheck = (b, m) => MaxAmmo - Ammo > 1
+    };
+
     //private bool CanUseNoMercy(out IAction act)
     //{
     //    if (!NoMercy.CanUse(out act, CanUseOption.OnLastAbility)) return false;
 
-    //    if (!IsFullParty && !IsTargetBoss && !IsMoving && DemonSlice.CanUse(out _)) return true;
+    // if (!IsFullParty && !IsTargetBoss && !IsMoving && DemonSlice.CanUse(out _)) return true;
 
-    //    if (!BurstStrike.EnoughLevel) return true;
+    // if (!BurstStrike.EnoughLevel) return true;
 
-    //    if (BurstStrike.EnoughLevel)
-    //    {
-    //        if (IsLastGCD((ActionID)KeenEdge.ID) && Ammo == 1 && !GnashingFang.IsCoolingDown && !BloodFest.IsCoolingDown) return true;
-    //        else if (Ammo == (Level >= 88 ? 3 : 2)) return true;
-    //        else if (Ammo == 2 && GnashingFang.IsCoolingDown) return true;
-    //    }
+    // if (BurstStrike.EnoughLevel) { if (IsLastGCD((ActionID)KeenEdge.ID) && Ammo == 1 && !GnashingFang.IsCoolingDown && !BloodFest.IsCoolingDown)
+    // return true; else if (Ammo == (Level >= 88 ? 3 : 2)) return true; else if (Ammo == 2 && GnashingFang.IsCoolingDown) return true; }
 
     //    act = null;
     //    return false;
     //}
+
+    private static bool CanUseBowShock(out IAction act)
+    {
+        if (BowShock.CanUse(out act, CanUseOption.MustUse))
+        {
+            if (DemonSlice.CanUse(out _) && !IsFullParty)
+            {
+                return true;
+            }
+
+            if (!SonicBreak.EnoughLevel && Player.HasStatus(true, StatusID.NoMercy))
+            {
+                return true;
+            }
+
+            if (Player.HasStatus(true, StatusID.NoMercy) && SonicBreak.IsCoolingDown)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static bool CanUseBurstStrike(out IAction act)
+    {
+        if (BurstStrike.CanUse(out act))
+        {
+            if (DemonSlice.CanUse(out _))
+            {
+                return false;
+            }
+
+            if (SonicBreak.IsCoolingDown && SonicBreak.WillHaveOneCharge(0.5f) && GnashingFang.EnoughLevel)
+            {
+                return false;
+            }
+
+            if (Player.HasStatus(true, StatusID.NoMercy) &&
+                AmmoComboStep == 0 &&
+                !GnashingFang.WillHaveOneCharge(1))
+            {
+                return true;
+            }
+
+            if (!CartridgeCharge2.EnoughLevel && Ammo == 2)
+            {
+                return true;
+            }
+
+            if (IsLastGCD((ActionID)BrutalShell.ID) &&
+                (Ammo == MaxAmmo ||
+                BloodFest.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercy.WillHaveOneCharge(10) && BloodFest.EnoughLevel))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static bool CanUseDoubleDown(out IAction act)
+    {
+        if (DoubleDown.CanUse(out act, CanUseOption.MustUse))
+        {
+            if (DemonSlice.CanUse(out _) && Player.HasStatus(true, StatusID.NoMercy))
+            {
+                return true;
+            }
+
+            if (SonicBreak.IsCoolingDown && Player.HasStatus(true, StatusID.NoMercy))
+            {
+                return true;
+            }
+
+            if (Player.HasStatus(true, StatusID.NoMercy) && !NoMercy.WillHaveOneCharge(55) && BloodFest.WillHaveOneCharge(5))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private static bool CanUseGnashingFang(out IAction act)
     {
@@ -360,86 +438,6 @@ internal sealed class GNB_DefaultPvE : GNB_Base
 
             if (!DoubleDown.EnoughLevel && Player.HasStatus(true, StatusID.ReadyToRip)
                 && GnashingFang.IsCoolingDown)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static bool CanUseDoubleDown(out IAction act)
-    {
-        if (DoubleDown.CanUse(out act, CanUseOption.MustUse))
-        {
-            if (DemonSlice.CanUse(out _) && Player.HasStatus(true, StatusID.NoMercy))
-            {
-                return true;
-            }
-
-            if (SonicBreak.IsCoolingDown && Player.HasStatus(true, StatusID.NoMercy))
-            {
-                return true;
-            }
-
-            if (Player.HasStatus(true, StatusID.NoMercy) && !NoMercy.WillHaveOneCharge(55) && BloodFest.WillHaveOneCharge(5))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static bool CanUseBurstStrike(out IAction act)
-    {
-        if (BurstStrike.CanUse(out act))
-        {
-            if (DemonSlice.CanUse(out _))
-            {
-                return false;
-            }
-
-            if (SonicBreak.IsCoolingDown && SonicBreak.WillHaveOneCharge(0.5f) && GnashingFang.EnoughLevel)
-            {
-                return false;
-            }
-
-            if (Player.HasStatus(true, StatusID.NoMercy) &&
-                AmmoComboStep == 0 &&
-                !GnashingFang.WillHaveOneCharge(1))
-            {
-                return true;
-            }
-
-            if (!CartridgeCharge2.EnoughLevel && Ammo == 2)
-            {
-                return true;
-            }
-
-            if (IsLastGCD((ActionID)BrutalShell.ID) &&
-                (Ammo == MaxAmmo ||
-                BloodFest.WillHaveOneCharge(6) && Ammo <= 2 && !NoMercy.WillHaveOneCharge(10) && BloodFest.EnoughLevel))
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static bool CanUseBowShock(out IAction act)
-    {
-        if (BowShock.CanUse(out act, CanUseOption.MustUse))
-        {
-            if (DemonSlice.CanUse(out _) && !IsFullParty)
-            {
-                return true;
-            }
-
-            if (!SonicBreak.EnoughLevel && Player.HasStatus(true, StatusID.NoMercy))
-            {
-                return true;
-            }
-
-            if (Player.HasStatus(true, StatusID.NoMercy) && SonicBreak.IsCoolingDown)
             {
                 return true;
             }

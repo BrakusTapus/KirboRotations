@@ -1,31 +1,147 @@
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Healer;
 
+[BetaRotation]
 [RotationDesc(ActionID.ChainStratagem)]
 [SourceCode(Path = "main/KirboRotations/Healer/SCH_Default.cs")]
 internal sealed class SCH_KirboPvE : SCH_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    public override bool CanHealSingleSpell => base.CanHealSingleSpell && (Configs.GetBool("GCDHeal") || PartyHealers.Count() < 2);
     public override bool CanHealAreaSpell => base.CanHealAreaSpell && (Configs.GetBool("GCDHeal") || PartyHealers.Count() < 2);
+
+    public override bool CanHealSingleSpell => base.CanHealSingleSpell && (Configs.GetBool("GCDHeal") || PartyHealers.Count() < 2);
+
+    protected override bool AttackAbility(out IAction act)
+    {
+        if (IsBurst && ChainStratagem.CanUse(out act))
+        {
+            return true;
+        }
+
+        if ((Dissipation.EnoughLevel && Dissipation.WillHaveOneChargeGCD(3) && Dissipation.IsEnabled || Aetherflow.WillHaveOneChargeGCD(3)) && EnergyDrain.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        {
+            return true;
+        }
+
+        //转化
+        if (Dissipation.CanUse(out act))
+        {
+            return true;
+        }
+
+        //以太超流
+        if (Aetherflow.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.AttackAbility(out act);
+    }
+
+    //15秒秘策单盾扩散
+    protected override IAction CountDownAction(float remainTime)
+    {
+        if (remainTime < Ruin.CastTime + CountDownAhead
+            && Ruin.CanUse(out var act))
+        {
+            return act;
+        }
+
+        if (Configs.GetBool("prevDUN") && remainTime <= 15 && !DeploymentTactics.IsCoolingDown && PartyMembers.Count() > 1)
+        {
+            if (!Recitation.IsCoolingDown)
+            {
+                return Recitation;
+            }
+
+            if (!PartyMembers.Any((n) => n.HasStatus(true, StatusID.Galvanize)))
+            {
+                //如果还没上激励就给t一个激励
+                if (Configs.GetBool("GiveT"))
+                {
+                    return Adloquium;
+                }
+            }
+            else
+            {
+                return DeploymentTactics;
+            }
+        }
+        return base.CountDownAction(remainTime);
+    }
 
     protected override IRotationConfigSet CreateConfiguration()
     {
         return base.CreateConfiguration().SetBool(CombatType.PvE, "GCDHeal", false, "Use spells with cast times to heal.")
                                             .SetBool(CombatType.PvE, "prevDUN", false, "Recitation at 15 seconds remaining on Countdown.")
                                             .SetBool(CombatType.PvE, "GiveT", false, "Give Recitation to Tank");
+    }
+
+    [RotationDesc(ActionID.FeyIllumination, ActionID.Expedient, ActionID.SummonSeraph, ActionID.Consolation, ActionID.SacredSoil)]
+    protected override bool DefenseAreaAbility(out IAction act)
+    {
+        //异想的幻光
+        if (FeyIllumination.CanUse(out act))
+        {
+            return true;
+        }
+
+        //疾风怒涛之计
+        if (Expedient.CanUse(out act))
+        {
+            return true;
+        }
+
+        //慰藉
+        if (WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1) && SummonSeraph.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
+        {
+            return true;
+        }
+
+        //野战治疗阵
+        if (SacredSoil.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaAbility(out act);
+    }
+
+    [RotationDesc(ActionID.Succor)]
+    protected override bool DefenseAreaGCD(out IAction act)
+    {
+        if (Succor.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaGCD(out act);
+    }
+
+    [RotationDesc(ActionID.Excogitation)]
+    protected override bool DefenseSingleAbility(out IAction act)
+    {
+        if (Excogitation.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(out act);
     }
 
     protected override bool EmergencyAbility(IAction nextGCD, out IAction act)
@@ -94,22 +210,57 @@ internal sealed class SCH_KirboPvE : SCH_Base
         return base.GeneralGCD(out act);
     }
 
-    [RotationDesc(ActionID.Adloquium, ActionID.Physick)]
-    protected override bool HealSingleGCD(out IAction act)
+    [RotationDesc(ActionID.SummonSeraph, ActionID.Consolation, ActionID.WhisperingDawn, ActionID.SacredSoil, ActionID.Indomitability)]
+    protected override bool HealAreaAbility(out IAction act)
     {
-        //鼓舞激励之策
-        if (Adloquium.CanUse(out act))
+        //慰藉
+        if ((WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1)) && SummonSeraph.CanUse(out act))
         {
             return true;
         }
 
-        //医术
-        if (Physick.CanUse(out act))
+        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
         {
             return true;
         }
 
-        return base.HealSingleGCD(out act);
+        //异想的祥光
+        if (FeyBlessing.CanUse(out act))
+        {
+            return true;
+        }
+
+        //仙光的低语
+        if (WhisperingDawn.CanUse(out act))
+        {
+            return true;
+        }
+
+        //野战治疗阵
+        if (SacredSoil.CanUse(out act))
+        {
+            return true;
+        }
+
+        //不屈不挠之策
+        if (Indomitability.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.HealAreaAbility(out act);
+    }
+
+    [RotationDesc(ActionID.Succor)]
+    protected override bool HealAreaGCD(out IAction act)
+    {
+        //士气高扬之策
+        if (Succor.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.HealAreaGCD(out act);
     }
 
     [RotationDesc(ActionID.Aetherpact, ActionID.Protraction, ActionID.SacredSoil, ActionID.Excogitation, ActionID.Lustrate, ActionID.Aetherpact)]
@@ -157,172 +308,21 @@ internal sealed class SCH_KirboPvE : SCH_Base
         return base.HealSingleAbility(out act);
     }
 
-    [RotationDesc(ActionID.Excogitation)]
-    protected override bool DefenseSingleAbility(out IAction act)
+    [RotationDesc(ActionID.Adloquium, ActionID.Physick)]
+    protected override bool HealSingleGCD(out IAction act)
     {
-        if (Excogitation.CanUse(out act))
+        //鼓舞激励之策
+        if (Adloquium.CanUse(out act))
         {
             return true;
         }
 
-        return base.DefenseSingleAbility(out act);
-    }
-
-    [RotationDesc(ActionID.Succor)]
-    protected override bool HealAreaGCD(out IAction act)
-    {
-        //士气高扬之策
-        if (Succor.CanUse(out act))
+        //医术
+        if (Physick.CanUse(out act))
         {
             return true;
         }
 
-        return base.HealAreaGCD(out act);
-    }
-
-    [RotationDesc(ActionID.SummonSeraph, ActionID.Consolation, ActionID.WhisperingDawn, ActionID.SacredSoil, ActionID.Indomitability)]
-    protected override bool HealAreaAbility(out IAction act)
-    {
-        //慰藉
-        if ((WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1)) && SummonSeraph.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-        {
-            return true;
-        }
-
-        //异想的祥光
-        if (FeyBlessing.CanUse(out act))
-        {
-            return true;
-        }
-
-        //仙光的低语
-        if (WhisperingDawn.CanUse(out act))
-        {
-            return true;
-        }
-
-        //野战治疗阵
-        if (SacredSoil.CanUse(out act))
-        {
-            return true;
-        }
-
-        //不屈不挠之策
-        if (Indomitability.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.HealAreaAbility(out act);
-    }
-
-    [RotationDesc(ActionID.Succor)]
-    protected override bool DefenseAreaGCD(out IAction act)
-    {
-        if (Succor.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaGCD(out act);
-    }
-
-    [RotationDesc(ActionID.FeyIllumination, ActionID.Expedient, ActionID.SummonSeraph, ActionID.Consolation, ActionID.SacredSoil)]
-    protected override bool DefenseAreaAbility(out IAction act)
-    {
-        //异想的幻光
-        if (FeyIllumination.CanUse(out act))
-        {
-            return true;
-        }
-
-        //疾风怒涛之计
-        if (Expedient.CanUse(out act))
-        {
-            return true;
-        }
-
-        //慰藉
-        if (WhisperingDawn.ElapsedOneChargeAfterGCD(1) || FeyIllumination.ElapsedOneChargeAfterGCD(1) || FeyBlessing.ElapsedOneChargeAfterGCD(1) && SummonSeraph.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Consolation.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-        {
-            return true;
-        }
-
-        //野战治疗阵
-        if (SacredSoil.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaAbility(out act);
-    }
-
-    protected override bool AttackAbility(out IAction act)
-    {
-        if (IsBurst && ChainStratagem.CanUse(out act))
-        {
-            return true;
-        }
-
-        if ((Dissipation.EnoughLevel && Dissipation.WillHaveOneChargeGCD(3) && Dissipation.IsEnabled || Aetherflow.WillHaveOneChargeGCD(3)) && EnergyDrain.CanUse(out act, CanUseOption.EmptyOrSkipCombo))
-        {
-            return true;
-        }
-
-        //转化
-        if (Dissipation.CanUse(out act))
-        {
-            return true;
-        }
-
-        //以太超流
-        if (Aetherflow.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.AttackAbility(out act);
-    }
-
-    //15秒秘策单盾扩散
-    protected override IAction CountDownAction(float remainTime)
-    {
-        if (remainTime < Ruin.CastTime + CountDownAhead
-            && Ruin.CanUse(out var act))
-        {
-            return act;
-        }
-
-        if (Configs.GetBool("prevDUN") && remainTime <= 15 && !DeploymentTactics.IsCoolingDown && PartyMembers.Count() > 1)
-        {
-            if (!Recitation.IsCoolingDown)
-            {
-                return Recitation;
-            }
-
-            if (!PartyMembers.Any((n) => n.HasStatus(true, StatusID.Galvanize)))
-            {
-                //如果还没上激励就给t一个激励
-                if (Configs.GetBool("GiveT"))
-                {
-                    return Adloquium;
-                }
-            }
-            else
-            {
-                return DeploymentTactics;
-            }
-        }
-        return base.CountDownAction(remainTime);
+        return base.HealSingleGCD(out act);
     }
 }

@@ -1,14 +1,9 @@
 ﻿using Dalamud.Game.ClientState.Objects.SubKinds;
-using KirboRotations.Configurations;
-using RotationSolver.Basic.Actions;
-using RotationSolver.Basic.Attributes;
-using RotationSolver.Basic.Configuration.RotationConfig;
-using RotationSolver.Basic.Data;
-using RotationSolver.Basic.Helpers;
-using RotationSolver.Basic.Rotations.Basic;
+using static KirboRotations.Extensions.BattleCharaEx;
 
 namespace KirboRotations.PvE.Tank;
 
+[BetaRotation]
 [LinkDescription("https://xiv.sleepyshiba.com/pld/img/63-60stentative2.png")]
 [RotationDesc("The whole rotation's burst\nis base on:")]
 [RotationDesc(ActionID.FightOrFlight)]
@@ -16,43 +11,20 @@ namespace KirboRotations.PvE.Tank;
 internal class PLD_DefaultPvE : PLD_Base
 {
     #region Rotation Info
+
     public override string GameVersion => "6.51";
-    public override string RotationName => $"{RotationConfigs.USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+
     public override CombatType Type => CombatType.PvE;
+
     #endregion Rotation Info
 
-    /// <summary>
-    ///
-    /// </summary>
-    public new static IBaseAction Requiescat { get; } = new BaseAction(ActionID.Requiescat, ActionOption.Attack)
+    /// <summary> </summary>
+    internal new static IBaseAction Requiescat { get; } = new BaseAction(ActionID.Requiescat, ActionOption.Attack)
     {
         FilterForHostiles = tars => tars.Where(t => t is PlayerCharacter),
     };
-
-    protected override IRotationConfigSet CreateConfiguration()
-    {
-        return base.CreateConfiguration()
-            .SetBool(CombatType.PvE, "UseDivineVeilPre", false, "Use Divine Veil at 15 seconds remaining on Countdown")
-            .SetBool(CombatType.PvE, "UseHolyWhenAway", true, "Use Holy Circle or Holy Spirit when out of melee range")
-            .SetBool(CombatType.PvE, "UseShieldBash", true, "Use Shield Bash when Low Blow is cooling down");
-    }
-
-    protected override IAction CountDownAction(float remainTime)
-    {
-        if (remainTime < HolySpirit.CastTime + CountDownAhead
-            && HolySpirit.CanUse(out var act))
-        {
-            return act;
-        }
-
-        if (remainTime < 15 && Configs.GetBool("UseDivineVeilPre")
-            && DivineVeil.CanUse(out act, CanUseOption.IgnoreClippingCheck))
-        {
-            return act;
-        }
-
-        return base.CountDownAction(remainTime);
-    }
 
     protected override bool AttackAbility(out IAction act)
     {
@@ -108,6 +80,81 @@ internal class PLD_DefaultPvE : PLD_Base
         }
 
         return base.AttackAbility(out act);
+    }
+
+    protected override IAction CountDownAction(float remainTime)
+    {
+        if (remainTime < HolySpirit.CastTime + CountDownAhead
+            && HolySpirit.CanUse(out var act))
+        {
+            return act;
+        }
+
+        if (remainTime < 15 && Configs.GetBool("UseDivineVeilPre")
+            && DivineVeil.CanUse(out act, CanUseOption.IgnoreClippingCheck))
+        {
+            return act;
+        }
+
+        return base.CountDownAction(remainTime);
+    }
+
+    protected override IRotationConfigSet CreateConfiguration()
+    {
+        return base.CreateConfiguration()
+            .SetBool(CombatType.PvE, "UseDivineVeilPre", false, "Use Divine Veil at 15 seconds remaining on Countdown")
+            .SetBool(CombatType.PvE, "UseHolyWhenAway", true, "Use Holy Circle or Holy Spirit when out of melee range")
+            .SetBool(CombatType.PvE, "UseShieldBash", true, "Use Shield Bash when Low Blow is cooling down");
+    }
+
+    [RotationDesc(ActionID.Reprisal, ActionID.DivineVeil)]
+    protected override bool DefenseAreaAbility(out IAction act)
+    {
+        if (Reprisal.CanUse(out act, CanUseOption.MustUse))
+        {
+            return true;
+        }
+
+        if (DivineVeil.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseAreaAbility(out act);
+    }
+
+    [RotationDesc(ActionID.Sentinel, ActionID.Rampart, ActionID.Bulwark, ActionID.Sheltron, ActionID.Reprisal)]
+    protected override bool DefenseSingleAbility(out IAction act)
+    {
+        //10
+        if (Bulwark.CanUse(out act, CanUseOption.OnLastAbility))
+        {
+            return true;
+        }
+
+        if (UseOath(out act, CanUseOption.OnLastAbility))
+        {
+            return true;
+        }
+
+        //30
+        if ((!Rampart.IsCoolingDown || Rampart.ElapsedAfter(60)) && Sentinel.CanUse(out act))
+        {
+            return true;
+        }
+
+        //20
+        if (Sentinel.IsCoolingDown && Sentinel.ElapsedAfter(60) && Rampart.CanUse(out act))
+        {
+            return true;
+        }
+
+        if (Reprisal.CanUse(out act))
+        {
+            return true;
+        }
+
+        return base.DefenseSingleAbility(out act);
     }
 
     protected override bool GeneralGCD(out IAction act)
@@ -177,6 +224,7 @@ internal class PLD_DefaultPvE : PLD_Base
                 return true;
             }
         }
+
         //123
         if (Configs.GetBool("UseShieldBash") && ShieldBash.CanUse(out act))
         {
@@ -219,22 +267,6 @@ internal class PLD_DefaultPvE : PLD_Base
         return base.GeneralGCD(out act);
     }
 
-    [RotationDesc(ActionID.Reprisal, ActionID.DivineVeil)]
-    protected override bool DefenseAreaAbility(out IAction act)
-    {
-        if (Reprisal.CanUse(out act, CanUseOption.MustUse))
-        {
-            return true;
-        }
-
-        if (DivineVeil.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseAreaAbility(out act);
-    }
-
     [RotationDesc(ActionID.PassageOfArms)]
     protected override bool HealAreaAbility(out IAction act)
     {
@@ -244,39 +276,6 @@ internal class PLD_DefaultPvE : PLD_Base
         }
 
         return base.HealAreaAbility(out act);
-    }
-
-    [RotationDesc(ActionID.Sentinel, ActionID.Rampart, ActionID.Bulwark, ActionID.Sheltron, ActionID.Reprisal)]
-    protected override bool DefenseSingleAbility(out IAction act)
-    {
-        //10
-        if (Bulwark.CanUse(out act, CanUseOption.OnLastAbility))
-        {
-            return true;
-        }
-
-        if (UseOath(out act, CanUseOption.OnLastAbility))
-        {
-            return true;
-        }
-        //30
-        if ((!Rampart.IsCoolingDown || Rampart.ElapsedAfter(60)) && Sentinel.CanUse(out act))
-        {
-            return true;
-        }
-
-        //20
-        if (Sentinel.IsCoolingDown && Sentinel.ElapsedAfter(60) && Rampart.CanUse(out act))
-        {
-            return true;
-        }
-
-        if (Reprisal.CanUse(out act))
-        {
-            return true;
-        }
-
-        return base.DefenseSingleAbility(out act);
     }
 
     private static bool UseOath(out IAction act, CanUseOption option = CanUseOption.None)
