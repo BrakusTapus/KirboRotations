@@ -10,9 +10,9 @@ internal class MCH_KirboPvE : MCH_Base
 {
     #region Rotation Info
 
-    internal override string GameVersion => "6.51";
+    public override string GameVersion => "6.51";
 
-    internal override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
+    public override string RotationName => $"{USERNAME}'s {ClassJob.Abbreviation} [{Type}]";
 
     public override CombatType Type => CombatType.PvE;
 
